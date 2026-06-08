@@ -1,0 +1,101 @@
+package com.novaos.novahalo.updates;
+
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.Worker;
+import androidx.work.WorkerParameters;
+
+import java.util.concurrent.TimeUnit;
+
+import com.google.android.play.core.appupdate.AppUpdateInfo;
+import com.google.android.play.core.appupdate.AppUpdateManager;
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
+import com.google.android.play.core.install.model.UpdateAvailability;
+import com.google.android.gms.tasks.Tasks;
+import com.novaos.novahalo.R;
+
+public class UpdateCheckWorker extends Worker {
+
+    private static final String CHANNEL_ID = "nova_halo_updates";
+    private static final int NOTIFICATION_ID = 1001;
+
+    public UpdateCheckWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+        super(context, workerParams);
+    }
+
+    public static void schedule(Context context) {
+        PeriodicWorkRequest updateCheckRequest =
+                new PeriodicWorkRequest.Builder(UpdateCheckWorker.class, 24, TimeUnit.HOURS)
+                        .setInitialDelay(1, TimeUnit.HOURS)
+                        .build();
+
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+                "update_check",
+                ExistingPeriodicWorkPolicy.KEEP,
+                updateCheckRequest);
+    }
+
+    @NonNull
+    @Override
+    public Result doWork() {
+        Context context = getApplicationContext();
+        AppUpdateManager appUpdateManager = AppUpdateManagerFactory.create(context);
+
+        try {
+            AppUpdateInfo appUpdateInfo = Tasks.await(appUpdateManager.getAppUpdateInfo());
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
+                showUpdateNotification(context);
+            }
+        } catch (Exception e) {
+            return Result.retry();
+        }
+
+        return Result.success();
+    }
+
+    private void showUpdateNotification(Context context) {
+        createNotificationChannel(context);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + context.getPackageName()));
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 
+                PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0));
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.mipmap.ic_launcher_home)
+                .setContentTitle("Update Available")
+                .setContentText("A new version of Nova Halo is available on Google Play.")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+        try {
+            notificationManager.notify(NOTIFICATION_ID, builder.build());
+        } catch (SecurityException e) {
+            // Permission might be missing on Android 13+
+        }
+    }
+
+    private void createNotificationChannel(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "App Updates";
+            String description = "Notifications for Nova Halo app updates";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+}

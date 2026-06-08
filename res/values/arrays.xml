@@ -1,0 +1,19 @@
+<resources>
+    <string-array name="which_wallpaper_options">
+        <item>@string/which_wallpaper_option_home_screen</item>
+        <item>@string/which_wallpaper_option_lock_screen</item>
+        <item>@string/which_wallpaper_option_home_screen_and_lock_screen</item>
+    </string-array>
+
+    <string-array name="swipe_down_action_entries">
+        <item>@string/swipe_down_action_search</item>
+        <item>@string/swipe_down_action_notifications</item>
+        <item>@string/swipe_down_action_none</item>
+    </string-array>
+
+    <string-array name="swipe_down_action_values">
+        <item>search</item>
+        <item>notifications</item>
+        <item>none</item>
+    </string-array>
+</resources>
