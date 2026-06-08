@@ -110,10 +110,15 @@ public class HolographicOutlineHelper {
         mBlurPaint.setMaskFilter(mMediumOuterBlurMaskFilter);
         int[] outerBlurOffset = new int[2];
         Bitmap thickOuterBlur = srcDst.extractAlpha(mBlurPaint, outerBlurOffset);
+        if (thickOuterBlur == null) return;
 
         mBlurPaint.setMaskFilter(mThinOuterBlurMaskFilter);
         int[] brightOutlineOffset = new int[2];
         Bitmap brightOutline = srcDst.extractAlpha(mBlurPaint, brightOutlineOffset);
+        if (brightOutline == null) {
+            thickOuterBlur.recycle();
+            return;
+        }
 
         // calculate the inner blur
         srcDstCanvas.setBitmap(srcDst);
@@ -121,6 +126,11 @@ public class HolographicOutlineHelper {
         mBlurPaint.setMaskFilter(mMediumInnerBlurMaskFilter);
         int[] thickInnerBlurOffset = new int[2];
         Bitmap thickInnerBlur = srcDst.extractAlpha(mBlurPaint, thickInnerBlurOffset);
+        if (thickInnerBlur == null) {
+            thickOuterBlur.recycle();
+            brightOutline.recycle();
+            return;
+        }
 
         // mask out the inner blur
         srcDstCanvas.setBitmap(thickInnerBlur);

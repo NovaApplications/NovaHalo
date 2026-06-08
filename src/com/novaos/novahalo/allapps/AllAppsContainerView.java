@@ -18,8 +18,10 @@ package com.novaos.novahalo.allapps;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
+import androidx.core.graphics.ColorUtils;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.widget.ImageButton;
@@ -283,6 +285,29 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
         mAppsRecyclerView.scrollToTop();
     }
 
+    public void updateBackground() {
+        if (mLauncher.getExtractedColors() == null) {
+            return;
+        }
+        int color = mLauncher.getExtractedColors().getHotseatColor(getContext());
+        // Increase alpha for all apps background as it looks too thin otherwise
+        int alpha = Color.alpha(color);
+        int targetAlpha = Math.min(255, (int) (alpha * 1.5f));
+        int finalColor = ColorUtils.setAlphaComponent(color, targetAlpha);
+        getContentView().setBackgroundColor(finalColor);
+        
+        int textColor = Utilities.getTextColorForBackground(finalColor);
+        if (mAdapter != null) {
+            mAdapter.setTextColor(textColor);
+        }
+        if (mPersonalTab != null) {
+            mPersonalTab.setTextColor(textColor);
+        }
+        if (mWorkTab != null) {
+            mWorkTab.setTextColor(textColor);
+        }
+    }
+
     /**
      * Returns whether the view itself will handle the touch event or not.
      */
@@ -396,7 +421,7 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
 
         getRevealView().setVisibility(View.VISIBLE);
         getContentView().setVisibility(View.VISIBLE);
-        getContentView().setBackground(null);
+        updateBackground();
     }
 
     @Override

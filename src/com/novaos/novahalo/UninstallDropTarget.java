@@ -43,23 +43,39 @@ public class UninstallDropTarget extends ButtonDropTarget {
             return false;
         }
 
-        Pair<ComponentName, Integer> componentInfo = getAppInfoFlags(info);
-        return componentInfo != null && (componentInfo.second & AppInfo.DOWNLOADED_FLAG) != 0;
+        Pair<ComponentName, UserHandle> componentInfo = getComponentAndUser(info);
+        if (componentInfo == null) {
+            return false;
+        }
+
+        ComponentName cn = componentInfo.first;
+        // Check if it's a system app
+        try {
+            android.content.pm.ApplicationInfo ai = context.getPackageManager().getApplicationInfo(
+                    cn.getPackageName(), 0);
+            if ((ai.flags & android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0) {
+                // System app. Can only uninstall if it's an update.
+                return (ai.flags & android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
+            }
+            return true;
+        } catch (android.content.pm.PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 
     /**
-     * @return the component name and flags if {@param info} is an AppInfo or an app shortcut.
+     * @return the component name and user if {@param info} is an AppInfo or an app shortcut.
      */
-    private static Pair<ComponentName, Integer> getAppInfoFlags(Object item) {
+    private static Pair<ComponentName, UserHandle> getComponentAndUser(Object item) {
         if (item instanceof AppInfo) {
             AppInfo info = (AppInfo) item;
-            return Pair.create(info.componentName, info.flags);
+            return Pair.create(info.componentName, info.user);
         } else if (item instanceof ShortcutInfo) {
             ShortcutInfo info = (ShortcutInfo) item;
             ComponentName component = info.getTargetComponent();
             if (info.itemType == LauncherSettings.BaseLauncherColumns.ITEM_TYPE_APPLICATION
                     && component != null) {
-                return Pair.create(component, info.flags);
+                return Pair.create(component, info.user);
             }
         }
         return null;
@@ -87,27 +103,54 @@ public class UninstallDropTarget extends ButtonDropTarget {
 
     public static boolean startUninstallActivity(
             final Launcher launcher, ItemInfo info, DropTargetResultCallback callback) {
-        Pair<ComponentName, Integer> componentInfo = getAppInfoFlags(info);
+        Pair<ComponentName, UserHandle> componentInfo = getComponentAndUser(info);
+        if (componentInfo == null) {
+            android.util.Log.e("UninstallDropTarget", "Failed to get component info for " + info);
+            return false;
+        }
         ComponentName cn = componentInfo.first;
+        UserHandle user = componentInfo.second;
 
-        final boolean isUninstallable;
-        if ((componentInfo.second & AppInfo.DOWNLOADED_FLAG) == 0) {
-            // System applications cannot be installed. For now, show a toast explaining that.
-            // We may give them the option of disabling apps this way.
+        final boolean isUninstallable = supportsDrop(launcher, info);
+        android.util.Log.d("UninstallDropTarget", "Starting uninstall for " + cn.getPackageName() + " user=" + user + " isUninstallable=" + isUninstallable);
+
+        if (!isUninstallable) {
             Toast.makeText(launcher, R.string.uninstall_system_app_text, Toast.LENGTH_SHORT).show();
-            isUninstallable = false;
         } else {
-            Intent intent = new Intent(Intent.ACTION_DELETE,
-                    Uri.fromParts("package", cn.getPackageName(), cn.getClassName()))
-                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                            | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            intent.putExtra(Intent.EXTRA_USER, info.user);
-            launcher.startActivity(intent);
-            isUninstallable = true;
+            try {
+                Intent intent = new Intent(Intent.ACTION_DELETE,
+                        Uri.fromParts("package", cn.getPackageName(), null))
+                        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                intent.putExtra(Intent.EXTRA_USER, user);
+                // Also add the older extra just in case
+                intent.putExtra("android.intent.extra.USER_HANDLE", user);
+                launcher.startActivity(intent);
+            } catch (Exception e) {
+                android.util.Log.e("UninstallDropTarget", "Failed to start uninstall activity", e);
+                // Fallback to older intent
+                try {
+                    Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
+                    intent.setData(Uri.parse("package:" + cn.getPackageName()));
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra(Intent.EXTRA_USER, user);
+                    intent.putExtra("android.intent.extra.USER_HANDLE", user);
+                    launcher.startActivity(intent);
+                } catch (Exception e2) {
+                    android.util.Log.e("UninstallDropTarget", "Fallback uninstall failed, trying App Details", e2);
+                    try {
+                        com.novaos.novahalo.compat.LauncherAppsCompat.getInstance(launcher)
+                                .showAppDetailsForProfile(cn, user);
+                    } catch (Exception e3) {
+                        android.util.Log.e("UninstallDropTarget", "App Details fallback failed", e3);
+                        return false;
+                    }
+                }
+            }
         }
         if (callback != null) {
             sendUninstallResult(
-                    launcher, isUninstallable, componentInfo.first, info.user, callback);
+                    launcher, isUninstallable, componentInfo.first, user, callback);
         }
         return isUninstallable;
     }
@@ -128,8 +171,8 @@ public class UninstallDropTarget extends ButtonDropTarget {
                 @Override
                 public void run() {
                     String packageName = cn.getPackageName();
-                    boolean uninstallSuccessful = !AllAppsList.packageHasActivities(
-                            launcher, packageName, user);
+                    boolean uninstallSuccessful = !com.novaos.novahalo.compat.LauncherAppsCompat
+                            .getInstance(launcher).isPackageEnabledForProfile(packageName, user);
                     callback.onDragObjectRemoved(uninstallSuccessful);
                 }
             };

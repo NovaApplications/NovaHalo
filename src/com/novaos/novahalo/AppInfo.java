@@ -101,10 +101,9 @@ public class AppInfo extends ItemInfo {
         int flags = 0;
         if ((appFlags & android.content.pm.ApplicationInfo.FLAG_SYSTEM) == 0) {
             flags |= DOWNLOADED_FLAG;
-
-            if ((appFlags & android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
-                flags |= UPDATED_SYSTEM_APP_FLAG;
-            }
+        }
+        if ((appFlags & android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
+            flags |= UPDATED_SYSTEM_APP_FLAG;
         }
         return flags;
     }

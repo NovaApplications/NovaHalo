@@ -137,6 +137,11 @@ public class IconCache {
         mLowResOptions.inPreferredConfig = Bitmap.Config.RGB_565;
     }
 
+    public synchronized void clear() {
+        mCache.clear();
+        mIconDb.delete(null, null);
+    }
+
     private Drawable getFullResDefaultActivityIcon() {
         return getFullResIcon(Resources.getSystem(), android.R.mipmap.sym_def_app_icon);
     }
@@ -441,6 +446,18 @@ public class IconCache {
         application.contentDescription = entry.contentDescription;
         IconPack iconPack = IconPackProvider.loadAndGetIconPack(mContext);
         Drawable icon = iconPack == null ? null : iconPack.getIcon(application.componentName);
+
+        String customIconKey = "custom_icon_" + application.componentName.flattenToString();
+        String encodedIcon = Utilities.getPrefs(mContext).getString(customIconKey, null);
+        if (encodedIcon != null) {
+            Bitmap b = Utilities.decodeBitmap(encodedIcon);
+            if (b != null) {
+                application.iconBitmap = b;
+                application.usingLowResIcon = false;
+                return;
+            }
+        }
+
         boolean hasNotifications = NotificationListener.hasNotifications(application.componentName.getPackageName());
         application.iconBitmap = icon == null ? getNonNullIcon(entry, user, hasNotifications) : Utilities.createIconBitmap(icon, mContext, hasNotifications);
         application.usingLowResIcon = entry.isLowResIcon;
@@ -459,6 +476,18 @@ public class IconCache {
             application.contentDescription = entry.contentDescription;
             IconPack iconPack = IconPackProvider.loadAndGetIconPack(mContext);
             Drawable icon = iconPack == null ? null : iconPack.getIcon(application.componentName);
+
+            String customIconKey = "custom_icon_" + application.componentName.flattenToString();
+            String encodedIcon = Utilities.getPrefs(mContext).getString(customIconKey, null);
+            if (encodedIcon != null) {
+                Bitmap b = Utilities.decodeBitmap(encodedIcon);
+                if (b != null) {
+                    application.iconBitmap = b;
+                    application.usingLowResIcon = false;
+                    return;
+                }
+            }
+
             boolean hasNotifications = NotificationListener.hasNotifications(application.componentName.getPackageName());
             application.iconBitmap = icon == null ? entry.icon : Utilities.createIconBitmap(icon, mContext, hasNotifications);
             application.usingLowResIcon = entry.isLowResIcon;
@@ -511,6 +540,23 @@ public class IconCache {
         CacheEntry entry = cacheLocked(component, info, user, usePkgIcon, useLowResIcon);
         IconPack iconPack = IconPackProvider.loadAndGetIconPack(mContext);
         Drawable icon = iconPack == null ? null : iconPack.getIcon(component);
+
+        String customIconKey = "custom_icon_" + component.flattenToString();
+        String encodedIcon = Utilities.getPrefs(mContext).getString(customIconKey, null);
+        if (encodedIcon != null) {
+            Bitmap b = Utilities.decodeBitmap(encodedIcon);
+            if (b != null) {
+                shortcutInfo.setIcon(b);
+                String title = Utilities.trim(entry.title);
+                String key = "alias_" + component.flattenToString();
+                shortcutInfo.title = Utilities.getPrefs(mContext).getString(key, title);
+                shortcutInfo.contentDescription = entry.contentDescription;
+                shortcutInfo.usingFallbackIcon = false;
+                shortcutInfo.usingLowResIcon = false;
+                return;
+            }
+        }
+
         boolean hasNotifications = NotificationListener.hasNotifications(component.getPackageName());
         Bitmap iBitmap = icon == null ? getNonNullIcon(entry, user, hasNotifications) : Utilities.createIconBitmap(icon, mContext, hasNotifications);
         shortcutInfo.setIcon(iBitmap);
@@ -531,6 +577,19 @@ public class IconCache {
                 infoInOut.packageName, infoInOut.user, useLowResIcon);
         infoInOut.title = Utilities.trim(entry.title);
         infoInOut.contentDescription = entry.contentDescription;
+
+        ComponentName cn = new ComponentName(infoInOut.packageName, ".");
+        String customIconKey = "custom_icon_" + cn.flattenToString();
+        String encodedIcon = Utilities.getPrefs(mContext).getString(customIconKey, null);
+        if (encodedIcon != null) {
+            Bitmap b = Utilities.decodeBitmap(encodedIcon);
+            if (b != null) {
+                infoInOut.iconBitmap = b;
+                infoInOut.usingLowResIcon = false;
+                return;
+            }
+        }
+
         boolean hasNotifications = NotificationListener.hasNotifications(infoInOut.packageName);
         infoInOut.iconBitmap = getNonNullIcon(entry, infoInOut.user, hasNotifications);
         infoInOut.usingLowResIcon = entry.isLowResIcon;

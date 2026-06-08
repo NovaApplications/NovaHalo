@@ -48,6 +48,7 @@ import android.util.Property;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewParent;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
@@ -1974,7 +1975,16 @@ public class Workspace extends PagedView
 
         mDragInfo = cellInfo;
         child.setVisibility(INVISIBLE);
-        CellLayout layout = (CellLayout) child.getParent().getParent();
+        
+        ViewParent parent = child.getParent();
+        if (parent == null || !(parent instanceof ShortcutAndWidgetContainer)) {
+            return;
+        }
+        ShortcutAndWidgetContainer container = (ShortcutAndWidgetContainer) parent;
+        if (!(container.getParent() instanceof CellLayout)) {
+            return;
+        }
+        CellLayout layout = (CellLayout) container.getParent();
         layout.prepareChildForDrag(child);
 
         if (options.isAccessibleDrag) {
@@ -2016,6 +2026,9 @@ public class Workspace extends PagedView
 
         // The drag bitmap follows the touch point around on the screen
         final Bitmap b = previewProvider.createDragBitmap(mCanvas);
+        if (b == null) {
+            return null;
+        }
         int halfPadding = previewProvider.previewPadding / 2;
 
         float scale = previewProvider.getScaleAndPosition(b, mTempXY);
@@ -2055,7 +2068,6 @@ public class Workspace extends PagedView
         DragView dv = mDragController.startDrag(b, dragLayerX, dragLayerY, source,
                 dragObject, dragVisualizeOffset, dragRect, scale, dragOptions);
         dv.setIntrinsicIconScaleFactor(source.getIntrinsicIconScaleFactor());
-        b.recycle();
         return dv;
     }
 
@@ -3172,6 +3184,9 @@ public class Workspace extends PagedView
 
     public Bitmap createWidgetBitmap(ItemInfo widgetInfo, View layout) {
         int[] unScaledSize = mLauncher.getWorkspace().estimateItemSize(widgetInfo, false);
+        if (unScaledSize[0] <= 0 || unScaledSize[1] <= 0) {
+            return null;
+        }
         int visibility = layout.getVisibility();
         layout.setVisibility(VISIBLE);
 
@@ -3244,8 +3259,10 @@ public class Workspace extends PagedView
                 info.itemType == LauncherSettings.Favorites.ITEM_TYPE_CUSTOM_APPWIDGET;
         if ((animationType == ANIMATE_INTO_POSITION_AND_RESIZE || external) && finalView != null) {
             Bitmap crossFadeBitmap = createWidgetBitmap(info, finalView);
-            dragView.setCrossFadeBitmap(crossFadeBitmap);
-            dragView.crossFade((int) (duration * 0.8f));
+            if (crossFadeBitmap != null) {
+                dragView.setCrossFadeBitmap(crossFadeBitmap);
+                dragView.crossFade((int) (duration * 0.8f));
+            }
         } else if (isWidget && external) {
             scaleXY[0] = scaleXY[1] = Math.min(scaleXY[0], scaleXY[1]);
         }
@@ -3367,7 +3384,7 @@ public class Workspace extends PagedView
             }
         }
         if ((d.cancelled || (beingCalledAfterUninstall && !mUninstallSuccessful))
-                && mDragInfo.cell != null) {
+                && mDragInfo != null && mDragInfo.cell != null) {
             mDragInfo.cell.setVisibility(VISIBLE);
         }
         mOutlineProvider = null;

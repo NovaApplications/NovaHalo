@@ -16,4 +16,52 @@
         <item>notifications</item>
         <item>none</item>
     </string-array>
+
+    <string-array name="taskbar_color_entries">
+        <item>@string/taskbar_color_default</item>
+        <item>@string/taskbar_color_red</item>
+        <item>@string/taskbar_color_blue</item>
+        <item>@string/taskbar_color_green</item>
+        <item>@string/taskbar_color_black</item>
+    </string-array>
+
+    <string-array name="taskbar_color_values">
+        <item>default</item>
+        <item>#FFFF0000</item>
+        <item>#FF0000FF</item>
+        <item>#FF00FF00</item>
+        <item>#FF000000</item>
+    </string-array>
+
+    <string-array name="icon_shape_entries">
+        <item>@string/icon_shape_system</item>
+        <item>@string/icon_shape_circle</item>
+        <item>@string/icon_shape_square</item>
+        <item>@string/icon_shape_squircle</item>
+        <item>@string/icon_shape_teardrop</item>
+    </string-array>
+
+    <string-array name="icon_shape_values">
+        <item>system</item>
+        <item>circle</item>
+        <item>square</item>
+        <item>squircle</item>
+        <item>teardrop</item>
+    </string-array>
+
+    <string-array name="taskbar_transparency_entries">
+        <item>@string/taskbar_transparency_0</item>
+        <item>@string/taskbar_transparency_25</item>
+        <item>@string/taskbar_transparency_50</item>
+        <item>@string/taskbar_transparency_75</item>
+        <item>@string/taskbar_transparency_100</item>
+    </string-array>
+
+    <string-array name="taskbar_transparency_values">
+        <item>1.0</item>
+        <item>0.75</item>
+        <item>0.5</item>
+        <item>0.25</item>
+        <item>0.0</item>
+    </string-array>
 </resources>

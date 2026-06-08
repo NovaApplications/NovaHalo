@@ -122,4 +122,25 @@
     <string name="swipe_down_action_search">Search</string>
     <string name="swipe_down_action_notifications">Notifications</string>
     <string name="swipe_down_action_none">None</string>
+
+    <string name="pref_taskbar_color_title">Taskbar Color</string>
+    <string name="taskbar_color_default">Default</string>
+    <string name="taskbar_color_red">Red</string>
+    <string name="taskbar_color_blue">Blue</string>
+    <string name="taskbar_color_green">Green</string>
+    <string name="taskbar_color_black">Black</string>
+
+    <string name="pref_icon_shape_title">Icon Shape</string>
+    <string name="icon_shape_system">System Default</string>
+    <string name="icon_shape_circle">Circle</string>
+    <string name="icon_shape_square">Square</string>
+    <string name="icon_shape_squircle">Squircle</string>
+    <string name="icon_shape_teardrop">Teardrop</string>
+
+    <string name="pref_taskbar_transparency_title">Taskbar Transparency</string>
+    <string name="taskbar_transparency_0">0% (Solid)</string>
+    <string name="taskbar_transparency_25">25%</string>
+    <string name="taskbar_transparency_50">50%</string>
+    <string name="taskbar_transparency_75">75%</string>
+    <string name="taskbar_transparency_100">100% (Transparent)</string>
 </resources>

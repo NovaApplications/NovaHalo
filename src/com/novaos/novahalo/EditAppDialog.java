@@ -4,7 +4,11 @@ import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import android.util.Log;
@@ -16,7 +20,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,6 +46,7 @@ public class EditAppDialog extends Dialog {
         if (hiddenApps == null) {
             hiddenApps = new HashSet<>();
         }
+        launcher.mEditingAppInfo = info;
         setCanceledOnTouchOutside(true);
     }
 
@@ -77,6 +82,15 @@ public class EditAppDialog extends Dialog {
                 return false;
             }
         };
+        icon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                launcher.startActivityForResult(intent, Launcher.REQUEST_PICK_ICON);
+            }
+        });
+
         icon.setOnLongClickListener(olcl);
 
         View.OnClickListener resetTitle = new View.OnClickListener() {

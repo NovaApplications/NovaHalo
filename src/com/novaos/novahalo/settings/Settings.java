@@ -20,6 +20,9 @@ public class Settings implements SharedPreferences.OnSharedPreferenceChangeListe
     private static final String KEY_SHOW_VOICE_SEARCH_BUTTON = "pref_showMic";
     private static final String KEY_PREF_ALL_APPS_OPACITY = "pref_allAppsOpacitySB";
     private static final String KEY_PREF_SHOW_HIDDEN_APPS = "pref_showHidden";
+    private static final String KEY_PREF_TASKBAR_COLOR = "pref_taskbarColor";
+    private static final String KEY_PREF_ICON_SHAPE = "pref_iconShape";
+    private static final String KEY_PREF_TASKBAR_TRANSPARENCY = "pref_taskbarTransparency";
     private static Settings instance;
     private Launcher mLauncher;
 
@@ -69,6 +72,17 @@ public class Settings implements SharedPreferences.OnSharedPreferenceChangeListe
                     break;
                 case KEY_PREF_SHOW_HIDDEN_APPS:
                     LauncherAppState.getInstance().reloadAllApps();
+                    break;
+                case KEY_PREF_TASKBAR_COLOR:
+                case KEY_PREF_TASKBAR_TRANSPARENCY:
+                    mLauncher.getHotseat().updateColor(mLauncher.getExtractedColors(), true);
+                    if (mLauncher.getAppsView() != null) {
+                        mLauncher.getAppsView().updateBackground();
+                    }
+                    break;
+                case KEY_PREF_ICON_SHAPE:
+                    LauncherAppState.getInstance().getIconCache().clear();
+                    LauncherAppState.getInstance().reloadAll(false);
                     break;
                 case KEY_PREF_KEEP_SCROLL_STATE:
                 case KEY_SHOW_VOICE_SEARCH_BUTTON:

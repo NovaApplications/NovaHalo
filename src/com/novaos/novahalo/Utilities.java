@@ -39,10 +39,14 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
+import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.PaintDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -267,6 +271,31 @@ public final class Utilities {
         return srcTgt;
     }
 
+    public static Path getShapePath(String shape, int width, int height) {
+        Path path = new Path();
+        float w = (float) width;
+        float h = (float) height;
+        switch (shape) {
+            case "circle":
+                path.addOval(0, 0, w, h, Path.Direction.CW);
+                break;
+            case "square":
+                path.addRect(0, 0, w, h, Path.Direction.CW);
+                break;
+            case "squircle":
+                float r = w * 0.25f;
+                path.addRoundRect(new RectF(0, 0, w, h), r, r, Path.Direction.CW);
+                break;
+            case "teardrop":
+                float r1 = w * 0.5f;
+                float r2 = w * 0.15f;
+                path.addRoundRect(new RectF(0, 0, w, h),
+                        new float[]{r1, r1, r1, r1, r1, r1, r2, r2}, Path.Direction.CW);
+                break;
+        }
+        return path;
+    }
+
     /**
      * Returns a bitmap suitable for the all apps view.
      */
@@ -312,21 +341,63 @@ public final class Utilities {
             int textureWidth = iconBitmapSize;
             int textureHeight = iconBitmapSize;
 
-            final Bitmap bitmap = Bitmap.createBitmap(textureWidth, textureHeight,
+            Bitmap bitmap = Bitmap.createBitmap(textureWidth, textureHeight,
                     Bitmap.Config.ARGB_8888);
             final Canvas canvas = sCanvas;
             canvas.setBitmap(bitmap);
 
-            final int left = (textureWidth - width) / 2;
-            final int top = (textureHeight - height) / 2;
+            String shape = com.novaos.novahalo.config.FeatureFlags.iconShape(context);
+            boolean shouldShape = !"system".equals(shape);
 
-            sOldBounds.set(icon.getBounds());
-            icon.setBounds(left, top, left + width, top + height);
-            canvas.save();
-            canvas.scale(scale, scale, textureWidth / 2f, textureHeight / 2f);
-            icon.draw(canvas);
-            canvas.restore();
-            icon.setBounds(sOldBounds);
+            if (shouldShape) {
+                Bitmap temp = Bitmap.createBitmap(textureWidth, textureHeight, Bitmap.Config.ARGB_8888);
+                Canvas tempCanvas = new Canvas(temp);
+
+                final int left = (textureWidth - width) / 2;
+                final int top = (textureHeight - height) / 2;
+
+                sOldBounds.set(icon.getBounds());
+                icon.setBounds(left, top, left + width, top + height);
+                tempCanvas.save();
+                tempCanvas.scale(scale, scale, textureWidth / 2f, textureHeight / 2f);
+
+                if (ATLEAST_OREO && icon instanceof AdaptiveIconDrawable) {
+                    AdaptiveIconDrawable aid = (AdaptiveIconDrawable) icon;
+                    float extraScale = 1.5f; 
+                    tempCanvas.save();
+                    tempCanvas.scale(extraScale, extraScale, textureWidth / 2f, textureHeight / 2f);
+                    aid.getBackground().setBounds(icon.getBounds());
+                    aid.getBackground().draw(tempCanvas);
+                    aid.getForeground().setBounds(icon.getBounds());
+                    aid.getForeground().draw(tempCanvas);
+                    tempCanvas.restore();
+                } else {
+                    icon.draw(tempCanvas);
+                }
+
+                tempCanvas.restore();
+                icon.setBounds(sOldBounds);
+
+                Paint maskPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                maskPaint.setColor(Color.BLACK);
+                Path maskPath = getShapePath(shape, textureWidth, textureHeight);
+                canvas.drawPath(maskPath, maskPaint);
+                maskPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+                canvas.drawBitmap(temp, 0, 0, maskPaint);
+                temp.recycle();
+            } else {
+                final int left = (textureWidth - width) / 2;
+                final int top = (textureHeight - height) / 2;
+
+                sOldBounds.set(icon.getBounds());
+                icon.setBounds(left, top, left + width, top + height);
+                canvas.save();
+                canvas.scale(scale, scale, textureWidth / 2f, textureHeight / 2f);
+                icon.draw(canvas);
+                canvas.restore();
+                icon.setBounds(sOldBounds);
+            }
+
             canvas.setBitmap(null);
             if (notificationBadge) {
                 return addNotificationBadgeToIcon(bitmap);
@@ -931,5 +1002,31 @@ public final class Utilities {
         } catch (Exception e) {
             Log.e(TAG, "Failed to expand notifications", e);
         }
+    }
+
+    public static String encodeBitmap(Bitmap bitmap) {
+        java.io.ByteArrayOutputStream byteArrayOutputStream = new java.io.ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        return android.util.Base64.encodeToString(byteArray, android.util.Base64.DEFAULT);
+    }
+
+    public static Bitmap decodeBitmap(String encodedString) {
+        try {
+            byte[] encodeByte = android.util.Base64.decode(encodedString, android.util.Base64.DEFAULT);
+            return BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static int getTextColorForBackground(int backgroundColor) {
+        // If background is mostly transparent, assume it's on top of something dark (for Nova Halo)
+        // or just use white as default for safety.
+        if (Color.alpha(backgroundColor) < 128) {
+            return Color.WHITE;
+        }
+        double luminance = androidx.core.graphics.ColorUtils.calculateLuminance(backgroundColor);
+        return luminance > 0.5 ? Color.BLACK : Color.WHITE;
     }
 }

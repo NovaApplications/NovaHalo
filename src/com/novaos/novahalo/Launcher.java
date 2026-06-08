@@ -49,6 +49,9 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import androidx.core.content.ContextCompat;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -78,7 +81,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -140,6 +143,7 @@ public class Launcher extends Activity
     private static final int REQUEST_RECONFIGURE_APPWIDGET = 12;
 
     private static final int REQUEST_PERMISSION_CALL_PHONE = 13;
+    public static final int REQUEST_PICK_ICON = 15;
 
     private static final float BOUNCE_ANIMATION_TENSION = 1.3f;
 
@@ -321,6 +325,7 @@ public class Launcher extends Activity
      * {@link #startActivityForResult(Intent, int)} or {@link #requestPermissions(String[], int)}
      */
     private PendingRequestArgs mPendingRequestArgs;
+    public AppInfo mEditingAppInfo;
 
     public ViewGroupFocusHelper mFocusHandler;
 
@@ -354,11 +359,11 @@ public class Launcher extends Activity
         // LauncherModel load.
         mPaused = false;
 
+        mExtractedColors = new ExtractedColors();
         setContentView(R.layout.launcher);
 
         setupViews();
         mDeviceProfile.layout(this, false /* notifyListeners */);
-        mExtractedColors = new ExtractedColors();
         loadExtractedColorsAndColorItems();
 
         ((AccessibilityManager) getSystemService(ACCESSIBILITY_SERVICE))
@@ -396,6 +401,9 @@ public class Launcher extends Activity
         mExtractedColors.load(this);
         mHotseat.updateColor(mExtractedColors, !mPaused);
         mWorkspace.getPageIndicator().updateColor(mExtractedColors);
+        if (mAppsView != null) {
+            mAppsView.updateBackground();
+        }
         // It's possible that All Apps is visible when this is run,
         // so always use light status bar in that case.
         activateLightStatusBar(isAllAppsVisible());
@@ -511,6 +519,24 @@ public class Launcher extends Activity
             return;
         }
         mPendingActivityResult = null;
+
+        if (requestCode == REQUEST_PICK_ICON && resultCode == RESULT_OK && data != null && mEditingAppInfo != null) {
+            Uri iconUri = data.getData();
+            if (iconUri != null) {
+                try {
+                    InputStream is = getContentResolver().openInputStream(iconUri);
+                    Bitmap icon = BitmapFactory.decodeStream(is);
+                    if (icon != null) {
+                        String key = "custom_icon_" + mEditingAppInfo.componentName.flattenToString();
+                        Utilities.getPrefs(this).edit().putString(key, Utilities.encodeBitmap(icon)).apply();
+                        LauncherAppState.getInstance().reloadAll(false);
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error loading custom icon", e);
+                }
+            }
+            return;
+        }
 
         // Reset the startActivity waiting flag
         final PendingRequestArgs requestArgs = mPendingRequestArgs;

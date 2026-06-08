@@ -84,8 +84,12 @@ public class DragPreviewProvider {
             }
             destCanvas.translate(-mView.getScrollX() + DRAG_BITMAP_PADDING / 2,
                     -mView.getScrollY() + DRAG_BITMAP_PADDING / 2);
-            destCanvas.clipRect(clipRect, Op.REPLACE);
-            mView.draw(destCanvas);
+            destCanvas.clipRect(clipRect);
+            try {
+                mView.draw(destCanvas);
+            } catch (Exception e) {
+                android.util.Log.e("DragPreviewProvider", "Error drawing drag preview", e);
+            }
 
             // Restore text visibility of FolderIcon if necessary
             if (textVisible) {
@@ -108,8 +112,14 @@ public class DragPreviewProvider {
             b = Bitmap.createBitmap(bounds.width() + DRAG_BITMAP_PADDING,
                     bounds.height() + DRAG_BITMAP_PADDING, Bitmap.Config.ARGB_8888);
         } else {
-            b = Bitmap.createBitmap(mView.getWidth() + DRAG_BITMAP_PADDING,
-                    mView.getHeight() + DRAG_BITMAP_PADDING, Bitmap.Config.ARGB_8888);
+            int width = mView.getWidth();
+            int height = mView.getHeight();
+            if (width <= 0 || height <= 0) {
+                width = 100; // Fallback size
+                height = 100;
+            }
+            b = Bitmap.createBitmap(width + DRAG_BITMAP_PADDING,
+                    height + DRAG_BITMAP_PADDING, Bitmap.Config.ARGB_8888);
         }
 
         canvas.setBitmap(b);
@@ -128,8 +138,14 @@ public class DragPreviewProvider {
      * Responsibility for the bitmap is transferred to the caller.
      */
     public Bitmap createDragOutline(Canvas canvas) {
-        final Bitmap b = Bitmap.createBitmap(mView.getWidth() + DRAG_BITMAP_PADDING,
-                mView.getHeight() + DRAG_BITMAP_PADDING, Bitmap.Config.ALPHA_8);
+        int width = mView.getWidth();
+        int height = mView.getHeight();
+        if (width <= 0 || height <= 0) {
+            width = 100; // Fallback size
+            height = 100;
+        }
+        final Bitmap b = Bitmap.createBitmap(width + DRAG_BITMAP_PADDING,
+                height + DRAG_BITMAP_PADDING, Bitmap.Config.ALPHA_8);
         canvas.setBitmap(b);
         drawDragView(canvas);
         HolographicOutlineHelper.obtain(mView.getContext())

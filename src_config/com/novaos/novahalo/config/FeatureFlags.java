@@ -28,6 +28,8 @@ public final class FeatureFlags {
     private static final String KEY_PREF_LIGHT_STATUS_BAR = "pref_lightStatusBar";
     private static final String KEY_PREF_PINCH_TO_OVERVIEW = "pref_pinchToOverview";
     private static final String KEY_PREF_SWIPE_DOWN_ACTION = "pref_swipeDownAction";
+    private static final String KEY_PREF_ICON_SHAPE = "pref_iconShape";
+    private static final String KEY_PREF_TASKBAR_TRANSPARENCY = "pref_taskbarTransparency";
     private static final String KEY_PREF_HOTSEAT_EXTRACTED_COLORS = "pref_hotseatShouldUseExtractedColors";
     private static final String KEY_PREF_HAPTIC_FEEDBACK = "pref_enableHapticFeedback";
     private static final String KEY_PREF_KEEP_SCROLL_STATE = "pref_keepScrollState";
@@ -41,6 +43,14 @@ public final class FeatureFlags {
     // Returns the action to perform on swipe down gesture on the first workspace.
     public static String swipeDownAction(Context context) {
         return Utilities.getPrefs(context).getString(KEY_PREF_SWIPE_DOWN_ACTION, "search");
+    }
+
+    public static String iconShape(Context context) {
+        return Utilities.getPrefs(context).getString(KEY_PREF_ICON_SHAPE, "system");
+    }
+
+    public static float taskbarTransparency(Context context) {
+        return Float.parseFloat(Utilities.getPrefs(context).getString(KEY_PREF_TASKBAR_TRANSPARENCY, "1.0"));
     }
 
     public static boolean pinchToOverview(Context context) {

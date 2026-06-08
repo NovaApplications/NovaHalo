@@ -104,6 +104,30 @@
             app:summaryMultiplier="100"
             app:defaultValue="1.0"
             android:persistent="true" />
+
+        <ListPreference
+            android:key="pref_taskbarColor"
+            android:title="@string/pref_taskbar_color_title"
+            android:entries="@array/taskbar_color_entries"
+            android:entryValues="@array/taskbar_color_values"
+            android:defaultValue="default"
+            android:persistent="true" />
+
+        <ListPreference
+            android:key="pref_taskbarTransparency"
+            android:title="@string/pref_taskbar_transparency_title"
+            android:entries="@array/taskbar_transparency_entries"
+            android:entryValues="@array/taskbar_transparency_values"
+            android:defaultValue="1.0"
+            android:persistent="true" />
+
+        <ListPreference
+            android:key="pref_iconShape"
+            android:title="@string/pref_icon_shape_title"
+            android:entries="@array/icon_shape_entries"
+            android:entryValues="@array/icon_shape_values"
+            android:defaultValue="system"
+            android:persistent="true" />
     </PreferenceScreen>
 
     <PreferenceScreen

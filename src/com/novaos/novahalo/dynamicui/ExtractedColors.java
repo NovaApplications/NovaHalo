@@ -180,27 +180,41 @@ public class ExtractedColors {
      */
     public int getHotseatColor(Context context) {
         int hotseatColor;
+        String prefColor = Utilities.getPrefs(context).getString("pref_taskbarColor", "default");
+        if (!"default".equals(prefColor)) {
+            try {
+                hotseatColor = Color.parseColor(prefColor);
+            } catch (Exception e) {
+                hotseatColor = getDefaultHotseatColor(context);
+            }
+        } else {
+            hotseatColor = getDefaultHotseatColor(context);
+        }
+
+        float transparency = FeatureFlags.taskbarTransparency(context);
+        return ColorUtils.setAlphaComponent(hotseatColor, (int) (255 * transparency));
+    }
+
+    private int getDefaultHotseatColor(Context context) {
+        int hotseatColor;
         boolean shouldUseExtractedColors = FeatureFlags.hotseatShouldUseExtractedColors(context);
         if (getColor(IS_SUPER_LIGHT, 0) == 1) {
             if (shouldUseExtractedColors) {
-                int baseColor = getColor(HOTSEAT_DARK_MUTED_INDEX, getColor(HOTSEAT_DARK_VIBRANT_INDEX, Color.BLACK));
-                hotseatColor = ColorUtils.setAlphaComponent(baseColor, (int) (0.20f * 255));
+                hotseatColor = getColor(HOTSEAT_DARK_MUTED_INDEX, getColor(HOTSEAT_DARK_VIBRANT_INDEX, Color.BLACK));
             } else {
-                hotseatColor = ColorUtils.setAlphaComponent(Color.BLACK, (int) (0.12f * 255));
+                hotseatColor = Color.BLACK;
             }
         } else if (getColor(IS_SUPER_DARK, 0) == 1) {
             if (shouldUseExtractedColors) {
-                int baseColor = getColor(HOTSEAT_LIGHT_MUTED_INDEX, getColor(HOTSEAT_LIGHT_VIBRANT_INDEX, Color.WHITE));
-                hotseatColor = ColorUtils.setAlphaComponent(baseColor, (int) (0.25f * 255));
+                hotseatColor = getColor(HOTSEAT_LIGHT_MUTED_INDEX, getColor(HOTSEAT_LIGHT_VIBRANT_INDEX, Color.WHITE));
             } else {
-                hotseatColor = ColorUtils.setAlphaComponent(Color.WHITE, (int) (0.18f * 255));
+                hotseatColor = Color.WHITE;
             }
         } else {
             if (shouldUseExtractedColors) {
-                int baseColor = getColor(HOTSEAT_LIGHT_VIBRANT_INDEX, getColor(HOTSEAT_LIGHT_MUTED_INDEX, Color.WHITE));
-                hotseatColor = ColorUtils.setAlphaComponent(baseColor, (int) (0.40f * 255));
+                hotseatColor = getColor(HOTSEAT_LIGHT_VIBRANT_INDEX, getColor(HOTSEAT_LIGHT_MUTED_INDEX, Color.WHITE));
             } else {
-                hotseatColor = ColorUtils.setAlphaComponent(Color.WHITE, (int) (0.25f * 255));
+                hotseatColor = Color.WHITE;
             }
         }
         return hotseatColor;

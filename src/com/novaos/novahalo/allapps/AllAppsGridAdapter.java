@@ -162,6 +162,14 @@ public class AllAppsGridAdapter extends RecyclerView.Adapter<AllAppsGridAdapter.
     private String mEmptySearchMessage;
     // The intent to send off to the market app, updated each time the search query changes.
     private Intent mMarketSearchIntent;
+    private int mTextColor = android.graphics.Color.WHITE;
+
+    public void setTextColor(int color) {
+        if (mTextColor != color) {
+            mTextColor = color;
+            notifyDataSetChanged();
+        }
+    }
 
     public AllAppsGridAdapter(Launcher launcher, AlphabeticalAppsList apps, View.OnClickListener
             iconClickListener, View.OnLongClickListener iconLongClickListener) {
@@ -289,17 +297,20 @@ public class AllAppsGridAdapter extends RecyclerView.Adapter<AllAppsGridAdapter.
                 AppInfo info = mApps.getAdapterItems().get(position).appInfo;
                 BubbleTextView icon = (BubbleTextView) holder.mContent;
                 icon.applyFromApplicationInfo(info);
+                icon.setTextColor(mTextColor);
                 icon.setAccessibilityDelegate(mLauncher.getAccessibilityDelegate());
                 break;
             }
             case VIEW_TYPE_EMPTY_SEARCH:
                 TextView emptyViewText = (TextView) holder.mContent;
                 emptyViewText.setText(mEmptySearchMessage);
+                emptyViewText.setTextColor(mTextColor);
                 emptyViewText.setGravity(mApps.hasNoFilteredResults() ? Gravity.CENTER :
                         Gravity.START | Gravity.CENTER_VERTICAL);
                 break;
             case VIEW_TYPE_SEARCH_MARKET:
                 TextView searchView = (TextView) holder.mContent;
+                searchView.setTextColor(mTextColor);
                 if (mMarketSearchIntent != null) {
                     searchView.setVisibility(View.VISIBLE);
                 } else {
