@@ -148,7 +148,7 @@ public class SettingsActivity extends AppCompatActivity implements
                     buildPref.setSummary(launcherName + "-" + dateStr + "." + String.format(java.util.Locale.US, "%04d", BuildConfig.VERSION_CODE));
 
                     buildPref.setOnPreferenceClickListener(preference -> {
-                        Context context = getActivity();
+                        Context context = getContext();
                         if (context != null && Utilities.getPrefs(context).getBoolean("pref_dev_mode", false)) {
                             return true;
                         }
@@ -156,8 +156,11 @@ public class SettingsActivity extends AppCompatActivity implements
                         if (mDevTapCount >= 7) {
                             mDevTapCount = 0;
                             showDevModeDialog(null); // No need to refresh immediately here
-                        } else if (mDevTapCount > 2 && getActivity() != null) {
-                            Toast.makeText(getActivity(), "You are now " + (7 - mDevTapCount) + " steps away from being a developer.", Toast.LENGTH_SHORT).show();
+                        } else if (mDevTapCount > 2) {
+                            Context c = getContext();
+                            if (c != null) {
+                                Toast.makeText(c, "You are now " + (7 - mDevTapCount) + " steps away from being a developer.", Toast.LENGTH_SHORT).show();
+                            }
                         }
                         return true;
                     });
@@ -194,7 +197,7 @@ public class SettingsActivity extends AppCompatActivity implements
         }
 
         private void clearCrashLogs() {
-            Context context = getActivity();
+            Context context = getContext();
             if (context == null) return;
             java.io.File logFile = new java.io.File(context.getExternalFilesDir(null), "nova_crash_logs.txt");
             if (logFile.exists() && logFile.delete()) {
@@ -205,7 +208,7 @@ public class SettingsActivity extends AppCompatActivity implements
         }
 
         private void exportCrashLogs() {
-            Context context = getActivity();
+            Context context = getContext();
             if (context == null) return;
             java.io.File logFile = new java.io.File(context.getExternalFilesDir(null), "nova_crash_logs.txt");
             if (!logFile.exists()) {
@@ -231,7 +234,7 @@ public class SettingsActivity extends AppCompatActivity implements
                 .setMessage("Enter password to unlock development features:")
                 .setView(input)
                 .setPositiveButton("OK", (dialog, which) -> {
-                    Context context = getActivity();
+                    Context context = getContext();
                     if (context != null && "development".equals(input.getText().toString())) {
                         Utilities.getPrefs(context).edit().putBoolean("pref_dev_mode", true).apply();
                         if (category != null) {
@@ -271,18 +274,21 @@ public class SettingsActivity extends AppCompatActivity implements
                 if (key.equals("about")) {
                     return true;
                 } else if (key.equals("check_for_update") && getActivity() != null) {
-                    final Context context = getActivity();
+                    final Context context = getContext();
+                    if (context == null) return true;
                     Toast.makeText(context, "Checking for updates...", Toast.LENGTH_SHORT).show();
                     
                     GitHubUpdateChecker.checkForUpdates(context, new GitHubUpdateChecker.UpdateCheckCallback() {
                         @Override
-                        public void onUpdateAvailable(final String version, final String downloadUrl) {
+                        public void onUpdateAvailable(@NonNull final String version, @NonNull final String downloadUrl) {
                             if (getActivity() == null) return;
                             getActivity().runOnUiThread(() -> {
-                                new AlertDialog.Builder(context)
+                                Context c = getContext();
+                                if (c == null) return;
+                                new AlertDialog.Builder(c)
                                         .setTitle("Update Available")
                                         .setMessage("A new version (v" + version + ") is available. Would you like to update now?")
-                                        .setPositiveButton("Update", (dialog, which) -> GitHubUpdateChecker.downloadAndInstall(context, downloadUrl, version))
+                                        .setPositiveButton("Update", (dialog, which) -> GitHubUpdateChecker.downloadAndInstall(c, downloadUrl, version))
                                         .setNegativeButton("Later", null)
                                         .show();
                             });
@@ -291,13 +297,23 @@ public class SettingsActivity extends AppCompatActivity implements
                         @Override
                         public void onNoUpdate() {
                             if (getActivity() == null) return;
-                            getActivity().runOnUiThread(() -> Toast.makeText(context, "Nova Halo is up to date!", Toast.LENGTH_SHORT).show());
+                            getActivity().runOnUiThread(() -> {
+                                Context c = getContext();
+                                if (c != null) {
+                                    Toast.makeText(c, "Nova Halo is up to date!", Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         }
 
                         @Override
-                        public void onError(final String error) {
+                        public void onError(@NonNull final String error) {
                             if (getActivity() == null) return;
-                            getActivity().runOnUiThread(() -> Toast.makeText(context, "Update check failed: " + error, Toast.LENGTH_SHORT).show());
+                            getActivity().runOnUiThread(() -> {
+                                Context c = getContext();
+                                if (c != null) {
+                                    Toast.makeText(c, "Update check failed: " + error, Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         }
                     });
                     return true;

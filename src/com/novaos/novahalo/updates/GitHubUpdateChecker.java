@@ -5,11 +5,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
+import android.widget.Toast;
 import androidx.core.content.FileProvider;
 
 import com.novaos.novahalo.BuildConfig;
@@ -171,11 +171,25 @@ public class GitHubUpdateChecker {
     }
 
     public static void downloadAndInstall(final Context context, String downloadUrl, String version) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!context.getPackageManager().canRequestPackageInstalls()) {
+                Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
+                intent.setData(Uri.parse("package:" + context.getPackageName()));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+                Toast.makeText(context, "Please enable 'Install unknown apps' for Nova Halo and try again.", Toast.LENGTH_LONG).show();
+                return;
+            }
+        }
+
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
         request.setTitle("Nova Halo Update " + version);
         request.setDescription("Downloading update...");
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "NovaHalo-" + version + ".apk");
+        
+        File destination = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "NovaHalo-" + version + ".apk");
+        if (destination.exists()) destination.delete();
+        request.setDestinationUri(Uri.fromFile(destination));
 
         final DownloadManager manager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
         final long downloadId = manager.enqueue(request);
@@ -185,7 +199,7 @@ public class GitHubUpdateChecker {
             public void onReceive(Context context, Intent intent) {
                 long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
                 if (downloadId == id) {
-                    installApk(context, downloadId);
+                    installApk(context, destination);
                     context.unregisterReceiver(this);
                 }
             }
@@ -198,37 +212,18 @@ public class GitHubUpdateChecker {
         }
     }
 
-    private static void installApk(Context context, long downloadId) {
-        DownloadManager manager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-        Cursor cursor = manager.query(new DownloadManager.Query().setFilterById(downloadId));
-        if (cursor.moveToFirst()) {
-            int statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
-            if (statusIndex != -1) {
-                int status = cursor.getInt(statusIndex);
-                if (status == DownloadManager.STATUS_SUCCESSFUL) {
-                    int uriIndex = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI);
-                    if (uriIndex != -1) {
-                        String uriString = cursor.getString(uriIndex);
-                        Uri apkUri = Uri.parse(uriString);
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            String path = apkUri.getPath();
-                            if (path != null) {
-                                File downloadFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                                        new File(path).getName());
-                                apkUri = FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", downloadFile);
-                            }
-                        }
-
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        context.startActivity(intent);
-                    }
-                }
-            }
+    private static void installApk(Context context, File apkFile) {
+        if (!apkFile.exists()) {
+            Log.e(TAG, "APK file not found: " + apkFile.getAbsolutePath());
+            return;
         }
-        cursor.close();
+
+        Uri apkUri = FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", apkFile);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        context.startActivity(intent);
     }
 }
