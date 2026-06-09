@@ -481,8 +481,12 @@ public class LauncherStateTransitionAnimation {
         updateAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                dispatchOnLauncherTransitionStep(fromView, animation.getAnimatedFraction());
-                dispatchOnLauncherTransitionStep(toView, animation.getAnimatedFraction());
+                if (fromView != null) {
+                    dispatchOnLauncherTransitionStep(fromView, animation.getAnimatedFraction());
+                }
+                if (toView != null) {
+                    dispatchOnLauncherTransitionStep(toView, animation.getAnimatedFraction());
+                }
             }
         });
         return updateAnimator;

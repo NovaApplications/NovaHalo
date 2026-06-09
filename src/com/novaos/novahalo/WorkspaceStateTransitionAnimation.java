@@ -192,16 +192,20 @@ public class WorkspaceStateTransitionAnimation {
             mStateAnimator.play(scale);
 
             Animator hotseatAlphaAnimation = mWorkspace.createHotseatAlphaAnimator(finalHotseatAlpha);
-            hotseatAlphaAnimation.setDuration(duration);
-            hotseatAlphaAnimation.setInterpolator(mZoomInInterpolator);
-            mStateAnimator.play(hotseatAlphaAnimation);
+            if (hotseatAlphaAnimation != null) {
+                hotseatAlphaAnimation.setDuration(duration);
+                hotseatAlphaAnimation.setInterpolator(mZoomInInterpolator);
+                mStateAnimator.play(hotseatAlphaAnimation);
+            }
 
-            ObjectAnimator overviewPanelAlpha = ObjectAnimator.ofFloat(overviewPanel, "alpha",
-                    finalOverviewPanelAlpha);
-            overviewPanelAlpha.addListener(new AlphaUpdateListener(overviewPanel, true));
-            overviewPanelAlpha.setDuration(duration);
-            overviewPanelAlpha.setInterpolator(mZoomInInterpolator);
-            mStateAnimator.play(overviewPanelAlpha);
+            if (overviewPanel != null) {
+                ObjectAnimator overviewPanelAlpha = ObjectAnimator.ofFloat(overviewPanel, "alpha",
+                        finalOverviewPanelAlpha);
+                overviewPanelAlpha.addListener(new AlphaUpdateListener(overviewPanel, true));
+                overviewPanelAlpha.setDuration(duration);
+                overviewPanelAlpha.setInterpolator(mZoomInInterpolator);
+                mStateAnimator.play(overviewPanelAlpha);
+            }
 
             mStateAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override

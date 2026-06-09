@@ -438,8 +438,11 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
         mContentBounds.set(mContainerPaddingLeft, 0, widthPx - mContainerPaddingRight, heightPx);
 
         DeviceProfile grid = mLauncher.getDeviceProfile();
-        if (mNumAppsPerRow != grid.inv.numColumns) {
-            mNumAppsPerRow = grid.inv.numColumns;
+        int numCols = grid.isPhone ? grid.inv.numColumns : 
+                (grid.availableWidthPx > grid.availableHeightPx ? grid.inv.numColumns + 2 : grid.inv.numColumns);
+        
+        if (mNumAppsPerRow != numCols) {
+            mNumAppsPerRow = numCols;
 
             mAppsRecyclerView.setNumAppsPerRow(grid, mNumAppsPerRow);
             mAdapter.setNumAppsPerRow(mNumAppsPerRow);
@@ -478,14 +481,22 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
         if (Utilities.isRtl(getResources())) {
             mAppsRecyclerView.setPadding(bgPadding.left + maxScrollBarWidth, 0, bgPadding.right
                     + startInset, mRecyclerViewBottomPadding);
-        } else {
+        } else if (mLauncher.getDeviceProfile().isPhone) {
             mAppsRecyclerView.setPadding(bgPadding.left + startInset, 0, bgPadding.right +
                     maxScrollBarWidth, mRecyclerViewBottomPadding);
+        } else {
+            // For tablets (Touch), span full width
+            mAppsRecyclerView.setPadding(startInset, 0, maxScrollBarWidth, mRecyclerViewBottomPadding);
         }
 
         MarginLayoutParams lp = (MarginLayoutParams) mSearchContainer.getLayoutParams();
-        lp.leftMargin = bgPadding.left;
-        lp.rightMargin = bgPadding.right;
+        if (mLauncher.getDeviceProfile().isPhone) {
+            lp.leftMargin = bgPadding.left;
+            lp.rightMargin = bgPadding.right;
+        } else {
+            lp.leftMargin = 0;
+            lp.rightMargin = 0;
+        }
 
         // Clip the view to the left and right edge of the background to
         // to prevent shadows from rendering beyond the edges
@@ -499,7 +510,11 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
         MarginLayoutParams mlp = (MarginLayoutParams) mAppsRecyclerView.getLayoutParams();
 
         Rect insets = mLauncher.getDragLayer().getInsets();
-        getContentView().setPadding(bgPadding.left, 0, bgPadding.right, 0);
+        if (mLauncher.getDeviceProfile().isPhone) {
+            getContentView().setPadding(bgPadding.left, 0, bgPadding.right, 0);
+        } else {
+            getContentView().setPadding(0, 0, 0, 0);
+        }
         
         // Search container height and padding for status bar
         int searchHeight = insets.top + mSearchContainerOffsetTop + 

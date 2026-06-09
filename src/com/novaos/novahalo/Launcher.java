@@ -2792,20 +2792,24 @@ public class Launcher extends Activity
      */
     void showOverviewMode(boolean animated, boolean requestButtonFocus) {
         Runnable postAnimRunnable = null;
-        if (requestButtonFocus) {
+        if (mOverviewPanel != null && requestButtonFocus) {
             postAnimRunnable = new Runnable() {
                 @Override
                 public void run() {
                     // Hitting the menu button when in touch mode does not trigger touch mode to
                     // be disabled, so if requested, force focus on one of the overview panel
                     // buttons.
-                    mOverviewPanel.requestFocusFromTouch();
+                    if (mOverviewPanel != null) {
+                        mOverviewPanel.requestFocusFromTouch();
+                    }
                 }
             };
         }
         mWorkspace.setVisibility(View.VISIBLE);
-        mStateTransitionAnimation.startAnimationToWorkspace(mState, mWorkspace.getState(),
-                Workspace.State.OVERVIEW, animated, postAnimRunnable);
+        if (mStateTransitionAnimation != null) {
+            mStateTransitionAnimation.startAnimationToWorkspace(mState, mWorkspace.getState(),
+                    Workspace.State.OVERVIEW, animated, postAnimRunnable);
+        }
         mState = State.WORKSPACE;
         // If animated from long press, then don't allow any of the controller in the drag
         // layer to intercept any remaining touch.

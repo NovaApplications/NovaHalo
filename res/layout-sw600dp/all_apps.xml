@@ -33,7 +33,7 @@
 
     <com.novaos.novahalo.allapps.AllAppsRecyclerViewContainerView
         android:id="@+id/main_content"
-        android:layout_width="600dp"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"
         android:focusable="true"
