@@ -398,9 +398,14 @@ public class Launcher extends Activity
     }
 
     private void loadExtractedColorsAndColorItems() {
+        if (mExtractedColors == null) return;
         mExtractedColors.load(this);
-        mHotseat.updateColor(mExtractedColors, !mPaused);
-        mWorkspace.getPageIndicator().updateColor(mExtractedColors);
+        if (mHotseat != null) {
+            mHotseat.updateColor(mExtractedColors, !mPaused);
+        }
+        if (mWorkspace != null && mWorkspace.getPageIndicator() != null) {
+            mWorkspace.getPageIndicator().updateColor(mExtractedColors);
+        }
         if (mAppsView != null) {
             mAppsView.updateBackground();
         }
@@ -847,7 +852,8 @@ public class Launcher extends Activity
         android.widget.TextView devInfo = (android.widget.TextView) findViewById(R.id.dev_info);
         if (devInfo != null) {
             boolean isDev = Utilities.getPrefs(this).getBoolean("pref_dev_mode", false);
-            if (isDev) {
+            boolean showInfo = Utilities.getPrefs(this).getBoolean("pref_show_build_info", true);
+            if (isDev && showInfo) {
                 devInfo.setVisibility(View.VISIBLE);
                 devInfo.setText(String.format("v%s (%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_NUMBER));
             } else {
@@ -2246,11 +2252,12 @@ public class Launcher extends Activity
     public void onClickSettingsButton(View v) {
         try {
             Intent intent = new Intent(this, SettingsActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            // Motorola fix: Explicitly set the task behavior to avoid security crashes
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
         } catch (Exception e) {
             Log.e(TAG, "Critical failure launching SettingsActivity", e);
-            Toast.makeText(this, "Unable to open settings", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Settings is unavailable", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -2659,7 +2666,11 @@ public class Launcher extends Activity
                 if (mWorkspace.isInOverviewMode()) {
                     mWorkspace.startReordering(v);
                 } else {
-                    showOverviewMode(true);
+                    try {
+                        showOverviewMode(true);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error entering overview mode", e);
+                    }
                 }
             } else {
                 if (!(itemUnderLongClick instanceof Folder)) {

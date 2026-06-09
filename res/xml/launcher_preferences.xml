@@ -197,4 +197,26 @@
         android:title="@string/nova_check_for_update_title"
         android:key="check_for_update" />
 
+    <PreferenceCategory
+        android:key="category_developer"
+        android:title="Developer Options">
+
+        <SwitchPreference
+            android:key="pref_show_build_info"
+            android:title="Show Build Info on Home"
+            android:summary="Display version and build number in top-left corner"
+            android:defaultValue="true" />
+
+        <Preference
+            android:key="pref_export_logs"
+            android:title="Export Crash Logs"
+            android:summary="Save logs to a file for developer support" />
+
+        <Preference
+            android:key="pref_clear_logs"
+            android:title="Clear Crash Logs"
+            android:summary="Delete all saved crash reports" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

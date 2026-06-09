@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.Preference;
+import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 
@@ -107,6 +108,9 @@ public class SettingsActivity extends AppCompatActivity implements
                 versionPref.setSummary(BuildConfig.VERSION_NAME);
             }
 
+            final PreferenceCategory devCategory = (PreferenceCategory) findPreference("category_developer");
+            updateDevOptionsVisibility(devCategory);
+
             Preference buildPref = findPreference("build");
             if (buildPref != null) {
                 String dateStr = new java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.US).format(new java.util.Date());
@@ -122,7 +126,7 @@ public class SettingsActivity extends AppCompatActivity implements
                         mDevTapCount++;
                         if (mDevTapCount >= 7) {
                             mDevTapCount = 0;
-                            showDevModeDialog();
+                            showDevModeDialog(devCategory);
                         } else if (mDevTapCount > 2) {
                             Toast.makeText(getActivity(), "You are now " + (7 - mDevTapCount) + " steps away from being a developer.", Toast.LENGTH_SHORT).show();
                         }
@@ -132,7 +136,60 @@ public class SettingsActivity extends AppCompatActivity implements
             }
         }
 
-        private void showDevModeDialog() {
+        private void updateDevOptionsVisibility(PreferenceCategory category) {
+            if (category != null) {
+                boolean isDev = Utilities.getPrefs(getActivity()).getBoolean("pref_dev_mode", false);
+                category.setVisible(isDev);
+                
+                Preference exportPref = findPreference("pref_export_logs");
+                if (exportPref != null) {
+                    exportPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                        @Override
+                        public boolean onPreferenceClick(Preference preference) {
+                            exportCrashLogs();
+                            return true;
+                        }
+                    });
+                }
+
+                Preference clearPref = findPreference("pref_clear_logs");
+                if (clearPref != null) {
+                    clearPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                        @Override
+                        public boolean onPreferenceClick(Preference preference) {
+                            clearCrashLogs();
+                            return true;
+                        }
+                    });
+                }
+            }
+        }
+
+        private void clearCrashLogs() {
+            java.io.File logFile = new java.io.File(getActivity().getExternalFilesDir(null), "nova_crash_logs.txt");
+            if (logFile.exists() && logFile.delete()) {
+                Toast.makeText(getActivity(), "Crash logs cleared.", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getActivity(), "No logs to clear.", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        private void exportCrashLogs() {
+            java.io.File logFile = new java.io.File(getActivity().getExternalFilesDir(null), "nova_crash_logs.txt");
+            if (!logFile.exists()) {
+                Toast.makeText(getActivity(), "No crash logs found.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_STREAM, androidx.core.content.FileProvider.getUriForFile(
+                    getActivity(), getActivity().getPackageName() + ".fileprovider", logFile));
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(intent, "Send crash logs"));
+        }
+
+        private void showDevModeDialog(final PreferenceCategory category) {
             final EditText input = new EditText(getActivity());
             int padding = (int) (16 * getResources().getDisplayMetrics().density);
             input.setPadding(padding, padding, padding, padding);
@@ -146,6 +203,7 @@ public class SettingsActivity extends AppCompatActivity implements
                     public void onClick(DialogInterface dialog, int which) {
                         if ("development".equals(input.getText().toString())) {
                             Utilities.getPrefs(getActivity()).edit().putBoolean("pref_dev_mode", true).apply();
+                            updateDevOptionsVisibility(category);
                             Toast.makeText(getActivity(), "Developer mode enabled!", Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(getActivity(), "Incorrect password", Toast.LENGTH_SHORT).show();

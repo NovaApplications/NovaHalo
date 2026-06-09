@@ -228,11 +228,18 @@ public class DeviceProfile {
 
         cellWidthPx = iconSizePx;
         int textHeight = Utilities.calculateTextHeight(iconTextSizePx);
-        cellHeightPx = iconSizePx + iconDrawablePaddingPx + textHeight;
+        
+        // On tablets, increase padding between icon and text to prevent overlap/cut-off
+        int padding = iconDrawablePaddingPx;
+        if (!isPhone) {
+            padding = (int) (padding * 1.5f);
+        }
+        
+        cellHeightPx = iconSizePx + padding + textHeight;
 
         // Ensure there is enough vertical space for labels on tablets/large screens
         if (!isPhone) {
-            cellHeightPx += Utilities.pxFromDp(4, dm); 
+            cellHeightPx += Utilities.pxFromDp(12, dm);
         }
         dragViewScale = iconSizePx;
 

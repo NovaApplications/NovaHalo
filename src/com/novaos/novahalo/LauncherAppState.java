@@ -124,6 +124,33 @@ public class LauncherAppState {
         }
 
         UpdateCheckWorker.schedule(sContext);
+        initCrashLogging(sContext);
+    }
+
+    private void initCrashLogging(final Context context) {
+        final Thread.UncaughtExceptionHandler defaultHandler = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread thread, Throwable throwable) {
+                try {
+                    java.io.File logFile = new java.io.File(context.getExternalFilesDir(null), "nova_crash_logs.txt");
+                    java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter(logFile, true));
+                    writer.println("--- CRASH LOG ---");
+                    writer.println("Date: " + new java.util.Date().toString());
+                    writer.println("Version: " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")");
+                    writer.println("Device: " + android.os.Build.MODEL + " (Android " + android.os.Build.VERSION.RELEASE + ")");
+                    throwable.printStackTrace(writer);
+                    writer.println("\n");
+                    writer.flush();
+                    writer.close();
+                } catch (Exception e) {
+                    Log.e("LauncherAppState", "Failed to write crash log", e);
+                }
+                if (defaultHandler != null) {
+                    defaultHandler.uncaughtException(thread, throwable);
+                }
+            }
+        });
     }
 
     /**
