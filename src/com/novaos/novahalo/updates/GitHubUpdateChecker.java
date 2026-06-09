@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.core.content.FileProvider;
 
 import com.novaos.novahalo.BuildConfig;
+import com.novaos.novahalo.R;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -177,13 +178,15 @@ public class GitHubUpdateChecker {
                 intent.setData(Uri.parse("package:" + context.getPackageName()));
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
-                Toast.makeText(context, "Please enable 'Install unknown apps' for Nova Halo and try again.", Toast.LENGTH_LONG).show();
+                String name = context.getString(R.string.launcher_name);
+                Toast.makeText(context, "Please enable 'Install unknown apps' for " + name + " and try again.", Toast.LENGTH_LONG).show();
                 return;
             }
         }
 
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
-        request.setTitle("Nova Halo Update " + version);
+        String name = context.getString(R.string.launcher_name);
+        request.setTitle(name + " Update " + version);
         request.setDescription("Downloading update...");
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
         

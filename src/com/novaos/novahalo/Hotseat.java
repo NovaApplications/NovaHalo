@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
@@ -114,12 +115,13 @@ public class Hotseat extends FrameLayout {
     }
 
     public void updateColor(ExtractedColors extractedColors, boolean animate) {
-        int color = extractedColors.getHotseatColor(getContext());
+        final int color = extractedColors.getHotseatColor(getContext());
         if (mBackgroundColorAnimator != null) {
             mBackgroundColorAnimator.cancel();
         }
         if (!animate) {
             setBackgroundColor(color);
+            mBackgroundColor = color;
         } else {
             mBackgroundColorAnimator = ValueAnimator.ofInt(mBackgroundColor, color);
             mBackgroundColorAnimator.setEvaluator(new ArgbEvaluator());
@@ -132,19 +134,19 @@ public class Hotseat extends FrameLayout {
             mBackgroundColorAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
+                    mBackgroundColor = color;
                     mBackgroundColorAnimator = null;
                 }
             });
             mBackgroundColorAnimator.start();
         }
-        mBackgroundColor = color;
     }
 
     public void setBackgroundTransparent(boolean enable) {
         if (enable) {
             mBackground.setAlpha(0);
         } else {
-            mBackground.setAlpha(255);
+            mBackground.setAlpha(Color.alpha(mBackgroundColor));
         }
     }
 

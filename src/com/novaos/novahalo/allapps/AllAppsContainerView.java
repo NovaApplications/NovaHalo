@@ -300,6 +300,7 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
         int targetAlpha = Math.min(255, (int) (alpha * 1.5f));
         int finalColor = ColorUtils.setAlphaComponent(color, targetAlpha);
         getContentView().setBackgroundColor(finalColor);
+        setRevealDrawableColor(finalColor);
         
         int textColor = Utilities.getTextColorForBackground(finalColor);
         if (mAdapter != null) {

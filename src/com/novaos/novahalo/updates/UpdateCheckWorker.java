@@ -84,7 +84,7 @@ public class UpdateCheckWorker extends Worker {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher_home)
                 .setContentTitle("Update Available: v" + version)
-                .setContentText("A new version of Nova Halo is available on GitHub.")
+                .setContentText("A new version of " + context.getString(R.string.launcher_name) + " is available on GitHub.")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
@@ -100,7 +100,7 @@ public class UpdateCheckWorker extends Worker {
     private void createNotificationChannel(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "App Updates";
-            String description = "Notifications for Nova Halo app updates";
+            String description = "Notifications for " + context.getString(R.string.launcher_name) + " app updates";
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);

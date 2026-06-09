@@ -300,7 +300,8 @@ public class SettingsActivity extends AppCompatActivity implements
                             getActivity().runOnUiThread(() -> {
                                 Context c = getContext();
                                 if (c != null) {
-                                    Toast.makeText(c, "Nova Halo is up to date!", Toast.LENGTH_SHORT).show();
+                                    String name = getString(R.string.launcher_name);
+                                    Toast.makeText(c, name + " is up to date!", Toast.LENGTH_SHORT).show();
                                 }
                             });
                         }
