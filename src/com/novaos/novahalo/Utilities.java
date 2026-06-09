@@ -307,6 +307,10 @@ public final class Utilities {
      * @param scale the scale to apply before drawing {@param icon} on the canvas
      */
     public static Bitmap createIconBitmap(Drawable icon, Context context, float scale, boolean notificationBadge) {
+        if (icon == null) {
+            // Revert to a default icon instead of crashing
+            icon = context.getResources().getDrawable(R.mipmap.ic_launcher_home);
+        }
         synchronized (sCanvas) {
             final int iconBitmapSize = getIconBitmapSize();
 
@@ -366,10 +370,16 @@ public final class Utilities {
                     float extraScale = 1.5f; 
                     tempCanvas.save();
                     tempCanvas.scale(extraScale, extraScale, textureWidth / 2f, textureHeight / 2f);
-                    aid.getBackground().setBounds(icon.getBounds());
-                    aid.getBackground().draw(tempCanvas);
-                    aid.getForeground().setBounds(icon.getBounds());
-                    aid.getForeground().draw(tempCanvas);
+                    Drawable background = aid.getBackground();
+                    Drawable foreground = aid.getForeground();
+                    if (background != null) {
+                        background.setBounds(icon.getBounds());
+                        background.draw(tempCanvas);
+                    }
+                    if (foreground != null) {
+                        foreground.setBounds(icon.getBounds());
+                        foreground.draw(tempCanvas);
+                    }
                     tempCanvas.restore();
                 } else {
                     icon.draw(tempCanvas);
