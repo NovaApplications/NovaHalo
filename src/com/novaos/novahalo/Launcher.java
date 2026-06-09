@@ -2244,13 +2244,7 @@ public class Launcher extends Activity
      * on the home screen.
      */
     public void onClickSettingsButton(View v) {
-        Intent intent;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            intent = new Intent(Intent.ACTION_APPLICATION_PREFERENCES);
-        } else {
-            intent = new Intent(this, SettingsActivity.class);
-        }
-        intent.setPackage(getPackageName());
+        Intent intent = new Intent(this, SettingsActivity.class);
         intent.setSourceBounds(getViewBounds(v));
         startActivity(intent, getActivityLaunchOptions(v));
     }
