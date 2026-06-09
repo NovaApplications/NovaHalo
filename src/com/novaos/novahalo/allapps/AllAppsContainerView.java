@@ -439,7 +439,7 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
 
         DeviceProfile grid = mLauncher.getDeviceProfile();
         int numCols = grid.isPhone ? grid.inv.numColumns : 
-                (grid.availableWidthPx > grid.availableHeightPx ? grid.inv.numColumns + 2 : grid.inv.numColumns);
+                (widthPx > heightPx ? grid.inv.numColumns + 2 : grid.inv.numColumns);
         
         if (mNumAppsPerRow != numCols) {
             mNumAppsPerRow = numCols;

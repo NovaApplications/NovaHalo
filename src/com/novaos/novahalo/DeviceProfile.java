@@ -227,8 +227,13 @@ public class DeviceProfile {
         allAppsIconTextSizePx = iconTextSizePx;
 
         cellWidthPx = iconSizePx;
-        cellHeightPx = iconSizePx + iconDrawablePaddingPx
-                + Utilities.calculateTextHeight(iconTextSizePx);
+        int textHeight = Utilities.calculateTextHeight(iconTextSizePx);
+        cellHeightPx = iconSizePx + iconDrawablePaddingPx + textHeight;
+
+        // Ensure there is enough vertical space for labels on tablets/large screens
+        if (!isPhone) {
+            cellHeightPx += Utilities.pxFromDp(4, dm); 
+        }
         dragViewScale = iconSizePx;
 
         // Hotseat

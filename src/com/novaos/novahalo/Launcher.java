@@ -1081,31 +1081,37 @@ public class Launcher extends Activity
 
         // Bind widget button actions
         mWidgetsButton = findViewById(R.id.widget_button);
-        mWidgetsButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!mWorkspace.isSwitchingState()) {
-                    onClickAddWidgetButton();
+        if (mWidgetsButton != null) {
+            mWidgetsButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (!mWorkspace.isSwitchingState()) {
+                        onClickAddWidgetButton();
+                    }
                 }
-            }
-        });
-        mWidgetsButton.setOnLongClickListener(performClickOnLongClick);
-        mWidgetsButton.setOnTouchListener(getHapticFeedbackTouchListener());
+            });
+            mWidgetsButton.setOnLongClickListener(performClickOnLongClick);
+            mWidgetsButton.setOnTouchListener(getHapticFeedbackTouchListener());
+        }
 
         // Bind settings actions
         View settingsButton = findViewById(R.id.settings_button);
-        settingsButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!mWorkspace.isSwitchingState()) {
-                    onClickSettingsButton(view);
+        if (settingsButton != null) {
+            settingsButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (!mWorkspace.isSwitchingState()) {
+                        onClickSettingsButton(view);
+                    }
                 }
-            }
-        });
-        settingsButton.setOnLongClickListener(performClickOnLongClick);
-        settingsButton.setOnTouchListener(getHapticFeedbackTouchListener());
+            });
+            settingsButton.setOnLongClickListener(performClickOnLongClick);
+            settingsButton.setOnTouchListener(getHapticFeedbackTouchListener());
+        }
 
-        mOverviewPanel.setAlpha(0f);
+        if (mOverviewPanel != null) {
+            mOverviewPanel.setAlpha(0f);
+        }
     }
 
     /**
