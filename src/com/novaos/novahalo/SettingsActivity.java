@@ -3,8 +3,9 @@ package com.novaos.novahalo;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -45,12 +46,9 @@ public class SettingsActivity extends AppCompatActivity implements
         }
 
         // Handle Back/Up button visibility dynamically
-        getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
-            @Override
-            public void onBackStackChanged() {
-                if (getSupportActionBar() != null) {
-                    getSupportActionBar().setDisplayHomeAsUpEnabled(getSupportFragmentManager().getBackStackEntryCount() > 0);
-                }
+        getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(getSupportFragmentManager().getBackStackEntryCount() > 0);
             }
         });
 
@@ -76,11 +74,8 @@ public class SettingsActivity extends AppCompatActivity implements
                 new AlertDialog.Builder(this)
                         .setTitle("Update Available")
                         .setMessage("A new version (v" + version + ") is available. Would you like to update now?")
-                        .setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                GitHubUpdateChecker.downloadAndInstall(SettingsActivity.this, url, version);
-                            }
+                        .setPositiveButton("Update", (dialog, which) -> {
+                            GitHubUpdateChecker.downloadAndInstall(SettingsActivity.this, url, version);
                         })
                         .setNegativeButton("Later", null)
                         .show();
@@ -129,99 +124,104 @@ public class SettingsActivity extends AppCompatActivity implements
             getPreferenceManager().setSharedPreferencesName(LauncherFiles.SHARED_PREFERENCES_KEY);
             setPreferencesFromResource(R.xml.launcher_preferences, rootKey);
 
-            Preference aboutPref = findPreference("about");
-            if (aboutPref != null) {
-                String launcherName = getString(R.string.launcher_name);
-                aboutPref.setSummary(launcherName + " Version: " + BuildConfig.VERSION_NAME);
-            }
+            if (rootKey == null) {
+                // Main screen
+                final Preference devScreen = findPreference("category_developer");
+                updateDevOptionsVisibility(devScreen);
+            } else if (rootKey.equals("pref_screen_about")) {
+                // About screen
+                Preference aboutPref = findPreference("about");
+                if (aboutPref != null) {
+                    String launcherName = getString(R.string.launcher_name);
+                    aboutPref.setSummary(launcherName + " Version: " + BuildConfig.VERSION_NAME);
+                }
 
-            Preference versionPref = findPreference("version");
-            if (versionPref != null) {
-                versionPref.setSummary(BuildConfig.VERSION_NAME);
-            }
+                Preference versionPref = findPreference("version");
+                if (versionPref != null) {
+                    versionPref.setSummary(BuildConfig.VERSION_NAME);
+                }
 
-            final PreferenceCategory devCategory = (PreferenceCategory) findPreference("category_developer");
-            updateDevOptionsVisibility(devCategory);
+                Preference buildPref = findPreference("build");
+                if (buildPref != null) {
+                    String dateStr = new java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.US).format(new java.util.Date());
+                    String launcherName = getString(R.string.launcher_name);
+                    buildPref.setSummary(launcherName + "-" + dateStr + "." + String.format(java.util.Locale.US, "%04d", BuildConfig.VERSION_CODE));
 
-            Preference buildPref = findPreference("build");
-            if (buildPref != null) {
-                String dateStr = new java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.US).format(new java.util.Date());
-                String launcherName = getString(R.string.launcher_name);
-                buildPref.setSummary(launcherName + "-" + dateStr + "." + String.format(java.util.Locale.US, "%04d", BuildConfig.VERSION_CODE));
-
-                buildPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                    @Override
-                    public boolean onPreferenceClick(Preference preference) {
-                        if (Utilities.getPrefs(getActivity()).getBoolean("pref_dev_mode", false)) {
+                    buildPref.setOnPreferenceClickListener(preference -> {
+                        Context context = getActivity();
+                        if (context != null && Utilities.getPrefs(context).getBoolean("pref_dev_mode", false)) {
                             return true;
                         }
                         mDevTapCount++;
                         if (mDevTapCount >= 7) {
                             mDevTapCount = 0;
-                            showDevModeDialog(devCategory);
-                        } else if (mDevTapCount > 2) {
+                            showDevModeDialog(null); // No need to refresh immediately here
+                        } else if (mDevTapCount > 2 && getActivity() != null) {
                             Toast.makeText(getActivity(), "You are now " + (7 - mDevTapCount) + " steps away from being a developer.", Toast.LENGTH_SHORT).show();
                         }
                         return true;
-                    }
+                    });
+                }
+            } else if (rootKey.equals("category_developer")) {
+                // Developer screen
+                updateDevOptionsVisibility(null);
+            }
+        }
+
+        private void updateDevOptionsVisibility(Preference category) {
+            if (category != null) {
+                // This is called for the main screen to hide/show the "Developer" entry
+                boolean isDev = Utilities.getPrefs(getActivity()).getBoolean("pref_dev_mode", false);
+                category.setVisible(isDev);
+            }
+            
+            // This part handles the buttons inside the developer screen
+            Preference exportPref = findPreference("pref_export_logs");
+            if (exportPref != null) {
+                exportPref.setOnPreferenceClickListener(preference -> {
+                    exportCrashLogs();
+                    return true;
+                });
+            }
+
+            Preference clearPref = findPreference("pref_clear_logs");
+            if (clearPref != null) {
+                clearPref.setOnPreferenceClickListener(preference -> {
+                    clearCrashLogs();
+                    return true;
                 });
             }
         }
 
-        private void updateDevOptionsVisibility(PreferenceCategory category) {
-            if (category != null) {
-                boolean isDev = Utilities.getPrefs(getActivity()).getBoolean("pref_dev_mode", false);
-                category.setVisible(isDev);
-                
-                Preference exportPref = findPreference("pref_export_logs");
-                if (exportPref != null) {
-                    exportPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                        @Override
-                        public boolean onPreferenceClick(Preference preference) {
-                            exportCrashLogs();
-                            return true;
-                        }
-                    });
-                }
-
-                Preference clearPref = findPreference("pref_clear_logs");
-                if (clearPref != null) {
-                    clearPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                        @Override
-                        public boolean onPreferenceClick(Preference preference) {
-                            clearCrashLogs();
-                            return true;
-                        }
-                    });
-                }
-            }
-        }
-
         private void clearCrashLogs() {
-            java.io.File logFile = new java.io.File(getActivity().getExternalFilesDir(null), "nova_crash_logs.txt");
+            Context context = getActivity();
+            if (context == null) return;
+            java.io.File logFile = new java.io.File(context.getExternalFilesDir(null), "nova_crash_logs.txt");
             if (logFile.exists() && logFile.delete()) {
-                Toast.makeText(getActivity(), "Crash logs cleared.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Crash logs cleared.", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(getActivity(), "No logs to clear.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "No logs to clear.", Toast.LENGTH_SHORT).show();
             }
         }
 
         private void exportCrashLogs() {
-            java.io.File logFile = new java.io.File(getActivity().getExternalFilesDir(null), "nova_crash_logs.txt");
+            Context context = getActivity();
+            if (context == null) return;
+            java.io.File logFile = new java.io.File(context.getExternalFilesDir(null), "nova_crash_logs.txt");
             if (!logFile.exists()) {
-                Toast.makeText(getActivity(), "No crash logs found.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "No crash logs found.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("text/plain");
             intent.putExtra(Intent.EXTRA_STREAM, androidx.core.content.FileProvider.getUriForFile(
-                    getActivity(), getActivity().getPackageName() + ".fileprovider", logFile));
+                    context, context.getPackageName() + ".fileprovider", logFile));
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(Intent.createChooser(intent, "Send crash logs"));
         }
 
-        private void showDevModeDialog(final PreferenceCategory category) {
+        private void showDevModeDialog(final Preference category) {
             final EditText input = new EditText(getActivity());
             int padding = (int) (16 * getResources().getDisplayMetrics().density);
             input.setPadding(padding, padding, padding, padding);
@@ -230,16 +230,16 @@ public class SettingsActivity extends AppCompatActivity implements
                 .setTitle("Developer Mode")
                 .setMessage("Enter password to unlock development features:")
                 .setView(input)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if ("development".equals(input.getText().toString())) {
-                            Utilities.getPrefs(getActivity()).edit().putBoolean("pref_dev_mode", true).apply();
+                .setPositiveButton("OK", (dialog, which) -> {
+                    Context context = getActivity();
+                    if (context != null && "development".equals(input.getText().toString())) {
+                        Utilities.getPrefs(context).edit().putBoolean("pref_dev_mode", true).apply();
+                        if (category != null) {
                             updateDevOptionsVisibility(category);
-                            Toast.makeText(getActivity(), "Developer mode enabled!", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getActivity(), "Incorrect password", Toast.LENGTH_SHORT).show();
                         }
+                        Toast.makeText(context, "Developer mode enabled!", Toast.LENGTH_SHORT).show();
+                    } else if (context != null) {
+                        Toast.makeText(context, "Incorrect password", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -278,44 +278,26 @@ public class SettingsActivity extends AppCompatActivity implements
                         @Override
                         public void onUpdateAvailable(final String version, final String downloadUrl) {
                             if (getActivity() == null) return;
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    new AlertDialog.Builder(context)
-                                            .setTitle("Update Available")
-                                            .setMessage("A new version (v" + version + ") is available. Would you like to update now?")
-                                            .setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    GitHubUpdateChecker.downloadAndInstall(context, downloadUrl, version);
-                                                }
-                                            })
-                                            .setNegativeButton("Later", null)
-                                            .show();
-                                }
+                            getActivity().runOnUiThread(() -> {
+                                new AlertDialog.Builder(context)
+                                        .setTitle("Update Available")
+                                        .setMessage("A new version (v" + version + ") is available. Would you like to update now?")
+                                        .setPositiveButton("Update", (dialog, which) -> GitHubUpdateChecker.downloadAndInstall(context, downloadUrl, version))
+                                        .setNegativeButton("Later", null)
+                                        .show();
                             });
                         }
 
                         @Override
                         public void onNoUpdate() {
                             if (getActivity() == null) return;
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(context, "Nova Halo is up to date!", Toast.LENGTH_SHORT).show();
-                                }
-                            });
+                            getActivity().runOnUiThread(() -> Toast.makeText(context, "Nova Halo is up to date!", Toast.LENGTH_SHORT).show());
                         }
 
                         @Override
                         public void onError(final String error) {
                             if (getActivity() == null) return;
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(context, "Update check failed: " + error, Toast.LENGTH_SHORT).show();
-                                }
-                            });
+                            getActivity().runOnUiThread(() -> Toast.makeText(context, "Update check failed: " + error, Toast.LENGTH_SHORT).show());
                         }
                     });
                     return true;

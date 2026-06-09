@@ -103,11 +103,11 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
     private HeaderElevationController mElevationController;
     private int mSearchContainerOffsetTop;
 
-    private SpannableStringBuilder mSearchQueryBuilder = null;
+    private final SpannableStringBuilder mSearchQueryBuilder;
 
-    private int mSectionNamesMargin;
+    private final int mSectionNamesMargin;
     private int mNumAppsPerRow;
-    private int mRecyclerViewBottomPadding;
+    private final int mRecyclerViewBottomPadding;
     // This coordinate is relative to this container view
     private final Point mBoundsCheckLastTouchDownPos = new Point(-1, -1);
 
@@ -116,7 +116,7 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
     private TextView mWorkTab;
     private View mWorkModeToggle;
 
-    private HorizontalPullDetector mHorizontalPullDetector;
+    private final HorizontalPullDetector mHorizontalPullDetector;
 
     public AllAppsContainerView(Context context) {
         this(context, null);
@@ -149,40 +149,48 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
         final List<UserHandle> profiles = UserManagerCompat.getInstance(getContext()).getUserProfiles();
         if (profiles.size() > 1) {
             mTabs.setVisibility(View.VISIBLE);
-            mPersonalTab.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mAppsRecyclerView.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mApps.setWorkProfileFilter(false);
-                            mAppsRecyclerView.scrollToTop();
-                            mPersonalTab.setTextColor(Utilities.getColorAccent(getContext()));
-                            mPersonalTab.setAlpha(1.0f);
-                            mWorkTab.setTextColor(0xFF666666);
-                            mWorkTab.setAlpha(0.7f);
-                        }
-                    });
+            mPersonalTab.setOnClickListener(v -> {
+                if (mApps.isWorkProfileFilterEnabled()) {
+                    animateTabSwitch(false);
                 }
             });
-            mWorkTab.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mAppsRecyclerView.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mApps.setWorkProfileFilter(true);
-                            mAppsRecyclerView.scrollToTop();
-                            mWorkTab.setTextColor(Utilities.getColorAccent(getContext()));
-                            mWorkTab.setAlpha(1.0f);
-                            mPersonalTab.setTextColor(0xFF666666);
-                            mPersonalTab.setAlpha(0.7f);
-                        }
-                    });
+            mWorkTab.setOnClickListener(v -> {
+                if (!mApps.isWorkProfileFilterEnabled()) {
+                    animateTabSwitch(true);
                 }
             });
-            mPersonalTab.performClick();
+            updateTabStyles(false);
         }
+    }
+
+    private void animateTabSwitch(final boolean isWork) {
+        // Fade out current list
+        mAppsRecyclerView.animate()
+                .alpha(0f)
+                .setDuration(150)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mApps.setWorkProfileFilter(isWork);
+                        mAppsRecyclerView.scrollToTop();
+                        updateTabStyles(isWork);
+                        // Fade back in
+                        mAppsRecyclerView.animate()
+                                .alpha(1f)
+                                .setDuration(150)
+                                .start();
+                    }
+                }).start();
+    }
+
+    private void updateTabStyles(boolean isWork) {
+        int accentColor = Utilities.getColorAccent(getContext());
+        int inactiveColor = 0xFF666666;
+        
+        mPersonalTab.setTextColor(!isWork ? accentColor : inactiveColor);
+        mPersonalTab.setAlpha(!isWork ? 1.0f : 0.7f);
+        mWorkTab.setTextColor(isWork ? accentColor : inactiveColor);
+        mWorkTab.setAlpha(isWork ? 1.0f : 0.7f);
     }
 
     private void setupWorkModeToggle() {
@@ -200,18 +208,15 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
             final UserHandle finalWorkProfile = workProfile;
             mWorkModeToggle.setVisibility(View.VISIBLE);
             updateWorkModeToggleState(userManager, finalWorkProfile);
-            mWorkModeToggle.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    boolean isQuietMode = userManager.isQuietModeEnabled(finalWorkProfile);
-                    if (Utilities.isNycOrAbove()) {
-                        UserManager um = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
-                        if (Utilities.ATLEAST_P) {
-                            um.requestQuietModeEnabled(!isQuietMode, finalWorkProfile);
-                        }
+            mWorkModeToggle.setOnClickListener(v -> {
+                boolean isQuietMode = userManager.isQuietModeEnabled(finalWorkProfile);
+                if (Utilities.isNycOrAbove()) {
+                    UserManager um = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
+                    if (Utilities.ATLEAST_P) {
+                        um.requestQuietModeEnabled(!isQuietMode, finalWorkProfile);
                     }
-                    updateWorkModeToggleState(userManager, finalWorkProfile);
                 }
+                updateWorkModeToggleState(userManager, finalWorkProfile);
             });
         } else {
             mWorkModeToggle.setVisibility(View.GONE);
@@ -378,17 +383,14 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
 
         // This is a focus listener that proxies focus from a view into the list view.  This is to
         // work around the search box from getting first focus and showing the cursor.
-        getContentView().setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    mAppsRecyclerView.requestFocus();
-                }
+        getContentView().setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                mAppsRecyclerView.requestFocus();
             }
         });
 
         mSearchContainer = findViewById(R.id.search_container);
-        mSearchInput = (ExtendedEditText) findViewById(R.id.search_box_input);
+        mSearchInput = findViewById(R.id.search_box_input);
 
         // Update the hint to contain the icon.
         // Prefix the original hint with two spaces. The first space gets replaced by the icon
@@ -402,16 +404,16 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
         mSearchContainerOffsetTop = getResources().getDimensionPixelSize(
                 R.dimen.all_apps_search_bar_margin_top);
 
-        mElevationController = new HeaderElevationController.ControllerVL(mSearchContainer);
+        HeaderElevationController elevationController = new HeaderElevationController.ControllerVL(mSearchContainer);
 
         // Load the all apps recycler view
-        mAppsRecyclerView = (AllAppsRecyclerView) findViewById(R.id.apps_list_view);
+        mAppsRecyclerView = findViewById(R.id.apps_list_view);
         mAppsRecyclerView.setApps(mApps);
         mAppsRecyclerView.setLayoutManager(mLayoutManager);
         mAppsRecyclerView.setAdapter(mAdapter);
         mAppsRecyclerView.setHasFixedSize(true);
-        mAppsRecyclerView.addOnScrollListener(mElevationController);
-        mAppsRecyclerView.setElevationController(mElevationController);
+        mAppsRecyclerView.addOnScrollListener(elevationController);
+        mAppsRecyclerView.setElevationController(elevationController);
 
         FocusedItemDecorator focusedItemDecorator = new FocusedItemDecorator(mAppsRecyclerView);
         mAppsRecyclerView.addItemDecoration(focusedItemDecorator);
@@ -419,8 +421,8 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
         mAdapter.setIconFocusListener(focusedItemDecorator.getFocusListener());
 
         mTabs = findViewById(R.id.tabs);
-        mPersonalTab = (TextView) findViewById(R.id.tab_personal);
-        mWorkTab = (TextView) findViewById(R.id.tab_work);
+        mPersonalTab = findViewById(R.id.tab_personal);
+        mWorkTab = findViewById(R.id.tab_work);
         mWorkModeToggle = findViewById(R.id.work_mode_toggle);
         setupTabs();
         setupWorkModeToggle();
@@ -517,14 +519,13 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
         }
         
         // Search container height and padding for status bar
-        int searchHeight = insets.top + mSearchContainerOffsetTop + 
-                getResources().getDimensionPixelSize(R.dimen.all_apps_search_bar_height);
-        lp.height = searchHeight;
         mSearchContainer.setPadding(
                 mSearchContainer.getPaddingLeft(),
                 insets.top + mSearchContainerOffsetTop,
                 mSearchContainer.getPaddingRight(),
                 mSearchContainer.getPaddingBottom());
+        lp.height = insets.top + mSearchContainerOffsetTop +
+                getResources().getDimensionPixelSize(R.dimen.all_apps_search_bar_height);
         mSearchContainer.setLayoutParams(lp);
 
         // We no longer need to manually set margins as the LinearLayout handles stacking
@@ -607,12 +608,7 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
             if (icon.hasDeepShortcuts()) {
                 DeepShortcutsContainer dsc = DeepShortcutsContainer.showForIcon(icon);
                 if (dsc != null) {
-                    dragOptions.deferDragCondition = dsc.createDeferDragCondition(new Runnable() {
-                        @Override
-                        public void run() {
-                            icon.setVisibility(VISIBLE);
-                        }
-                    });
+                    dragOptions.deferDragCondition = dsc.createDeferDragCondition(() -> icon.setVisibility(VISIBLE));
                 }
             }
         }

@@ -179,27 +179,33 @@
             android:persistent="true" />
     </PreferenceScreen>
 
-    <Preference
-        android:title="@string/about_title"
-        android:key="about"
-        android:summary="@string/about_text" />
+    <PreferenceScreen
+        android:key="pref_screen_about"
+        android:title="@string/about_title">
 
-    <Preference
-        android:title="@string/nova_version_title"
-        android:key="version"
-        android:selectable="false" />
+        <Preference
+            android:title="@string/about_title"
+            android:key="about"
+            android:summary="@string/about_text" />
 
-    <Preference
-        android:title="@string/nova_build_title"
-        android:key="build" />
+        <Preference
+            android:title="@string/nova_version_title"
+            android:key="version"
+            android:selectable="false" />
 
-    <Preference
-        android:title="@string/nova_check_for_update_title"
-        android:key="check_for_update" />
+        <Preference
+            android:title="@string/nova_build_title"
+            android:key="build" />
 
-    <PreferenceCategory
+        <Preference
+            android:title="@string/nova_check_for_update_title"
+            android:key="check_for_update" />
+
+    </PreferenceScreen>
+
+    <PreferenceScreen
         android:key="category_developer"
-        android:title="Developer Options">
+        android:title="Developer">
 
         <SwitchPreference
             android:key="pref_show_build_info"
@@ -217,6 +223,6 @@
             android:title="Clear Crash Logs"
             android:summary="Delete all saved crash reports" />
 
-    </PreferenceCategory>
+    </PreferenceScreen>
 
 </PreferenceScreen>

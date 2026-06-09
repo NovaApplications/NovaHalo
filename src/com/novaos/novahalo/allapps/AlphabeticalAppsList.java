@@ -148,26 +148,26 @@ public class AlphabeticalAppsList {
         boolean continueMerging(SectionInfo section);
     }
 
-    private Launcher mLauncher;
+    private final Launcher mLauncher;
 
     // The set of apps from the system
     private final List<AppInfo> mApps = new ArrayList<>();
     private final HashMap<ComponentKey, AppInfo> mComponentToAppMap = new HashMap<>();
 
     // The set of filtered apps with the current filter
-    private List<AppInfo> mFilteredApps = new ArrayList<>();
+    private final List<AppInfo> mFilteredApps = new ArrayList<>();
     // The current set of adapter items
-    private List<AdapterItem> mAdapterItems = new ArrayList<>();
+    private final List<AdapterItem> mAdapterItems = new ArrayList<>();
     // The set of sections for the apps with the current filter
-    private List<SectionInfo> mSections = new ArrayList<>();
+    private final List<SectionInfo> mSections = new ArrayList<>();
     // The set of sections that we allow fast-scrolling to (includes non-merged sections)
-    private List<FastScrollSectionInfo> mFastScrollerSections = new ArrayList<>();
+    private final List<FastScrollSectionInfo> mFastScrollerSections = new ArrayList<>();
     // The of ordered component names as a result of a search query
     private ArrayList<ComponentKey> mSearchResults;
-    private HashMap<CharSequence, String> mCachedSectionNames = new HashMap<>();
+    private final HashMap<CharSequence, String> mCachedSectionNames = new HashMap<>();
     private AllAppsGridAdapter mAdapter;
-    private AlphabeticIndexCompat mIndexer;
-    private AppNameComparator mAppNameComparator;
+    private final AlphabeticIndexCompat mIndexer;
+    private final AppNameComparator mAppNameComparator;
     private MergeAlgorithm mMergeAlgorithm;
     private int mNumAppsPerRow;
     private int mNumAppRowsInAdapter;
@@ -228,13 +228,18 @@ public class AlphabeticalAppsList {
         updateAdapterItems();
     }
 
-    /**
+    public boolean isWorkProfileFilterEnabled() {
+        return mFilterByUser && mShowWorkApps;
+    }
+
+    /*
      * Resets the user filter.
      */
-    public void resetUserFilter() {
-        mFilterByUser = false;
-        updateAdapterItems();
-    }
+//    public void resetUserFilter() {
+//        mFilterByUser = false;
+//        mShowWorkApps = false;
+//        updateAdapterItems();
+//    }
 
     /**
      * Returns the number of rows of applications
@@ -443,8 +448,8 @@ public class AlphabeticalAppsList {
                     }
                     item.rowIndex = rowIndex;
                     item.rowAppIndex = numAppsInRow;
-                    numAppsInSection++;
                     numAppsInRow++;
+                    numAppsInSection++;
                 }
             }
             mNumAppRowsInAdapter = rowIndex + 1;
