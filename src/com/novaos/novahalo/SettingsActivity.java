@@ -58,6 +58,34 @@ public class SettingsActivity extends AppCompatActivity implements
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(getSupportFragmentManager().getBackStackEntryCount() > 0);
         }
+
+        handleUpdateIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleUpdateIntent(intent);
+    }
+
+    private void handleUpdateIntent(Intent intent) {
+        if (intent != null && intent.getBooleanExtra("trigger_update", false)) {
+            final String url = intent.getStringExtra("update_url");
+            final String version = intent.getStringExtra("update_version");
+            if (url != null && version != null) {
+                new AlertDialog.Builder(this)
+                        .setTitle("Update Available")
+                        .setMessage("A new version (v" + version + ") is available. Would you like to update now?")
+                        .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                GitHubUpdateChecker.downloadAndInstall(SettingsActivity.this, url, version);
+                            }
+                        })
+                        .setNegativeButton("Later", null)
+                        .show();
+            }
+        }
     }
 
     @Override

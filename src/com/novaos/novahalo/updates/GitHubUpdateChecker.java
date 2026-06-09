@@ -45,6 +45,8 @@ public class GitHubUpdateChecker {
                     connection.setRequestMethod("GET");
                     connection.setConnectTimeout(10000);
                     connection.setReadTimeout(10000);
+                    connection.setRequestProperty("User-Agent", "NovaHalo-Launcher");
+                    connection.setRequestProperty("Accept", "application/vnd.github.v3+json");
 
                     if (connection.getResponseCode() == 200) {
                         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -76,12 +78,79 @@ public class GitHubUpdateChecker {
                         } else {
                             callback.onNoUpdate();
                         }
+                        connection.disconnect();
+                    } else if (connection.getResponseCode() == 404) {
+                        // If 'latest' returns 404, maybe there are only pre-releases. 
+                        // Try fetching the list of all releases instead.
+                        checkForAllReleases(context, callback);
+                        connection.disconnect();
+                        return;
                     } else {
                         callback.onError("Server error: " + connection.getResponseCode());
                     }
                     connection.disconnect();
                 } catch (Exception e) {
                     Log.e(TAG, "Update check failed", e);
+                    callback.onError(e.getMessage());
+                }
+            }
+        }).start();
+    }
+
+    private static void checkForAllReleases(final Context context, final UpdateCheckCallback callback) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL("https://api.github.com/repos/" + GITHUB_REPO + "/releases");
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.setConnectTimeout(10000);
+                    connection.setReadTimeout(10000);
+                    connection.setRequestProperty("User-Agent", "NovaHalo-Launcher");
+
+                    if (connection.getResponseCode() == 200) {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        StringBuilder response = new StringBuilder();
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            response.append(line);
+                        }
+                        reader.close();
+
+                        JSONArray releases = new JSONArray(response.toString());
+                        if (releases.length() > 0) {
+                            // Take the first release in the list (usually the newest created)
+                            JSONObject json = releases.getJSONObject(0);
+                            String latestVersion = json.getString("tag_name").replace("v", "");
+
+                            if (isNewerVersion(latestVersion, BuildConfig.VERSION_NAME)) {
+                                JSONArray assets = json.getJSONArray("assets");
+                                String downloadUrl = null;
+                                for (int i = 0; i < assets.length(); i++) {
+                                    JSONObject asset = assets.getJSONObject(i);
+                                    if (asset.getString("name").endsWith(".apk")) {
+                                        downloadUrl = asset.getString("browser_download_url");
+                                        break;
+                                    }
+                                }
+                                if (downloadUrl != null) {
+                                    callback.onUpdateAvailable(latestVersion, downloadUrl);
+                                } else {
+                                    callback.onNoUpdate();
+                                }
+                            } else {
+                                callback.onNoUpdate();
+                            }
+                        } else {
+                            callback.onNoUpdate();
+                        }
+                    } else {
+                        callback.onError("Server error: " + connection.getResponseCode());
+                    }
+                    connection.disconnect();
+                } catch (Exception e) {
+                    Log.e(TAG, "Full release check failed", e);
                     callback.onError(e.getMessage());
                 }
             }
