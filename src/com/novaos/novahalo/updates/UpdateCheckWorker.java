@@ -18,11 +18,6 @@ import androidx.work.WorkerParameters;
 
 import java.util.concurrent.TimeUnit;
 
-import com.google.android.play.core.appupdate.AppUpdateInfo;
-import com.google.android.play.core.appupdate.AppUpdateManager;
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
-import com.google.android.play.core.install.model.UpdateAvailability;
-import com.google.android.gms.tasks.Tasks;
 import com.novaos.novahalo.R;
 
 public class UpdateCheckWorker extends Worker {
@@ -49,32 +44,47 @@ public class UpdateCheckWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        Context context = getApplicationContext();
-        AppUpdateManager appUpdateManager = AppUpdateManagerFactory.create(context);
-
-        try {
-            AppUpdateInfo appUpdateInfo = Tasks.await(appUpdateManager.getAppUpdateInfo());
-            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
-                showUpdateNotification(context);
+        final Context context = getApplicationContext();
+        
+        GitHubUpdateChecker.checkForUpdates(context, new GitHubUpdateChecker.UpdateCheckCallback() {
+            @Override
+            public void onUpdateAvailable(String version, String downloadUrl) {
+                showUpdateNotification(context, version, downloadUrl);
             }
-        } catch (Exception e) {
-            return Result.retry();
-        }
+
+            @Override
+            public void onNoUpdate() {
+                // Do nothing
+            }
+
+            @Override
+            public void onError(String error) {
+                // Log error
+            }
+        });
 
         return Result.success();
     }
 
-    private void showUpdateNotification(Context context) {
+    private void showUpdateNotification(Context context, String version, String downloadUrl) {
         createNotificationChannel(context);
 
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + context.getPackageName()));
+        // We can't easily trigger download from background notification without a custom pending intent
+        // So we'll just open the settings or a direct link for now, or let them click to download.
+        // Actually, we can use an action to trigger download.
+        
+        Intent intent = new Intent(context, com.novaos.novahalo.SettingsActivity.class);
+        intent.putExtra("trigger_update", true);
+        intent.putExtra("update_url", downloadUrl);
+        intent.putExtra("update_version", version);
+
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 
                 PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0));
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher_home)
-                .setContentTitle("Update Available")
-                .setContentText("A new version of Nova Halo is available on Google Play.")
+                .setContentTitle("Update Available: v" + version)
+                .setContentText("A new version of Nova Halo is available on GitHub.")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);

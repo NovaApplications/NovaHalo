@@ -1,11 +1,14 @@
 package com.novaos.novahalo;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
@@ -14,10 +17,11 @@ import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.novaos.novahalo.updates.GitHubUpdateChecker;
 
 /**
  * Settings activity for Launcher.
@@ -239,12 +243,53 @@ public class SettingsActivity extends AppCompatActivity implements
                 if (key.equals("about")) {
                     return true;
                 } else if (key.equals("check_for_update") && getActivity() != null) {
-                    String packageName = getActivity().getPackageName();
-                    try {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + packageName)));
-                    } catch (android.content.ActivityNotFoundException anfe) {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + packageName)));
-                    }
+                    final Context context = getActivity();
+                    Toast.makeText(context, "Checking for updates...", Toast.LENGTH_SHORT).show();
+                    
+                    GitHubUpdateChecker.checkForUpdates(context, new GitHubUpdateChecker.UpdateCheckCallback() {
+                        @Override
+                        public void onUpdateAvailable(final String version, final String downloadUrl) {
+                            if (getActivity() == null) return;
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    new AlertDialog.Builder(context)
+                                            .setTitle("Update Available")
+                                            .setMessage("A new version (v" + version + ") is available. Would you like to update now?")
+                                            .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    GitHubUpdateChecker.downloadAndInstall(context, downloadUrl, version);
+                                                }
+                                            })
+                                            .setNegativeButton("Later", null)
+                                            .show();
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onNoUpdate() {
+                            if (getActivity() == null) return;
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(context, "Nova Halo is up to date!", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onError(final String error) {
+                            if (getActivity() == null) return;
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(context, "Update check failed: " + error, Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    });
                     return true;
                 }
             }
