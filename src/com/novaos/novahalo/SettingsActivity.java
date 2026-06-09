@@ -61,7 +61,8 @@ public class SettingsActivity extends AppCompatActivity implements
             getSupportFragmentManager().popBackStack();
             return true;
         }
-        return super.onSupportNavigateUp();
+        finish(); // Final back press exits settings
+        return true;
     }
 
     @Override

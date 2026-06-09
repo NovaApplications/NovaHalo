@@ -2244,9 +2244,14 @@ public class Launcher extends Activity
      * on the home screen.
      */
     public void onClickSettingsButton(View v) {
-        Intent intent = new Intent(this, SettingsActivity.class);
-        intent.setSourceBounds(getViewBounds(v));
-        startActivity(intent, getActivityLaunchOptions(v));
+        try {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, "Critical failure launching SettingsActivity", e);
+            Toast.makeText(this, "Unable to open settings", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public View.OnTouchListener getHapticFeedbackTouchListener() {
