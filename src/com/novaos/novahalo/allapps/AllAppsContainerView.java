@@ -306,6 +306,12 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
         if (mWorkTab != null) {
             mWorkTab.setTextColor(textColor);
         }
+        
+        // Also update search input color for readability
+        if (mSearchInput != null) {
+            mSearchInput.setTextColor(textColor);
+            mSearchInput.setHintTextColor(ColorUtils.setAlphaComponent(textColor, 128));
+        }
     }
 
     /**

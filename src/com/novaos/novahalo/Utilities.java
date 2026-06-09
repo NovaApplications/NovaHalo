@@ -1021,12 +1021,16 @@ public final class Utilities {
     }
 
     public static int getTextColorForBackground(int backgroundColor) {
-        // If background is mostly transparent, assume it's on top of something dark (for Nova Halo)
-        // or just use white as default for safety.
-        if (Color.alpha(backgroundColor) < 128) {
-            return Color.WHITE;
+        // We calculate luminance based on the blended color (assuming white background for transparency)
+        // because usually wallpapers are light or the drawer background itself is light.
+        int alpha = Color.alpha(backgroundColor);
+        if (alpha < 50) {
+            // Very transparent - assume white background (common for light themes)
+            return Color.BLACK; 
         }
+        
         double luminance = androidx.core.graphics.ColorUtils.calculateLuminance(backgroundColor);
+        // If it's light (luminance > 0.5), use black text. Otherwise white.
         return luminance > 0.5 ? Color.BLACK : Color.WHITE;
     }
 }

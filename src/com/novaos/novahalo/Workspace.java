@@ -688,6 +688,8 @@ public class Workspace extends PagedView
             newScreen.enableAccessibleDrag(true, CellLayout.WORKSPACE_ACCESSIBILITY_DRAG);
         }
 
+        initPullDownAction();
+
         return newScreen;
     }
 
