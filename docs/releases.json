@@ -1,5 +1,30 @@
 [
   {
+    "version": "2.4.3",
+    "versionCode": 31,
+    "previousVersion": "2.4.2",
+    "releaseDate": "2026-06-09",
+    "title": "NovaOS v2.4.3 (Grid Calibration & Maintenance Patch)",
+    "summary": "This update calibrates layout cell dimensions for tablet displays, fixes a landscape measurement bug in the app drawer orientation tracker, and applies robust safe-null initialization wrappers across home screen options.",
+    "stats": {
+      "filesChanged": 5,
+      "additions": 37,
+      "deletions": 26
+    },
+    "changelog": {
+      "newFeatures": [
+        "Expanded Tablet Cell Margins: Upgraded DeviceProfile.java to automatically inject a 4dp vertical breathing room padding underneath app titles on non-phone configurations, keeping long app labels perfectly clear from clipping bounds."
+      ],
+      "optimizations": [
+        "Calibrated Orientation Metrics: Fixed an orientation checking bug inside AllAppsContainerView.java by mapping grid column expansions directly to physical bounding box pixels (`widthPx > heightPx`) rather than systemic configuration profiles, resulting in a flawless landscape column layout match."
+      ],
+      "bugFixes": [
+        "Defensive Overview Panel Bindings: Injected defensive null-safety wrappers around `mWidgetsButton`, `settingsButton`, and `mOverviewPanel` instances inside Launcher.java, squashing potential inflation failures if initialization properties trigger out of order.",
+        "Profile Metadata Alignment: Maintained structural reliability with clean build increments targeting runtime version code 31."
+      ]
+    }
+  },
+  {
     "version": "2.4.2",
     "versionCode": 30,
     "previousVersion": "2.4.1",
