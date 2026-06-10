@@ -1,32 +1,61 @@
-{
-  "version": "2.4.0",
-  "versionCode": 28,
-  "previousVersion": "2.3.1",
-  "releaseDate": "2026-06-08",
-  "title": "NovaHalo v2.4.0 (The Customization Update)",
-  "summary": "This release is packed with highly requested desktop visual customization options, smoother rendering engine logic, and robust quality-of-life stability fixes for managing your home screen layout.",
-  "stats": {
-    "filesChanged": 14,
-    "additions": 511,
-    "deletions": 6
+[
+  {
+    "version": "2.4.1",
+    "versionCode": 29,
+    "previousVersion": "2.4",
+    "releaseDate": "2026-06-09",
+    "title": "NovaOS v2.4.1 (Stability & Performance Patch)",
+    "summary": "This patch update squashes visibility bugs in the app drawer search interface, optimizes text contrast tracking across highly transparent backgrounds, and introduces pre-compiled baseline profiles for snappier performance.",
+    "stats": {
+      "filesChanged": 6,
+      "additions": 56,
+      "deletions": 7
+    },
+    "changelog": {
+      "newFeatures": [
+        "Dynamic Search Input Themes: The app drawer search bar text and placeholder hint colors now automatically adapt alongside the main text palette to guarantee maximum readability.",
+        "Optimized Alpha Contrasting: Overhauled the background luminance tracking calculations inside Utilities.java to safely handle highly transparent color bounds without dropping color consistency."
+      ],
+      "optimizations": [
+        "Added ART Baseline Profiles: Bundled native compilation profiles (.dm) for modern API targets (SDK 28 through 31+), significantly reducing layout rendering overhead and boosting app launch speeds on initial install.",
+        "Workspace Initialization Hooks: Polished cell layout insertions inside Workspace.java to ensure pull-down action elements trigger reliably during layout generation."
+      ],
+      "bugFixes": [
+        "Fixed Clear Background Text Blindness: Resolved a rendering bug where heavily translucent or transparent app drawer backgrounds would accidentally force white text against light wallpapers.",
+        "Manifest Refinement: Cleared out accidental trailing comments within the core android manifest declarations."
+      ]
+    }
   },
-  "changelog": {
-    "newFeatures": [
-      "Custom Icon Shapes: Select between System Default, Circle, Square, Squircle, or Teardrop shapes in launcher preferences.",
-      "Taskbar Color Selection: Manually set your Taskbar (Hotseat) color to Red, Blue, Green, or Solid Black directly from the settings.",
-      "Adjustable Taskbar Transparency: Scale background opacity from a solid 0% clear layout up to a completely translucent 100% overlay.",
-      "Custom Icon Image Picker: Long-press an icon inside the Edit App Dialog to select any custom image file from phone storage.",
-      "Adaptive Text Contrasting: Added an automatic luminance engine that reads the App Drawer background darkness and flips text colors between White and Black for readability."
-    ],
-    "optimizations": [
-      "Dynamic Graphics Reloading: Implemented centralized cache clearing listeners so icon shapes and taskbar changes update instantly without requiring a manual launcher refresh.",
-      "Enhanced Outline Mask Filter Engine: Refactored HolographicOutlineHelper logic to better calculate blurred borders around adaptive shapes.",
-      "Manifest Target Upgrade: Bumped internal target configurations to targetSdkVersion 35 while preserving backward flexibility down to SDK 21."
-    ],
-    "bugFixes": [
-      "Foolproof App Uninstallation: Overhauled UninstallDropTarget logic with multi-tier fallback intents to guarantee the system uninstallation handler executes flawlessly on all device configurations.",
-      "Drag & Drop Crash Prevention: Fixed a critical rendering vulnerability where initiating a drag-and-drop workflow on zero-width widgets or folders would crash the workspace.",
-      "Crash Fix on Drag Cancel: Resolved a common code crash that occurred if a user suddenly canceled a drag state immediately after an uninstallation event triggered."
-    ]
+  {
+    "version": "2.4.0",
+    "versionCode": 28,
+    "previousVersion": "2.3.1",
+    "releaseDate": "2026-06-08",
+    "title": "NovaOS v2.4.0 (The Customization Update)",
+    "summary": "This release is packed with highly requested desktop visual customization options, smoother rendering engine logic, and robust quality-of-life stability fixes for managing your home screen layout.",
+    "stats": {
+      "filesChanged": 14,
+      "additions": 511,
+      "deletions": 6
+    },
+    "changelog": {
+      "newFeatures": [
+        "Custom Icon Shapes: Select between System Default, Circle, Square, Squircle, or Teardrop shapes in launcher preferences.",
+        "Taskbar Color Selection: Manually set your Taskbar (Hotseat) color to Red, Blue, Green, or Solid Black directly from the settings.",
+        "Adjustable Taskbar Transparency: Scale background opacity from a solid 0% clear layout up to a completely translucent 100% overlay.",
+        "Custom Icon Image Picker: Long-press an icon inside the Edit App Dialog to select any custom image file from phone storage.",
+        "Adaptive Text Contrasting: Added an automatic luminance engine that reads the App Drawer background darkness and flips text colors between White and Black for readability."
+      ],
+      "optimizations": [
+        "Dynamic Graphics Reloading: Implemented centralized cache clearing listeners so icon shapes and taskbar changes update instantly without requiring a manual launcher refresh.",
+        "Enhanced Outline Mask Filter Engine: Refactored HolographicOutlineHelper logic to better calculate blurred borders around adaptive shapes.",
+        "Manifest Target Upgrade: Bumped internal target configurations to targetSdkVersion 35 while preserving backward flexibility down to SDK 21."
+      ],
+      "bugFixes": [
+        "Foolproof App Uninstallation: Overhauled UninstallDropTarget logic with multi-tier fallback intents to guarantee the system uninstallation handler executes flawlessly on all device configurations.",
+        "Drag & Drop Crash Prevention: Fixed a critical rendering vulnerability where initiating a drag-and-drop workflow on zero-width widgets or folders would crash the workspace.",
+        "Crash Fix on Drag Cancel: Resolved a common code crash that occurred if a user suddenly canceled a drag state immediately after an uninstallation event triggered."
+      ]
+    }
   }
-}
+]
