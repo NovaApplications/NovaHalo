@@ -5,30 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nova Halo - Custom Android Launcher</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
             <div class="logo">
-                <h1>🚀 Nova Halo</h1>
+                <h1>Nova Halo</h1>
             </div>
             <ul class="nav-links">
-                <li><a href="#overview">Overview</a></li>
+                <li><a href="#features">Features</a></li>
                 <li><a href="#releases">Releases</a></li>
+                <li><a href="#about">About</a></li>
                 <li><a href="https://github.com/NovaApplications/NovaHalo" target="_blank">GitHub</a></li>
             </ul>
         </div>
     </nav>
 
-    <section id="overview" class="overview">
+    <header class="hero">
+        <div class="hero-content">
+            <h2>Nova Halo</h2>
+            <p>A fast, classic, and highly customizable Android launcher</p>
+            <p class="subtitle">Built on the legacy foundation of Lawnchair Launcher v1</p>
+            <a href="#releases" class="cta-button">View Latest Release</a>
+        </div>
+    </header>
+
+    <section id="features" class="features">
         <div class="container">
-            <div class="readme-card">
-                <h2>About Nova Halo</h2>
-                <div id="readme-content" class="readme-body">
-                    <p>Loading project information...</p>
+            <h2>Key Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>⚡ Fast & Lightweight</h3>
+                    <p>Optimized performance with minimal resource consumption</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🎨 Highly Customizable</h3>
+                    <p>Tailor every aspect of your home screen experience</p>
+                </div>
+                <div class="feature-card">
+                    <h3>📱 Classic Design</h3>
+                    <p>Clean, intuitive interface inspired by Lawnchair v1</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔧 Open Source</h3>
+                    <p>Community-driven development and contributions welcome</p>
                 </div>
             </div>
         </div>
@@ -36,16 +56,28 @@
 
     <section id="releases" class="releases">
         <div class="container">
-            <h2>Latest Release</h2>
-            <div id="releases-container" class="releases-list">
-                <p class="loading">Loading release notes...</p>
+            <div class="release-header" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin-bottom: 10px;">
+                <h2 id="release-title" style="margin-bottom: 0;">Release Notes</h2>
+                <span id="release-date" style="font-size: 1rem; color: #888; font-style: italic;"></span>
             </div>
+            <p id="release-summary" style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px; color: #555; max-width: 800px;"></p>
+            
+            <div id="releases-container" class="releases-list">
+                <p class="loading">Loading latest updates...</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="about">
+        <div class="container">
+            <h2>About Nova Halo</h2>
+            <p>Nova Halo and Nova Touch is a custom Android launcher built on a modified foundation of the legacy, unmaintained Lawnchair Launcher (Version 1). We deliver a fast, classic, and highly customizable home screen experience for Android users who appreciate simplicity and performance.</p>
         </div>
     </section>
 
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 Nova Halo. Licensed under Apache License 2.0</p>
+            <p>&copy; 2026 Nova Halo. Licensed under Apache License 2.0</p>
             <p><a href="https://github.com/NovaApplications/NovaHalo" target="_blank">View on GitHub</a></p>
         </div>
     </footer>
@@ -53,3 +85,81 @@
     <script src="script.js"></script>
 </body>
 </html>
+
+```
+
+---
+
+### 2. The Updated JavaScript (`script.js`)
+
+This script targets `docs/release.json`. It will extract your summary, date, and loop through the `newFeatures`, `optimizations`, and `bugFixes` arrays, formatting them cleanly into distinct sub-sections.
+
+```javascript
+document.addEventListener("DOMContentLoaded", () => {
+    // Path to your JSON file inside your repository structure
+    // Date.now() works as a cache-buster to bypass the 10-minute GitHub Pages delay
+    const jsonUrl = `docs/release.json?t=${Date.now()}`;
+    const container = document.getElementById("releases-container");
+
+    fetch(jsonUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // 1. Populate metadata headers
+            document.getElementById("release-title").innerText = `${data.title}`;
+            document.getElementById("release-date").innerText = `Released: ${data.releaseDate}`;
+            document.getElementById("release-summary").innerText = data.summary;
+
+            // 2. Clear out the loading text placeholder
+            container.innerHTML = "";
+
+            // Mapping your customized JSON keys to clear headings
+            const sectionMapping = [
+                { key: "newFeatures", title: "🎨 What's New & Customization" },
+                { key: "optimizations", title: "🛠️ System Optimizations & Code Polish" },
+                { key: "bugFixes", title: "🐛 Bug Fixes & Stability" }
+            ];
+
+            // 3. Process each category array from the changelog
+            sectionMapping.forEach(section => {
+                const pointsArray = data.changelog[section.key];
+                
+                if (pointsArray && pointsArray.length > 0) {
+                    // Create wrapper layout block
+                    const sectionBlock = document.createElement("div");
+                    sectionBlock.className = "changelog-section";
+                    sectionBlock.style.marginBottom = "30px";
+
+                    const heading = document.createElement("h3");
+                    heading.innerText = section.title;
+                    heading.style.fontSize = "1.3rem";
+                    heading.style.marginBottom = "10px";
+                    sectionBlock.appendChild(heading);
+
+                    const bulletList = document.createElement("ul");
+                    bulletList.className = "changelog-list";
+                    bulletList.style.paddingLeft = "20px";
+                    bulletList.style.lineHeight = "1.7";
+
+                    // Inject individual bullet records
+                    pointsArray.forEach(text => {
+                        const listItem = document.createElement("li");
+                        listItem.innerText = text;
+                        listItem.style.marginBottom = "8px";
+                        bulletList.appendChild(listItem);
+                    });
+
+                    sectionBlock.appendChild(bulletList);
+                    container.appendChild(sectionBlock);
+                }
+            });
+        })
+        .catch(error => {
+            console.error("Error fetching or parsing changelog data:", error);
+            container.innerHTML = `<p class="error-text" style="color: red;">Failed to load update details. Please refresh or try again later.</p>`;
+        });
+});
