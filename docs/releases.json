@@ -29,4 +29,4 @@
       "Crash Fix on Drag Cancel: Resolved a common code crash that occurred if a user suddenly canceled a drag state immediately after an uninstallation event triggered."
     ]
   }
-},
+}
