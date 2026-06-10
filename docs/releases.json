@@ -1,5 +1,31 @@
 [
   {
+    "version": "2.6.4",
+    "versionCode": 40,
+    "previousVersion": "2.6.3",
+    "releaseDate": "2026-06-10",
+    "title": "NovaOS v2.6.4 (Dynamic Branding & Dock Alpha Patch)",
+    "summary": "This release implements dynamic resource string mapping to automatically switch user interface text between Nova Halo and Nova Touch depending on device screen size, and squashes an alpha transparency rendering bug in the hotseat dock background.",
+    "stats": {
+      "filesChanged": 8,
+      "additions": 23,
+      "deletions": 13
+    },
+    "changelog": {
+      "newFeatures": [
+        "Dynamic Ecosystem Branding: Added adaptive launcher resource configurations inside `values-sw600dp/strings.xml` and `values-sw720dp/strings.xml`. System alert elements, update installation sheets, download managers, and toast warnings now use dynamic localized context pulls (`getString(R.string.launcher_name)`) to display the perfect name brand across phones and tablets automatically."
+      ],
+      "optimizations": [
+        "Adaptive App Drawer Core: Polished layout updates within `AllAppsContainerView.java` to guarantee rendering stability when checking active collection adapters during dynamic view inflation changes."
+      ],
+      "bugFixes": [
+        "Hotseat Transparency Alpha Leak: Resolved a rendering layout issue inside `Hotseat.java` where toggling transparency would drop background visibility values to an absolute zero rather than conforming to the user's customized configuration. The background alpha profile is now safely calculated via `Color.alpha(mBackgroundColor)`.",
+        "Hotseat Threading Race Condition: Wrapped color extractor values in final parameters during value animations to squash potential UI thread synchronization anomalies.",
+        "Version Synchronicity: Compiled cleanly targeting release build configuration code 40."
+      ]
+    }
+  },
+  {
     "version": "2.6.3",
     "versionCode": 39,
     "previousVersion": "2.6.1",
