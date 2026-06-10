@@ -1,4 +1,4 @@
-// Load releases from local JSON file instead of GitHub API
+// Load releases from local JSON file
 // This gives you full control over release notes
 
 async function loadReleases() {
@@ -8,11 +8,46 @@ async function loadReleases() {
         const response = await fetch('./releases.json');
         const data = await response.json();
         
-        // Handle both single object and array formats
+        // The JSON should be a single object or array with a single object
         const release = Array.isArray(data) ? data[0] : data;
         
-        if (!response.ok || !release) {
+        if (!response.ok || !release || !release.title) {
             throw new Error('Failed to load releases');
+        }
+        
+        // Build the release card HTML
+        let releaseBody = '';
+        
+        // Add summary if available
+        if (release.summary) {
+            releaseBody += `<p><strong>Summary:</strong> ${escapeHtml(release.summary)}</p>`;
+        }
+        
+        // Add features
+        if (release.changelog && release.changelog.newFeatures && release.changelog.newFeatures.length > 0) {
+            releaseBody += '<h3>✨ New Features</h3><ul>';
+            release.changelog.newFeatures.forEach(feature => {
+                releaseBody += `<li>${escapeHtml(feature)}</li>`;
+            });
+            releaseBody += '</ul>';
+        }
+        
+        // Add optimizations
+        if (release.changelog && release.changelog.optimizations && release.changelog.optimizations.length > 0) {
+            releaseBody += '<h3>⚡ Optimizations</h3><ul>';
+            release.changelog.optimizations.forEach(opt => {
+                releaseBody += `<li>${escapeHtml(opt)}</li>`;
+            });
+            releaseBody += '</ul>';
+        }
+        
+        // Add bug fixes
+        if (release.changelog && release.changelog.bugFixes && release.changelog.bugFixes.length > 0) {
+            releaseBody += '<h3>🐛 Bug Fixes</h3><ul>';
+            release.changelog.bugFixes.forEach(fix => {
+                releaseBody += `<li>${escapeHtml(fix)}</li>`;
+            });
+            releaseBody += '</ul>';
         }
         
         const releaseHtml = `
@@ -20,17 +55,19 @@ async function loadReleases() {
                 <div class="release-header">
                     <h3 class="release-title">${escapeHtml(release.title)}</h3>
                     <span class="release-tag latest">
-                        ⭐ Latest - v${release.version}
+                        ⭐ Latest - v${escapeHtml(release.version)}
                     </span>
                 </div>
                 <p class="release-date">Released on ${escapeHtml(release.releaseDate)}</p>
                 <div class="release-body">
-                    ${formatReleaseNotes(release.changelog, release.summary)}
+                    ${releaseBody}
                 </div>
-                <p style="font-size: 0.9rem; color: var(--text-light); margin-top: 1rem;">
-                    📊 Changes: ${release.stats.filesChanged} files · +${release.stats.additions} · -${release.stats.deletions}
-                </p>
-                <a href="https://github.com/NovaApplications/NovaHalo/releases/tag/v${release.version}" target="_blank" class="release-link">View on GitHub →</a>
+                ${release.stats ? `
+                    <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                        📊 <strong>Changes:</strong> ${release.stats.filesChanged} files changed · <span style="color: var(--success-color);">+${release.stats.additions}</span> · <span style="color: #f44336;">-${release.stats.deletions}</span>
+                    </p>
+                ` : ''}
+                <a href="https://github.com/NovaApplications/NovaHalo/releases/tag/v${escapeHtml(release.version)}" target="_blank" class="release-link">View on GitHub →</a>
             </div>
         `;
         
@@ -46,6 +83,7 @@ async function loadReleases() {
 
 // Simple HTML escape function
 function escapeHtml(text) {
+    if (!text) return '';
     const map = {
         '&': '&amp;',
         '<': '&lt;',
@@ -53,42 +91,7 @@ function escapeHtml(text) {
         '"': '&quot;',
         "'": '&#039;'
     };
-    return text.replace(/[&<>"']/g, m => map[m]);
-}
-
-// Format release notes from changelog object
-function formatReleaseNotes(changelog, summary) {
-    let html = '';
-    
-    if (summary) {
-        html += `<p>${escapeHtml(summary)}</p>`;
-    }
-    
-    if (changelog.newFeatures && changelog.newFeatures.length > 0) {
-        html += '<h3>✨ New Features</h3><ul>';
-        changelog.newFeatures.forEach(feature => {
-            html += `<li>${escapeHtml(feature)}</li>`;
-        });
-        html += '</ul>';
-    }
-    
-    if (changelog.optimizations && changelog.optimizations.length > 0) {
-        html += '<h3>⚡ Optimizations</h3><ul>';
-        changelog.optimizations.forEach(opt => {
-            html += `<li>${escapeHtml(opt)}</li>`;
-        });
-        html += '</ul>';
-    }
-    
-    if (changelog.bugFixes && changelog.bugFixes.length > 0) {
-        html += '<h3>🐛 Bug Fixes</h3><ul>';
-        changelog.bugFixes.forEach(fix => {
-            html += `<li>${escapeHtml(fix)}</li>`;
-        });
-        html += '</ul>';
-    }
-    
-    return html;
+    return String(text).replace(/[&<>"']/g, m => map[m]);
 }
 
 // Add CSS for generated HTML elements
@@ -112,7 +115,7 @@ style.textContent = `
         line-height: 1.6;
     }
     .release-body p {
-        margin: 1rem 0;
+        margin: 0.8rem 0;
         line-height: 1.8;
     }
 `;
