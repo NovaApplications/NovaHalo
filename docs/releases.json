@@ -1,5 +1,33 @@
 [
   {
+    "version": "2.6.0",
+    "versionCode": 36,
+    "previousVersion": "2.5.1",
+    "releaseDate": "2026-06-09",
+    "title": "NovaOS v2.6.0 (The Native Update Engine)",
+    "summary": "This foundational milestone completely replaces the legacy Google Play Core updater engine with a native, open-source GitHub Release checking system, backed by background intent-driven installer actions and background notification workers.",
+    "stats": {
+      "filesChanged": 6,
+      "additions": 252,
+      "deletions": 30
+    },
+    "changelog": {
+      "newFeatures": [
+        "In-App GitHub Update Engine: Overhauled SettingsActivity.java to intercept the 'Check for Updates' preference tree selection. Instead of hard-redirecting users to a Play Store link, it now pulls live tags straight from your open-source repository engine.",
+        "Interactive Alert Dialogs: Added interactive alert prompt wizards that pop up when an update hits the frontend, allowing users to immediately trigger an in-app download or defer installation until later.",
+        "Automated Download Callbacks: Created a dedicated background lifecycle parser (`GitHubUpdateChecker.java`) that triggers Android's public `DownloadManager` network system, monitors downloads with custom BroadcastReceivers, and maps progress indicators right to the notification pane."
+      ],
+      "optimizations": [
+        "Cleaned Play Core Bloat: Removed the heavy external Google Play `app-update:2.1.0` and GMS Tasks library blocks from your build.gradle dependencies, successfully pruning app sizing metrics by several kilobytes."
+      ],
+      "bugFixes": [
+        "Background Notification Fixes: Migrated your scheduled WorkManager background engine (`UpdateCheckWorker.java`) away from dead Play Integrity availability states. The background daemon now silent-checks GitHub APIs on a clock interval and pushes crisp alerts to the system drawer containing intent metadata payload links.",
+        "Modern API Broadcast Flags: Hardened intent notification callbacks to comply with Android 13 (Tiramisu) security requirements by implementing explicit safety export definitions (`Context.RECEIVER_EXPORTED`).",
+        "Permission Hardening: Injected vital platform infrastructure rules (`INTERNET`, `INSTALL_PACKAGES`, and `REQUEST_INSTALL_PACKAGES`) right into the AndroidManifest.xml layer to authorize file provider streams to safely process package-archives."
+      ]
+    }
+  },
+  {
     "version": "2.5.1",
     "versionCode": 35,
     "previousVersion": "2.5.0",
