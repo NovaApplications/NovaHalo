@@ -1,6 +1,6 @@
 # GitHub Pages Jekyll Configuration
-title: Nova Halo
-description: A fast, classic, and highly customizable Android launcher
+title: NovaOS
+description: An Android Luncher
 url: "https://novaapplications.github.io/NovaHalo"
 repository: "NovaApplications/NovaHalo"
 theme: jekyll-theme-minimal
