@@ -1,0 +1,16 @@
+# GitHub Pages Jekyll Configuration
+title: Nova Halo
+description: A fast, classic, and highly customizable Android launcher
+url: "https://novaapplications.github.io/NovaHalo"
+repository: "NovaApplications/NovaHalo"
+theme: jekyll-theme-minimal
+
+# Exclude Jekyll processing
+exclude:
+  - README.md
+  - CHANGELOG.md
+
+# Configure markdown
+markdown: kramdown
+kramdown:
+  auto_ids: true
