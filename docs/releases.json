@@ -1,0 +1,342 @@
+[
+  {
+    "version": "2.6.5",
+    "versionCode": 41,
+    "previousVersion": "2.6.4",
+    "releaseDate": "2026-06-10",
+    "title": "NovaOS v2.6.5 (Dock Rendering & Color Animation Patch)",
+    "summary": "This update fixes color-fade rendering bugs inside the home screen hotseat dock, optimizes animation interpolators for smoother layout state blending, and implements active canvas invalidation rules to prevent stale wallpaper extraction color states.",
+    "stats": {
+      "filesChanged": 3,
+      "additions": 21,
+      "deletions": 8
+    },
+    "changelog": {
+      "newFeatures": [],
+      "optimizations": [
+        "Calibrated Hotseat Color Transitions: Upgraded the dock color fade engine in Hotseat.java to calculate shifts via `ValueAnimator.ofArgb()` instead of standard mathematical layout value structures. This completely eliminates flickering artifacts and optimizes rendering performance during system wallpaper modifications.",
+        "Active Canvas Redrawing: Implemented explicit layout `invalidate()` commands throughout animation updates and quick-state shifts, forcing the hardware-accelerated canvas to render refreshed frames instantly."
+      ],
+      "bugFixes": [
+        "Hotseat Layer Detachment Guard: Added an automated structural check (`getBackground() != mBackground`) inside the color engine logic to re-bind the primary background drawable if it ever gets stripped by system themes or layout orientation shifts.",
+        "Animation Redundancy Short-Circuit: Injected an early-return optimization clause (`if (mBackgroundColor == color) return;`) to bypass animator inflation if the incoming color profile matches the active hex code, saving precious mobile CPU cycles.",
+        "Build Deployment Alignment: Synchronized system build properties safely to project versionCode 41."
+      ]
+    }
+  },
+  {
+    "version": "2.6.4",
+    "versionCode": 40,
+    "previousVersion": "2.6.3",
+    "releaseDate": "2026-06-10",
+    "title": "NovaOS v2.6.4 (Dynamic Branding & Dock Alpha Patch)",
+    "summary": "This release implements dynamic resource string mapping to automatically switch user interface text between Nova Halo and Nova Touch depending on device screen size, and squashes an alpha transparency rendering bug in the hotseat dock background.",
+    "stats": {
+      "filesChanged": 8,
+      "additions": 23,
+      "deletions": 13
+    },
+    "changelog": {
+      "newFeatures": [
+        "Dynamic Ecosystem Branding: Added adaptive launcher resource configurations inside `values-sw600dp/strings.xml` and `values-sw720dp/strings.xml`. System alert elements, update installation sheets, download managers, and toast warnings now use dynamic localized context pulls (`getString(R.string.launcher_name)`) to display the perfect name brand across phones and tablets automatically."
+      ],
+      "optimizations": [
+        "Adaptive App Drawer Core: Polished layout updates within `AllAppsContainerView.java` to guarantee rendering stability when checking active collection adapters during dynamic view inflation changes."
+      ],
+      "bugFixes": [
+        "Hotseat Transparency Alpha Leak: Resolved a rendering layout issue inside `Hotseat.java` where toggling transparency would drop background visibility values to an absolute zero rather than conforming to the user's customized configuration. The background alpha profile is now safely calculated via `Color.alpha(mBackgroundColor)`.",
+        "Hotseat Threading Race Condition: Wrapped color extractor values in final parameters during value animations to squash potential UI thread synchronization anomalies.",
+        "Version Synchronicity: Compiled cleanly targeting release build configuration code 40."
+      ]
+    }
+  },
+  {
+    "version": "2.6.3",
+    "versionCode": 39,
+    "previousVersion": "2.6.1",
+    "releaseDate": "2026-06-10",
+    "title": "NovaOS v2.6.3 (Animation & Tooling Update)",
+    "summary": "This milestone updates internal dependencies to modern standards, implements animated cross-fades for Work Profile switching, refactors code syntax with clean Java 8 lambdas, and hardens the update engine against scoped storage runtime constraints.",
+    "stats": {
+      "filesChanged": 7,
+      "additions": 248,
+      "deletions": 253
+    },
+    "changelog": {
+      "newFeatures": [
+        "Animated Work Profile Transitions: Added a fluid cross-fade animation pipeline (`animateTabSwitch`) to AllAppsContainerView.java. Switching between Personal and Work profiles now gently scales alpha states over 150ms instead of popping aggressively.",
+        "Secure Scoped Storage Routing: Completely overhauled your update installer logic. Downloaded update binaries are now written directly into private context external directories (`getExternalFilesDir`) and retrieved seamlessly via native FileProviders, successfully bypassing Android 14+ scoped storage security blocks."
+      ],
+      "optimizations": [
+        "Java 8 Lambda Modernization: Refactored bulky anonymous `OnClickListener` and `OnFocusChangeListener` classes into highly optimized lambda expressions, significantly trimming compiler class allocation overhead.",
+        "Dependency Pipeline Bump: Upgraded structural layout library wrappers in build.gradle including `appcompat:1.7.1`, `recyclerview:1.3.2`, `work-runtime:2.11.2`, and `protobuf-gradle-plugin:0.10.0`.",
+        "Baseline Minimum Target: Bumped the launcher baseline framework requirement up to `minSdkVersion 23` (Android 6.0 Marshmallow)."
+      ],
+      "bugFixes": [
+        "Unknown Source Verification: Added pre-flight runtime validations for `canRequestPackageInstalls()`. On API 26+, the launcher will now cleanly prompt users with explicit settings instructions if installation authorization is toggled off.",
+        "Settings Layout Consolidation: Refactored preference tree groupings inside launcher_preferences.xml to stack About options and Developer utilities inside nested sub-menus, cleaning up visual clutter.",
+        "Readme Metadata Cleanup: Cleared out obsolete tracking tags and legacy external build badges from the primary README.md documentation file."
+      ]
+    }
+  },
+  {
+    "version": "2.6.1",
+    "versionCode": 37,
+    "previousVersion": "2.6.0",
+    "releaseDate": "2026-06-10",
+    "title": "NovaOS v2.6.1 (API Fallback & Intent Routing Patch)",
+    "summary": "This patch implements a structural fallback architecture for the GitHub API update engine to prevent 404 endpoint failures, adds mandatory HTTP request header properties, and links background notification handlers directly to the foreground settings wizard.",
+    "stats": {
+      "filesChanged": 4,
+      "additions": 101,
+      "deletions": 4
+    },
+    "changelog": {
+      "newFeatures": [
+        "Automated 404 API Fallback Engine: Added a new fallback method (`checkForAllReleases`) inside GitHubUpdateChecker.java. If the default `/releases/latest` API route returns a 404 exception, the launcher will dynamically query the full `/releases` array stream to pull the newest version, ensuring updates never break.",
+        "Notification Intent Interception: Built out an automated payload interceptor (`handleUpdateIntent`) in SettingsActivity.java alongside standard `onNewIntent` overrides. This lets background update notifications safely pass target URLs and version tags directly into a foreground alert dialog box if the user clicks the notification banner."
+      ],
+      "optimizations": [
+        "GitHub API Compliancy Headers: Injected missing `User-Agent` and `Accept` request parameters into your systemic HttpURLConnection blocks, satisfying GitHub's modern authentication traffic rules to avoid automatic server rate-limiting."
+      ],
+      "bugFixes": [
+        "Synchronized Build Tracking: Incremented core project compilation artifacts safely to versionCode 37."
+      ]
+    }
+  },
+  {
+    "version": "2.6.0",
+    "versionCode": 36,
+    "previousVersion": "2.5.1",
+    "releaseDate": "2026-06-09",
+    "title": "NovaOS v2.6.0 (The Native Update Engine)",
+    "summary": "This foundational milestone completely replaces the legacy Google Play Core updater engine with a native, open-source GitHub Release checking system, backed by background intent-driven installer actions and background notification workers.",
+    "stats": {
+      "filesChanged": 6,
+      "additions": 252,
+      "deletions": 30
+    },
+    "changelog": {
+      "newFeatures": [
+        "In-App GitHub Update Engine: Overhauled SettingsActivity.java to intercept the 'Check for Updates' preference tree selection. Instead of hard-redirecting users to a Play Store link, it now pulls live tags straight from your open-source repository engine.",
+        "Interactive Alert Dialogs: Added interactive alert prompt wizards that pop up when an update hits the frontend, allowing users to immediately trigger an in-app download or defer installation until later.",
+        "Automated Download Callbacks: Created a dedicated background lifecycle parser (`GitHubUpdateChecker.java`) that triggers Android's public `DownloadManager` network system, monitors downloads with custom BroadcastReceivers, and maps progress indicators right to the notification pane."
+      ],
+      "optimizations": [
+        "Cleaned Play Core Bloat: Removed the heavy external Google Play `app-update:2.1.0` and GMS Tasks library blocks from your build.gradle dependencies, successfully pruning app sizing metrics by several kilobytes."
+      ],
+      "bugFixes": [
+        "Background Notification Fixes: Migrated your scheduled WorkManager background engine (`UpdateCheckWorker.java`) away from dead Play Integrity availability states. The background daemon now silent-checks GitHub APIs on a clock interval and pushes crisp alerts to the system drawer containing intent metadata payload links.",
+        "Modern API Broadcast Flags: Hardened intent notification callbacks to comply with Android 13 (Tiramisu) security requirements by implementing explicit safety export definitions (`Context.RECEIVER_EXPORTED`).",
+        "Permission Hardening: Injected vital platform infrastructure rules (`INTERNET`, `INSTALL_PACKAGES`, and `REQUEST_INSTALL_PACKAGES`) right into the AndroidManifest.xml layer to authorize file provider streams to safely process package-archives."
+      ]
+    }
+  },
+  {
+    "version": "2.5.1",
+    "versionCode": 35,
+    "previousVersion": "2.5.0",
+    "releaseDate": "2026-06-09",
+    "title": "NovaOS v2.5.1 (Adaptive Icon Crash Patch)",
+    "summary": "This stability patch addresses deep-level rendering issues inside the icon canvas processor, eliminating widespread NullPointerException crashes when inflating broken or empty adaptive app icons.",
+    "stats": {
+      "filesChanged": 2,
+      "additions": 16,
+      "deletions": 6
+    },
+    "changelog": {
+      "newFeatures": [],
+      "optimizations": [],
+      "bugFixes": [
+        "Defensive Adaptive Icon Drawing: Fixed a severe rendering bug in Utilities.java where app packages supplying broken or uninitialized `AdaptiveIconDrawable` layers would cause immediate system canvas crashes. Background and foreground rendering streams are now securely nested behind proactive null verification wrappers.",
+        "Missing Asset Fallback: Implemented an emergency default vector asset fallback routing command (`ic_launcher_home`) if the system attempts to draw a completely empty or missing app icon shortcut, preserving home screen launcher layout layout stability.",
+        "Version Synchronization: Incremented core deployment dependencies to match systemic versionCode 35 release profiles."
+      ]
+    }
+  },
+  {
+    "version": "2.5.0",
+    "versionCode": 34,
+    "previousVersion": "2.4.5",
+    "releaseDate": "2026-06-09",
+    "title": "NovaOS v2.5.0 (The Developer Update)",
+    "summary": "This milestone release brings an advanced hidden Developer Options menu, an automated background crash tracking system with native log exports, enhanced Motorola task stability, and polished asset padding rules for tablet displays.",
+    "stats": {
+      "filesChanged": 7,
+      "additions": 153,
+      "deletions": 14
+    },
+    "changelog": {
+      "newFeatures": [
+        "Secret Developer Options Menu: Tapping the version number 7 times now triggers a secure password verification sequence. Entering 'development' unlocks a dedicated category in preferences.",
+        "Toggleable Home Build Info: Added a 'Show Build Info on Home' setting to seamlessly overlay software build metrics onto the top-left corner of your desktop grid setup.",
+        "Automated Crash Diagnostics: Implemented an uncaught exception thread handler inside LauncherAppState.java that catches application failures and details systemic hardware parameters into a local 'nova_crash_logs.txt' repository log file.",
+        "Native Log Export Sharing: Hooked an androidx FileProvider endpoint into the core manifest alongside an export interface, allowing developers to instantly stream diagnostic file reports outward using Android's native share sheet."
+      ],
+      "optimizations": [
+        "Enhanced Motorola Task Routing: Hardened settings navigation calls in Launcher.java using aggressive task stacking adjustments (`FLAG_ACTIVITY_CLEAR_TOP`), fixing a widespread security constraint layout vulnerability found on Motorola factory ROM configurations.",
+        "Polished Tablet Dimension Rules: Recalibrated cell icon heights and vertical padding modifiers inside DeviceProfile.java to expand breathing room bounds on large tablets, preventing asset clipping when running Touch modules in landscape layouts."
+      ],
+      "bugFixes": [
+        "Defensive Color Engine Loading: Injected explicit null checks across `mHotseat` and `mWorkspace` references during color extraction calculations to prevent background threading initialization failures.",
+        "Overview Mode Long-Press Crash Guard: Wrapped home screen workspace long-press event calls in a secure try-catch layout envelope, squashing rare reordering synchronization thread panics.",
+        "Crash Log Sweeper Utility: Added a 'Clear Crash Logs' utility option to easily wipe localized text diagnostics from device external file paths, preserving user space metrics."
+      ]
+    }
+  },
+  {
+    "version": "2.4.5",
+    "versionCode": 33,
+    "previousVersion": "2.4.4",
+    "releaseDate": "2026-06-09",
+    "title": "NovaOS v2.4.5 (Intent Safety & Navigation Patch)",
+    "summary": "This release implements critical try-catch safeguards to prevent crashing loops when opening launcher settings, polishes the preference menu back-stack routine, and synchronizes compilation dexing metrics.",
+    "stats": {
+      "filesChanged": 4,
+      "additions": 15,
+      "deletions": 9
+    },
+    "changelog": {
+      "newFeatures": [],
+      "optimizations": [
+        "Dexing Tooling Alignment: Synchronized internal metadata configs (`minSdkVersionForDexing`) to match your upgraded platform minimum threshold (SDK 22) to save compilation time overhead."
+      ],
+      "bugFixes": [
+        "Defensive Settings Initialization: Wrapped the `SettingsActivity` initialization routine in Launcher.java with an absolute try-catch safety barrier and explicit activity flags (`FLAG_ACTIVITY_NEW_TASK`), ensuring failure logs or warning toasts print cleanly instead of causing application runtime crashes.",
+        "Settings Back-Press Exit: Updated the support layout back-press engine in SettingsActivity.java to explicitly target `finish()` upon hitting zero entries in the fragment stack, ensuring back arrows exit the sub-menu layout smoothly instead of getting stuck in infinite loops."
+      ]
+    }
+  },
+  {
+    "version": "2.4.4",
+    "versionCode": 32,
+    "previousVersion": "2.4.3",
+    "releaseDate": "2026-06-09",
+    "title": "NovaOS v2.4.4 (Settings Routing & Platform Patch)",
+    "summary": "This release streamlines setting activity intentions on newer Android layers to avoid system-package collisions and upgrades legacy SDK compatibility tiers.",
+    "stats": {
+      "filesChanged": 2,
+      "additions": 3,
+      "deletions": 9
+    },
+    "changelog": {
+      "newFeatures": [
+        "Upgraded Minimum SDK Target: Shifted the minimum installation baseline from `minSdkVersion 21` (Android 5.0) up to `minSdkVersion 22` (Android 5.1 Lollipop MR1) to bypass archaic core rendering discrepancies."
+      ],
+      "optimizations": [],
+      "bugFixes": [
+        "Unified Settings Intent Routing: Stripped away broken conditional logic in Launcher.java that relied on generic system application packages (`ACTION_APPLICATION_PREFERENCES`). Clicking the Settings button now targets your project-native `SettingsActivity` explicitly, completely squashing launch intent mismatches or infinite loops on modern API environments."
+      ]
+    }
+  },
+  {
+    "version": "2.4.3",
+    "versionCode": 31,
+    "previousVersion": "2.4.2",
+    "releaseDate": "2026-06-09",
+    "title": "NovaOS v2.4.3 (Grid Calibration & Maintenance Patch)",
+    "summary": "This update calibrates layout cell dimensions for tablet displays, fixes a landscape measurement bug in the app drawer orientation tracker, and applies robust safe-null initialization wrappers across home screen options.",
+    "stats": {
+      "filesChanged": 5,
+      "additions": 37,
+      "deletions": 26
+    },
+    "changelog": {
+      "newFeatures": [
+        "Expanded Tablet Cell Margins: Upgraded DeviceProfile.java to automatically inject a 4dp vertical breathing room padding underneath app titles on non-phone configurations, keeping long app labels perfectly clear from clipping bounds."
+      ],
+      "optimizations": [
+        "Calibrated Orientation Metrics: Fixed an orientation checking bug inside AllAppsContainerView.java by mapping grid column expansions directly to physical bounding box pixels (`widthPx > heightPx`) rather than systemic configuration profiles, resulting in a flawless landscape column layout match."
+      ],
+      "bugFixes": [
+        "Defensive Overview Panel Bindings: Injected defensive null-safety wrappers around `mWidgetsButton`, `settingsButton`, and `mOverviewPanel` instances inside Launcher.java, squashing potential inflation failures if initialization properties trigger out of order.",
+        "Profile Metadata Alignment: Maintained structural reliability with clean build increments targeting runtime version code 31."
+      ]
+    }
+  },
+  {
+    "version": "2.4.2",
+    "versionCode": 30,
+    "previousVersion": "2.4.1",
+    "releaseDate": "2026-06-09",
+    "title": "NovaOS v2.4.2 (Tablet Optimization & Crash Patch)",
+    "summary": "This release delivers crucial tablet UI scaling optimizations for the Nova Touch interface, unlocks edge-to-edge app grid bounds, and implements robust guardrails against random animation lifecycle crashes.",
+    "stats": {
+      "filesChanged": 6,
+      "additions": 56,
+      "deletions": 29
+    },
+    "changelog": {
+      "newFeatures": [
+        "Nova Touch Full-Width Mode: Refactored layouts for wider screen profiles (sw600dp and sw720dp) to use match_parent formatting, letting the App Drawer canvas map seamlessly edge-to-edge across tablet monitors.",
+        "Dynamic Tablet Grids: Upgraded the layout measurement rules inside AllAppsContainerView.java. Tablets now automatically compute two extra columns of icons when rotated into horizontal landscape mode to fully utilize tablet real estate."
+      ],
+      "optimizations": [
+        "Streamlined Tablet Insets: Bypassed background card paddings and search margins when running on non-phone configurations, creating a sleek, integrated look for the tablet interface."
+      ],
+      "bugFixes": [
+        "Overview Mode Null Guardrails: Guarded the launcher overview panels and transitional states against unexpected null pointers during quick navigation adjustments inside Launcher.java.",
+        "Animation Lifecycle Crash Fixes: Injected structural safety logic inside LauncherStateTransitionAnimation.java and WorkspaceStateTransitionAnimation.java to prevent crashes when a user navigates away or clears views right as an alpha fade animation loops."
+      ]
+    }
+  },
+  {
+    "version": "2.4.1",
+    "versionCode": 29,
+    "previousVersion": "2.4",
+    "releaseDate": "2026-06-09",
+    "title": "NovaOS v2.4.1 (Stability & Performance Patch)",
+    "summary": "This patch update squashes visibility bugs in the app drawer search interface, optimizes text contrast tracking across highly transparent backgrounds, and introduces pre-compiled baseline profiles for snappier performance.",
+    "stats": {
+      "filesChanged": 6,
+      "additions": 56,
+      "deletions": 7
+    },
+    "changelog": {
+      "newFeatures": [
+        "Dynamic Search Input Themes: The app drawer search bar text and placeholder hint colors now automatically adapt alongside the main text palette to guarantee maximum readability.",
+        "Optimized Alpha Contrasting: Overhauled the background luminance tracking calculations inside Utilities.java to safely handle highly transparent color bounds without dropping color consistency."
+      ],
+      "optimizations": [
+        "Added ART Baseline Profiles: Bundled native compilation profiles (.dm) for modern API targets (SDK 28 through 31+), significantly reducing layout rendering overhead and boosting app launch speeds on initial install.",
+        "Workspace Initialization Hooks: Polished cell layout insertions inside Workspace.java to ensure pull-down action elements trigger reliably during layout generation."
+      ],
+      "bugFixes": [
+        "Fixed Clear Background Text Blindness: Resolved a rendering bug where heavily translucent or transparent app drawer backgrounds would accidentally force white text against light wallpapers.",
+        "Manifest Refinement: Cleared out accidental trailing comments within the core android manifest declarations."
+      ]
+    }
+  },
+  {
+    "version": "2.4.0",
+    "versionCode": 28,
+    "previousVersion": "2.3.1",
+    "releaseDate": "2026-06-08",
+    "title": "NovaOS v2.4.0 (The Customization Update)",
+    "summary": "This release is packed with highly requested desktop visual customization options, smoother rendering engine logic, and robust quality-of-life stability fixes for managing your home screen layout.",
+    "stats": {
+      "filesChanged": 14,
+      "additions": 511,
+      "deletions": 6
+    },
+    "changelog": {
+      "newFeatures": [
+        "Custom Icon Shapes: Select between System Default, Circle, Square, Squircle, or Teardrop shapes in launcher preferences.",
+        "Taskbar Color Selection: Manually set your Taskbar (Hotseat) color to Red, Blue, Green, or Solid Black directly from the settings.",
+        "Adjustable Taskbar Transparency: Scale background opacity from a solid 0% clear layout up to a completely translucent 100% overlay.",
+        "Custom Icon Image Picker: Long-press an icon inside the Edit App Dialog to select any custom image file from phone storage.",
+        "Adaptive Text Contrasting: Added an automatic luminance engine that reads the App Drawer background darkness and flips text colors between White and Black for readability."
+      ],
+      "optimizations": [
+        "Dynamic Graphics Reloading: Implemented centralized cache clearing listeners so icon shapes and taskbar changes update instantly without requiring a manual launcher refresh.",
+        "Enhanced Outline Mask Filter Engine: Refactored HolographicOutlineHelper logic to better calculate blurred borders around adaptive shapes.",
+        "Manifest Target Upgrade: Bumped internal target configurations to targetSdkVersion 35 while preserving backward flexibility down to SDK 21."
+      ],
+      "bugFixes": [
+        "Foolproof App Uninstallation: Overhauled UninstallDropTarget logic with multi-tier fallback intents to guarantee the system uninstallation handler executes flawlessly on all device configurations.",
+        "Drag & Drop Crash Prevention: Fixed a critical rendering vulnerability where initiating a drag-and-drop workflow on zero-width widgets or folders would crash the workspace.",
+        "Crash Fix on Drag Cancel: Resolved a common code crash that occurred if a user suddenly canceled a drag state immediately after an uninstallation event triggered."
+      ]
+    }
+  }
+]

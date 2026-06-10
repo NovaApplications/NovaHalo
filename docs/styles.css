@@ -1,0 +1,364 @@
+:root {
+    --primary-color: #2196F3;
+    --secondary-color: #1976D2;
+    --text-dark: #212121;
+    --text-light: #757575;
+    --bg-light: #f5f5f5;
+    --bg-very-light: #fafafa;
+    --border-color: #e0e0e0;
+    --success-color: #4CAF50;
+    --shadow: 0 2px 8px rgba(0,0,0,0.1);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    line-height: 1.6;
+    color: var(--text-dark);
+    background-color: #fff;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Navigation */
+.navbar {
+    background: #fff;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 20px;
+}
+
+.logo h1 {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-dark);
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .nav-links {
+        gap: 1rem;
+        font-size: 0.9rem;
+    }
+    .logo h1 {
+        font-size: 1.2rem;
+    }
+}
+
+/* Overview Section */
+.overview {
+    padding: 60px 20px;
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.05) 0%, rgba(25, 118, 210, 0.05) 100%);
+}
+
+.readme-card {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.3s ease;
+}
+
+.readme-card:hover {
+    box-shadow: var(--shadow-hover);
+}
+
+.readme-card h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+}
+
+.readme-body {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-dark);
+}
+
+.readme-body p {
+    margin-bottom: 1rem;
+}
+
+.readme-body h3 {
+    font-size: 1.3rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.8rem;
+    color: var(--primary-color);
+}
+
+.readme-body ul, .readme-body ol {
+    margin: 1rem 0 1rem 1.5rem;
+}
+
+.readme-body li {
+    margin-bottom: 0.5rem;
+}
+
+.readme-body code {
+    background: var(--bg-very-light);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.95em;
+    color: #d63384;
+}
+
+.readme-body pre {
+    background: var(--bg-very-light);
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 1rem 0;
+}
+
+.readme-body pre code {
+    background: none;
+    padding: 0;
+    color: inherit;
+}
+
+/* Releases Section */
+.releases {
+    padding: 80px 20px;
+    background: var(--bg-very-light);
+}
+
+.releases h2 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 3rem;
+    color: var(--primary-color);
+}
+
+.releases-list {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.release-card {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+}
+
+.release-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+}
+
+.release-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.release-title {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.release-tag {
+    display: inline-block;
+    background: var(--primary-color);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.release-tag.latest {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+.release-date {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    margin-top: 0.5rem;
+}
+
+.release-body {
+    color: var(--text-dark);
+    line-height: 1.8;
+    margin: 1.5rem 0;
+}
+
+.release-body h3 {
+    font-size: 1.15rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.8rem;
+    color: var(--primary-color);
+}
+
+.release-body h3:first-child {
+    margin-top: 0;
+}
+
+.release-body ul, .release-body ol {
+    margin: 0.8rem 0 1rem 1.5rem;
+    list-style-type: disc;
+}
+
+.release-body li {
+    margin-bottom: 0.6rem;
+    line-height: 1.6;
+}
+
+.release-body p {
+    margin: 0.8rem 0;
+}
+
+.release-body strong {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+.stats {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.stat-additions {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+.stat-deletions {
+    color: #f44336;
+    font-weight: 600;
+}
+
+.release-link {
+    display: inline-block;
+    margin-top: 1rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    padding: 8px 16px;
+    border-radius: 6px;
+}
+
+.release-link:hover {
+    background: rgba(33, 150, 243, 0.1);
+    color: var(--secondary-color);
+}
+
+.loading {
+    text-align: center;
+    color: var(--text-light);
+    padding: 3rem 1rem;
+}
+
+/* Footer */
+.footer {
+    background: var(--text-dark);
+    color: white;
+    padding: 2rem 20px;
+    text-align: center;
+}
+
+.footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer a:hover {
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .readme-card {
+        padding: 25px;
+    }
+    
+    .readme-card h2 {
+        font-size: 1.5rem;
+    }
+
+    .releases h2 {
+        font-size: 1.5rem;
+    }
+
+    .release-card {
+        padding: 20px;
+    }
+
+    .release-title {
+        font-size: 1.2rem;
+    }
+
+    .release-header {
+        flex-direction: column;
+    }
+
+    .overview {
+        padding: 40px 20px;
+    }
+
+    .releases {
+        padding: 40px 20px;
+    }
+}
