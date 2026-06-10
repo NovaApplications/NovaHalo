@@ -1,5 +1,34 @@
 [
   {
+    "version": "2.6.3",
+    "versionCode": 39,
+    "previousVersion": "2.6.1",
+    "releaseDate": "2026-06-10",
+    "title": "NovaOS v2.6.3 (Animation & Tooling Update)",
+    "summary": "This milestone updates internal dependencies to modern standards, implements animated cross-fades for Work Profile switching, refactors code syntax with clean Java 8 lambdas, and hardens the update engine against scoped storage runtime constraints.",
+    "stats": {
+      "filesChanged": 7,
+      "additions": 248,
+      "deletions": 253
+    },
+    "changelog": {
+      "newFeatures": [
+        "Animated Work Profile Transitions: Added a fluid cross-fade animation pipeline (`animateTabSwitch`) to AllAppsContainerView.java. Switching between Personal and Work profiles now gently scales alpha states over 150ms instead of popping aggressively.",
+        "Secure Scoped Storage Routing: Completely overhauled your update installer logic. Downloaded update binaries are now written directly into private context external directories (`getExternalFilesDir`) and retrieved seamlessly via native FileProviders, successfully bypassing Android 14+ scoped storage security blocks."
+      ],
+      "optimizations": [
+        "Java 8 Lambda Modernization: Refactored bulky anonymous `OnClickListener` and `OnFocusChangeListener` classes into highly optimized lambda expressions, significantly trimming compiler class allocation overhead.",
+        "Dependency Pipeline Bump: Upgraded structural layout library wrappers in build.gradle including `appcompat:1.7.1`, `recyclerview:1.3.2`, `work-runtime:2.11.2`, and `protobuf-gradle-plugin:0.10.0`.",
+        "Baseline Minimum Target: Bumped the launcher baseline framework requirement up to `minSdkVersion 23` (Android 6.0 Marshmallow)."
+      ],
+      "bugFixes": [
+        "Unknown Source Verification: Added pre-flight runtime validations for `canRequestPackageInstalls()`. On API 26+, the launcher will now cleanly prompt users with explicit settings instructions if installation authorization is toggled off.",
+        "Settings Layout Consolidation: Refactored preference tree groupings inside launcher_preferences.xml to stack About options and Developer utilities inside nested sub-menus, cleaning up visual clutter.",
+        "Readme Metadata Cleanup: Cleared out obsolete tracking tags and legacy external build badges from the primary README.md documentation file."
+      ]
+    }
+  },
+  {
     "version": "2.6.1",
     "versionCode": 37,
     "previousVersion": "2.6.0",
