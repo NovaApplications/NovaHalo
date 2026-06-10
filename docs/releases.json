@@ -1,5 +1,30 @@
 [
   {
+    "version": "2.6.5",
+    "versionCode": 41,
+    "previousVersion": "2.6.4",
+    "releaseDate": "2026-06-10",
+    "title": "NovaOS v2.6.5 (Dock Rendering & Color Animation Patch)",
+    "summary": "This update fixes color-fade rendering bugs inside the home screen hotseat dock, optimizes animation interpolators for smoother layout state blending, and implements active canvas invalidation rules to prevent stale wallpaper extraction color states.",
+    "stats": {
+      "filesChanged": 3,
+      "additions": 21,
+      "deletions": 8
+    },
+    "changelog": {
+      "newFeatures": [],
+      "optimizations": [
+        "Calibrated Hotseat Color Transitions: Upgraded the dock color fade engine in Hotseat.java to calculate shifts via `ValueAnimator.ofArgb()` instead of standard mathematical layout value structures. This completely eliminates flickering artifacts and optimizes rendering performance during system wallpaper modifications.",
+        "Active Canvas Redrawing: Implemented explicit layout `invalidate()` commands throughout animation updates and quick-state shifts, forcing the hardware-accelerated canvas to render refreshed frames instantly."
+      ],
+      "bugFixes": [
+        "Hotseat Layer Detachment Guard: Added an automated structural check (`getBackground() != mBackground`) inside the color engine logic to re-bind the primary background drawable if it ever gets stripped by system themes or layout orientation shifts.",
+        "Animation Redundancy Short-Circuit: Injected an early-return optimization clause (`if (mBackgroundColor == color) return;`) to bypass animator inflation if the incoming color profile matches the active hex code, saving precious mobile CPU cycles.",
+        "Build Deployment Alignment: Synchronized system build properties safely to project versionCode 41."
+      ]
+    }
+  },
+  {
     "version": "2.6.4",
     "versionCode": 40,
     "previousVersion": "2.6.3",
