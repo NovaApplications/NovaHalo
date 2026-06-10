@@ -1,87 +1,94 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // FIXED PATH: Matches your exact filename 'releases.json' from your /docs folder
-    // Date.now() bypasses the 10-minute GitHub Pages CDN cache freeze automatically
     const jsonUrl = `releases.json?t=${Date.now()}`;
     const container = document.getElementById("releases-container");
 
     fetch(jsonUrl)
         .then(response => {
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status} - Make sure releases.json exists.`);
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
-        .then(data => {
-            // 1. Update the main heading text dynamically to match your version title
-            const titleElement = document.getElementById("release-title");
-            if (titleElement) {
-                titleElement.innerText = data.title;
-            }
-
-            // 2. Clear out the "Loading..." placeholder text string
+        .then(releasesArray => {
+            // Clear out the loading text completely
             container.innerHTML = "";
 
-            // 3. Create a clean block for the summary text description
-            const summaryPara = document.createElement("p");
-            summaryPara.innerText = data.summary;
-            summaryPara.style.marginBottom = "25px";
-            summaryPara.style.fontSize = "1.1rem";
-            summaryPara.style.lineHeight = "1.6";
-            summaryPara.style.color = "inherit"; 
-            container.appendChild(summaryPara);
+            // Loop through every single release entry inside the JSON file array list
+            releasesArray.forEach(releaseData => {
+                // Create a master container box wrapper for this specific version entry
+                const releaseBox = document.createElement("div");
+                releaseBox.className = "release-version-block";
+                releaseBox.style.marginBottom = "50px";
+                releaseBox.style.borderBottom = "1px dashed #ccc";
+                releaseBox.style.paddingBottom = "30px";
 
-            // Mapping your customized JSON sections to structural headings
-            const sectionMapping = [
-                { key: "newFeatures", title: "🎨 What's New & Customization" },
-                { key: "optimizations", title: "🛠️ System Optimizations & Code Polish" },
-                { key: "bugFixes", title: "🐛 Bug Fixes & Stability" }
-            ];
+                // Build out heading row components
+                const titleHeading = document.createElement("h2");
+                titleHeading.innerText = releaseData.title;
+                titleHeading.style.fontSize = "1.8rem";
+                titleHeading.style.margin = "0 0 5px 0";
+                releaseBox.appendChild(titleHeading);
 
-            // 4. Loop through your changelog categories
-            sectionMapping.forEach(section => {
-                const pointsArray = data.changelog[section.key];
-                
-                if (pointsArray && pointsArray.length > 0) {
-                    // Category Sub-header
-                    const heading = document.createElement("h3");
-                    heading.innerText = section.title;
-                    heading.style.marginTop = "25px";
-                    heading.style.marginBottom = "10px";
-                    heading.style.fontSize = "1.3rem";
-                    container.appendChild(heading);
+                const dateBadge = document.createElement("p");
+                dateBadge.innerText = `Released on: ${releaseData.releaseDate} | Build Code: ${releaseData.versionCode}`;
+                dateBadge.style.color = "#777";
+                dateBadge.style.fontSize = "0.95rem";
+                dateBadge.style.marginBottom = "15px";
+                releaseBox.appendChild(dateBadge);
 
-                    // Standard Unordered Bullet List
-                    const bulletList = document.createElement("ul");
-                    bulletList.style.paddingLeft = "20px";
-                    bulletList.style.marginBottom = "20px";
-                    bulletList.style.lineHeight = "1.7";
+                const summaryText = document.createElement("p");
+                summaryText.innerText = releaseData.summary;
+                summaryText.style.fontSize = "1.1rem";
+                summaryText.style.lineHeight = "1.6";
+                summaryText.style.marginBottom = "25px";
+                releaseBox.appendChild(summaryText);
 
-                    // Inject individual lines
-                    pointsArray.forEach(text => {
-                        const listItem = document.createElement("li");
-                        listItem.style.marginBottom = "8px";
-                        listItem.style.fontSize = "1.05rem";
-                        
-                        // Automatically bold feature descriptors before a colon for crisp parsing
-                        if (text.includes(":")) {
-                            const parts = text.split(":");
-                            listItem.innerHTML = `<strong>${parts[0]}:</strong>${parts.slice(1).join(":")}`;
-                        } else {
-                            listItem.innerText = text;
-                        }
-                        
-                        bulletList.appendChild(listItem);
-                    });
+                // Setup internal categories matching details
+                const sectionMapping = [
+                    { key: "newFeatures", title: "🎨 What's New & Customization" },
+                    { key: "optimizations", title: "🛠️ System Optimizations & Code Polish" },
+                    { key: "bugFixes", title: "🐛 Bug Fixes & Stability" }
+                ];
 
-                    container.appendChild(bulletList);
-                }
+                sectionMapping.forEach(section => {
+                    const pointsArray = releaseData.changelog[section.key];
+                    
+                    if (pointsArray && pointsArray.length > 0) {
+                        const heading = document.createElement("h3");
+                        heading.innerText = section.title;
+                        heading.style.marginTop = "20px";
+                        heading.style.marginBottom = "10px";
+                        heading.style.fontSize = "1.25rem";
+                        releaseBox.appendChild(heading);
+
+                        const bulletList = document.createElement("ul");
+                        bulletList.style.paddingLeft = "20px";
+                        bulletList.style.marginBottom = "20px";
+                        bulletList.style.lineHeight = "1.7";
+
+                        pointsArray.forEach(text => {
+                            const listItem = document.createElement("li");
+                            listItem.style.marginBottom = "6px";
+                            
+                            if (text.includes(":")) {
+                                const parts = text.split(":");
+                                listItem.innerHTML = `<strong>${parts[0]}:</strong>${parts.slice(1).join(":")}`;
+                            } else {
+                                listItem.innerText = text;
+                            }
+                            bulletList.appendChild(listItem);
+                        });
+
+                        releaseBox.appendChild(bulletList);
+                    }
+                });
+
+                // Append the completed version segment into the core HTML container wrapper
+                container.appendChild(releaseBox);
             });
         })
         .catch(error => {
-            console.error("Error processing NovaOS project repository metadata JSON:", error);
-            container.innerHTML = `
-                <p class="error-text" style="color: red; font-style: italic; font-weight: bold;">
-                    Failed to load latest NovaOS release notes. (Error: ${error.message})
-                </p>`;
+            console.error("Error processing NovaOS project release logs history:", error);
+            container.innerHTML = `<p style="color: red; font-style: italic;">Failed to parse history timeline stream variables.</p>`;
         });
 });
