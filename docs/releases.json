@@ -1,5 +1,28 @@
 [
   {
+    "version": "2.4.5",
+    "versionCode": 33,
+    "previousVersion": "2.4.4",
+    "releaseDate": "2026-06-09",
+    "title": "NovaOS v2.4.5 (Intent Safety & Navigation Patch)",
+    "summary": "This release implements critical try-catch safeguards to prevent crashing loops when opening launcher settings, polishes the preference menu back-stack routine, and synchronizes compilation dexing metrics.",
+    "stats": {
+      "filesChanged": 4,
+      "additions": 15,
+      "deletions": 9
+    },
+    "changelog": {
+      "newFeatures": [],
+      "optimizations": [
+        "Dexing Tooling Alignment: Synchronized internal metadata configs (`minSdkVersionForDexing`) to match your upgraded platform minimum threshold (SDK 22) to save compilation time overhead."
+      ],
+      "bugFixes": [
+        "Defensive Settings Initialization: Wrapped the `SettingsActivity` initialization routine in Launcher.java with an absolute try-catch safety barrier and explicit activity flags (`FLAG_ACTIVITY_NEW_TASK`), ensuring failure logs or warning toasts print cleanly instead of causing application runtime crashes.",
+        "Settings Back-Press Exit: Updated the support layout back-press engine in SettingsActivity.java to explicitly target `finish()` upon hitting zero entries in the fragment stack, ensuring back arrows exit the sub-menu layout smoothly instead of getting stuck in infinite loops."
+      ]
+    }
+  },
+  {
     "version": "2.4.4",
     "versionCode": 32,
     "previousVersion": "2.4.3",
