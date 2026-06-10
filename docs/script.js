@@ -1,5 +1,37 @@
-// Load releases from local JSON file
-// This gives you full control over release notes
+// Load README content and release notes from JSON file
+
+async function loadReadme() {
+    const readmeContainer = document.getElementById('readme-content');
+    
+    try {
+        const response = await fetch('../README.md');
+        const markdown = await response.text();
+        
+        if (!response.ok) {
+            throw new Error('Failed to load README');
+        }
+        
+        // Simple markdown to HTML conversion
+        let html = markdown
+            .replace(/^### (.*?)$/gm, '<h3>$1</h3>')
+            .replace(/^## (.*?)$/gm, '<h3>$1</h3>')
+            .replace(/^# (.*?)$/gm, '<h2>$1</h2>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/__(.*?)__/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/_(.*?)_/g, '<em>$1</em>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n/g, '<br>');
+        
+        html = '<p>' + html + '</p>';
+        html = html.replace(/<p><\/p>/g, '');
+        
+        readmeContainer.innerHTML = html;
+    } catch (error) {
+        console.error('Error loading README:', error);
+        readmeContainer.innerHTML = '<p>Unable to load project information.</p>';
+    }
+}
 
 async function loadReleases() {
     const container = document.getElementById('releases-container');
@@ -50,6 +82,17 @@ async function loadReleases() {
             releaseBody += '</ul>';
         }
         
+        let statsHtml = '';
+        if (release.stats) {
+            statsHtml = `
+                <div class="stats">
+                    <div class="stat-item">📊 <strong>${release.stats.filesChanged}</strong> files changed</div>
+                    <div class="stat-item"><span class="stat-additions">+${release.stats.additions}</span></div>
+                    <div class="stat-item"><span class="stat-deletions">-${release.stats.deletions}</span></div>
+                </div>
+            `;
+        }
+        
         const releaseHtml = `
             <div class="release-card">
                 <div class="release-header">
@@ -62,11 +105,7 @@ async function loadReleases() {
                 <div class="release-body">
                     ${releaseBody}
                 </div>
-                ${release.stats ? `
-                    <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-                        📊 <strong>Changes:</strong> ${release.stats.filesChanged} files changed · <span style="color: var(--success-color);">+${release.stats.additions}</span> · <span style="color: #f44336;">-${release.stats.deletions}</span>
-                    </p>
-                ` : ''}
+                ${statsHtml}
                 <a href="https://github.com/NovaApplications/NovaHalo/releases/tag/v${escapeHtml(release.version)}" target="_blank" class="release-link">View on GitHub →</a>
             </div>
         `;
@@ -94,36 +133,13 @@ function escapeHtml(text) {
     return String(text).replace(/[&<>"']/g, m => map[m]);
 }
 
-// Add CSS for generated HTML elements
-const style = document.createElement('style');
-style.textContent = `
-    .release-body h3 {
-        font-size: 1.2rem;
-        margin-top: 1.5rem;
-        margin-bottom: 0.8rem;
-        color: var(--primary-color);
-    }
-    .release-body h3:first-child {
-        margin-top: 0;
-    }
-    .release-body ul {
-        margin: 0.5rem 0 1rem 1.5rem;
-        list-style-type: disc;
-    }
-    .release-body li {
-        margin-bottom: 0.7rem;
-        line-height: 1.6;
-    }
-    .release-body p {
-        margin: 0.8rem 0;
-        line-height: 1.8;
-    }
-`;
-document.head.appendChild(style);
-
-// Load releases when page loads
+// Load both when page loads
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadReleases);
+    document.addEventListener('DOMContentLoaded', () => {
+        loadReadme();
+        loadReleases();
+    });
 } else {
+    loadReadme();
     loadReleases();
 }
