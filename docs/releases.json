@@ -1,5 +1,27 @@
 [
   {
+    "version": "2.4.4",
+    "versionCode": 32,
+    "previousVersion": "2.4.3",
+    "releaseDate": "2026-06-09",
+    "title": "NovaOS v2.4.4 (Settings Routing & Platform Patch)",
+    "summary": "This release streamlines setting activity intentions on newer Android layers to avoid system-package collisions and upgrades legacy SDK compatibility tiers.",
+    "stats": {
+      "filesChanged": 2,
+      "additions": 3,
+      "deletions": 9
+    },
+    "changelog": {
+      "newFeatures": [
+        "Upgraded Minimum SDK Target: Shifted the minimum installation baseline from `minSdkVersion 21` (Android 5.0) up to `minSdkVersion 22` (Android 5.1 Lollipop MR1) to bypass archaic core rendering discrepancies."
+      ],
+      "optimizations": [],
+      "bugFixes": [
+        "Unified Settings Intent Routing: Stripped away broken conditional logic in Launcher.java that relied on generic system application packages (`ACTION_APPLICATION_PREFERENCES`). Clicking the Settings button now targets your project-native `SettingsActivity` explicitly, completely squashing launch intent mismatches or infinite loops on modern API environments."
+      ]
+    }
+  },
+  {
     "version": "2.4.3",
     "versionCode": 31,
     "previousVersion": "2.4.2",
