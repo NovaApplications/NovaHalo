@@ -1,5 +1,35 @@
 [
   {
+    "version": "2.5.0",
+    "versionCode": 34,
+    "previousVersion": "2.4.5",
+    "releaseDate": "2026-06-09",
+    "title": "NovaOS v2.5.0 (The Developer Update)",
+    "summary": "This milestone release brings an advanced hidden Developer Options menu, an automated background crash tracking system with native log exports, enhanced Motorola task stability, and polished asset padding rules for tablet displays.",
+    "stats": {
+      "filesChanged": 7,
+      "additions": 153,
+      "deletions": 14
+    },
+    "changelog": {
+      "newFeatures": [
+        "Secret Developer Options Menu: Tapping the version number 7 times now triggers a secure password verification sequence. Entering 'development' unlocks a dedicated category in preferences.",
+        "Toggleable Home Build Info: Added a 'Show Build Info on Home' setting to seamlessly overlay software build metrics onto the top-left corner of your desktop grid setup.",
+        "Automated Crash Diagnostics: Implemented an uncaught exception thread handler inside LauncherAppState.java that catches application failures and details systemic hardware parameters into a local 'nova_crash_logs.txt' repository log file.",
+        "Native Log Export Sharing: Hooked an androidx FileProvider endpoint into the core manifest alongside an export interface, allowing developers to instantly stream diagnostic file reports outward using Android's native share sheet."
+      ],
+      "optimizations": [
+        "Enhanced Motorola Task Routing: Hardened settings navigation calls in Launcher.java using aggressive task stacking adjustments (`FLAG_ACTIVITY_CLEAR_TOP`), fixing a widespread security constraint layout vulnerability found on Motorola factory ROM configurations.",
+        "Polished Tablet Dimension Rules: Recalibrated cell icon heights and vertical padding modifiers inside DeviceProfile.java to expand breathing room bounds on large tablets, preventing asset clipping when running Touch modules in landscape layouts."
+      ],
+      "bugFixes": [
+        "Defensive Color Engine Loading: Injected explicit null checks across `mHotseat` and `mWorkspace` references during color extraction calculations to prevent background threading initialization failures.",
+        "Overview Mode Long-Press Crash Guard: Wrapped home screen workspace long-press event calls in a secure try-catch layout envelope, squashing rare reordering synchronization thread panics.",
+        "Crash Log Sweeper Utility: Added a 'Clear Crash Logs' utility option to easily wipe localized text diagnostics from device external file paths, preserving user space metrics."
+      ]
+    }
+  },
+  {
     "version": "2.4.5",
     "versionCode": 33,
     "previousVersion": "2.4.4",
