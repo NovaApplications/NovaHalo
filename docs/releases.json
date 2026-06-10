@@ -1,95 +1,32 @@
 {
-  "releases": [
-    {
-      "version": "v2.6.5",
-      "title": "v2.6.5 - Bug Fixes & Improvements",
-      "date": "June 9, 2026",
-      "body": "## Bug Fixes\n- Fixed minor UI issues\n- Improved performance on older devices\n\n## Improvements\n- Better memory management\n- Smoother animations",
-      "download": "https://github.com/NovaApplications/NovaHalo/releases/tag/v2.6.5"
-    },
-    {
-      "version": "v2.6.4",
-      "title": "v2.6.4 - Performance Update",
-      "date": "June 9, 2026",
-      "body": "## Features\n- Optimized launcher performance\n- Reduced startup time\n\n## Bug Fixes\n- Fixed widget rendering issues",
-      "download": "https://github.com/NovaApplications/NovaHalo/releases/tag/v2.6.4"
-    },
-    {
-      "version": "v2.6.3",
-      "title": "v2.6.3 - Stability Release",
-      "date": "June 9, 2026",
-      "body": "## Improvements\n- Enhanced stability\n- Better crash handling\n\n## Bug Fixes\n- Fixed home screen rotation issue",
-      "download": "https://github.com/NovaApplications/NovaHalo/releases/tag/v2.6.3"
-    },
-    {
-      "version": "v2.6.1",
-      "title": "v2.6.1 - Minor Updates",
-      "date": "June 9, 2026",
-      "body": "## Changes\n- Various bug fixes\n- UI improvements",
-      "download": "https://github.com/NovaApplications/NovaHalo/releases/tag/v2.6.1"
-    },
-    {
-      "version": "v2.6.0",
-      "title": "v2.6.0 - Major Release",
-      "date": "June 9, 2026",
-      "body": "## Features\n- New customization options\n- Enhanced gesture controls\n- Improved app drawer\n\n## Bug Fixes\n- Fixed various stability issues\n- Improved memory efficiency",
-      "download": "https://github.com/NovaApplications/NovaHalo/releases/tag/v2.6.0"
-    },
-    {
-      "version": "v2.5.1",
-      "title": "v2.5.1 - Quick Fix",
-      "date": "June 9, 2026",
-      "body": "## Bug Fixes\n- Fixed critical crash on startup\n- Restored missing preferences",
-      "download": "https://github.com/NovaApplications/NovaHalo/releases/tag/v2.5.1"
-    },
-    {
-      "version": "v2.5.0",
-      "title": "v2.5.0 - Widget Support",
-      "date": "June 9, 2026",
-      "body": "## Features\n- Full widget support added\n- New widget customization options\n- Improved widget rendering\n\n## Improvements\n- Better performance with widgets\n- Enhanced UI responsiveness",
-      "download": "https://github.com/NovaApplications/NovaHalo/releases/tag/v2.5.0"
-    },
-    {
-      "version": "v2.4.5",
-      "title": "v2.4.5 - Optimization Update",
-      "date": "June 9, 2026",
-      "body": "## Improvements\n- Optimized app launcher\n- Reduced memory usage\n\n## Bug Fixes\n- Fixed app icon display issues",
-      "download": "https://github.com/NovaApplications/NovaHalo/releases/tag/v2.4.5"
-    },
-    {
-      "version": "v2.4.4",
-      "title": "v2.4.4 - Bug Fixes",
-      "date": "June 9, 2026",
-      "body": "## Bug Fixes\n- Fixed gesture recognition issues\n- Improved touch response",
-      "download": "https://github.com/NovaApplications/NovaHalo/releases/tag/v2.4.4"
-    },
-    {
-      "version": "v2.4.3",
-      "title": "v2.4.3 - UI Enhancements",
-      "date": "June 9, 2026",
-      "body": "## Features\n- Improved UI animations\n- Better color schemes\n\n## Bug Fixes\n- Fixed theme application issues",
-      "download": "https://github.com/NovaApplications/NovaHalo/releases/tag/v2.4.3"
-    },
-    {
-      "version": "v2.4.2",
-      "title": "v2.4.2 - Patch Release",
-      "date": "June 9, 2026",
-      "body": "## Bug Fixes\n- Fixed crashes on certain devices\n- Improved compatibility",
-      "download": "https://github.com/NovaApplications/NovaHalo/releases/tag/v2.4.2"
-    },
-    {
-      "version": "v2.4.1",
-      "title": "v2.4.1 - Quick Update",
-      "date": "June 9, 2026",
-      "body": "## Changes\n- Various stability improvements\n- Bug fixes",
-      "download": "https://github.com/NovaApplications/NovaHalo/releases/tag/v2.4.1"
-    },
-    {
-      "version": "v2.4.0",
-      "title": "v2.4.0 - Major Update",
-      "date": "June 8, 2026",
-      "body": "## Features\n- Complete launcher overhaul\n- New gesture system\n- Improved app organization\n\n## Improvements\n- Better performance\n- Enhanced user experience\n\n## Bug Fixes\n- Fixed numerous issues from previous version",
-      "download": "https://github.com/NovaApplications/NovaHalo/releases/tag/v2.4.0"
-    }
-  ]
-}
+  "version": "2.4.0",
+  "versionCode": 28,
+  "previousVersion": "2.3.1",
+  "releaseDate": "2026-06-08",
+  "title": "NovaHalo v2.4.0 (The Customization Update)",
+  "summary": "This release is packed with highly requested desktop visual customization options, smoother rendering engine logic, and robust quality-of-life stability fixes for managing your home screen layout.",
+  "stats": {
+    "filesChanged": 14,
+    "additions": 511,
+    "deletions": 6
+  },
+  "changelog": {
+    "newFeatures": [
+      "Custom Icon Shapes: Select between System Default, Circle, Square, Squircle, or Teardrop shapes in launcher preferences.",
+      "Taskbar Color Selection: Manually set your Taskbar (Hotseat) color to Red, Blue, Green, or Solid Black directly from the settings.",
+      "Adjustable Taskbar Transparency: Scale background opacity from a solid 0% clear layout up to a completely translucent 100% overlay.",
+      "Custom Icon Image Picker: Long-press an icon inside the Edit App Dialog to select any custom image file from phone storage.",
+      "Adaptive Text Contrasting: Added an automatic luminance engine that reads the App Drawer background darkness and flips text colors between White and Black for readability."
+    ],
+    "optimizations": [
+      "Dynamic Graphics Reloading: Implemented centralized cache clearing listeners so icon shapes and taskbar changes update instantly without requiring a manual launcher refresh.",
+      "Enhanced Outline Mask Filter Engine: Refactored HolographicOutlineHelper logic to better calculate blurred borders around adaptive shapes.",
+      "Manifest Target Upgrade: Bumped internal target configurations to targetSdkVersion 35 while preserving backward flexibility down to SDK 21."
+    ],
+    "bugFixes": [
+      "Foolproof App Uninstallation: Overhauled UninstallDropTarget logic with multi-tier fallback intents to guarantee the system uninstallation handler executes flawlessly on all device configurations.",
+      "Drag & Drop Crash Prevention: Fixed a critical rendering vulnerability where initiating a drag-and-drop workflow on zero-width widgets or folders would crash the workspace.",
+      "Crash Fix on Drag Cancel: Resolved a common code crash that occurred if a user suddenly canceled a drag state immediately after an uninstallation event triggered."
+    ]
+  }
+},
