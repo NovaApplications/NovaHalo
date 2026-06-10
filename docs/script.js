@@ -1,43 +1,38 @@
-// Fetch and display GitHub releases
-const REPO = 'NovaApplications/NovaHalo';
-const API_URL = `https://api.github.com/repos/${REPO}/releases`;
+// Load releases from local JSON file instead of GitHub API
+// This gives you full control over release notes
 
 async function loadReleases() {
     const container = document.getElementById('releases-container');
     
     try {
-        const response = await fetch(API_URL);
-        const releases = await response.json();
+        const response = await fetch('./releases.json');
+        const data = await response.json();
+        const releases = data.releases;
         
-        if (!response.ok) {
-            throw new Error('Failed to fetch releases');
-        }
-        
-        if (releases.length === 0) {
-            container.innerHTML = '<p class="loading">No releases yet. Check back soon!</p>';
-            return;
+        if (!response.ok || !releases || releases.length === 0) {
+            throw new Error('Failed to load releases');
         }
         
         container.innerHTML = releases.map((release, index) => `
             <div class="release-card">
                 <div class="release-header">
-                    <h3 class="release-title">${escapeHtml(release.name || release.tag_name)}</h3>
+                    <h3 class="release-title">${escapeHtml(release.title)}</h3>
                     <span class="release-tag ${index === 0 ? 'latest' : ''}">
-                        ${index === 0 ? '⭐ Latest' : release.tag_name}
+                        ${index === 0 ? '⭐ Latest' : release.version}
                     </span>
                 </div>
-                <p class="release-date">Released on ${new Date(release.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                <p class="release-date">Released on ${escapeHtml(release.date)}</p>
                 <div class="release-body">
-                    ${release.body ? markdownToHtml(release.body) : '<p><em>No description provided</em></p>'}
+                    ${markdownToHtml(release.body)}
                 </div>
-                <a href="${release.html_url}" target="_blank" class="release-link">View on GitHub →</a>
+                <a href="${release.download}" target="_blank" class="release-link">View on GitHub →</a>
             </div>
         `).join('');
     } catch (error) {
         console.error('Error loading releases:', error);
         container.innerHTML = `
             <p class="loading">Unable to load releases at this moment.</p>
-            <p class="loading" style="font-size: 0.9rem;">Visit <a href="https://github.com/${REPO}/releases" target="_blank" style="color: var(--primary-color);">GitHub Releases</a> to view them directly.</p>
+            <p class="loading" style="font-size: 0.9rem;">Visit <a href="https://github.com/NovaApplications/NovaHalo/releases" target="_blank" style="color: var(--primary-color);">GitHub Releases</a> to view them directly.</p>
         `;
     }
 }
