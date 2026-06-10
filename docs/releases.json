@@ -1,5 +1,27 @@
 [
   {
+    "version": "2.5.1",
+    "versionCode": 35,
+    "previousVersion": "2.5.0",
+    "releaseDate": "2026-06-09",
+    "title": "NovaOS v2.5.1 (Adaptive Icon Crash Patch)",
+    "summary": "This stability patch addresses deep-level rendering issues inside the icon canvas processor, eliminating widespread NullPointerException crashes when inflating broken or empty adaptive app icons.",
+    "stats": {
+      "filesChanged": 2,
+      "additions": 16,
+      "deletions": 6
+    },
+    "changelog": {
+      "newFeatures": [],
+      "optimizations": [],
+      "bugFixes": [
+        "Defensive Adaptive Icon Drawing: Fixed a severe rendering bug in Utilities.java where app packages supplying broken or uninitialized `AdaptiveIconDrawable` layers would cause immediate system canvas crashes. Background and foreground rendering streams are now securely nested behind proactive null verification wrappers.",
+        "Missing Asset Fallback: Implemented an emergency default vector asset fallback routing command (`ic_launcher_home`) if the system attempts to draw a completely empty or missing app icon shortcut, preserving home screen launcher layout layout stability.",
+        "Version Synchronization: Incremented core deployment dependencies to match systemic versionCode 35 release profiles."
+      ]
+    }
+  },
+  {
     "version": "2.5.0",
     "versionCode": 34,
     "previousVersion": "2.4.5",
