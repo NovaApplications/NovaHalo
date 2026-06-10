@@ -7,27 +7,34 @@ async function loadReleases() {
     try {
         const response = await fetch('./releases.json');
         const data = await response.json();
-        const releases = data.releases;
         
-        if (!response.ok || !releases || releases.length === 0) {
+        // Handle both single object and array formats
+        const release = Array.isArray(data) ? data[0] : data;
+        
+        if (!response.ok || !release) {
             throw new Error('Failed to load releases');
         }
         
-        container.innerHTML = releases.map((release, index) => `
+        const releaseHtml = `
             <div class="release-card">
                 <div class="release-header">
                     <h3 class="release-title">${escapeHtml(release.title)}</h3>
-                    <span class="release-tag ${index === 0 ? 'latest' : ''}">
-                        ${index === 0 ? '⭐ Latest' : release.version}
+                    <span class="release-tag latest">
+                        ⭐ Latest - v${release.version}
                     </span>
                 </div>
-                <p class="release-date">Released on ${escapeHtml(release.date)}</p>
+                <p class="release-date">Released on ${escapeHtml(release.releaseDate)}</p>
                 <div class="release-body">
-                    ${markdownToHtml(release.body)}
+                    ${formatReleaseNotes(release.changelog, release.summary)}
                 </div>
-                <a href="${release.download}" target="_blank" class="release-link">View on GitHub →</a>
+                <p style="font-size: 0.9rem; color: var(--text-light); margin-top: 1rem;">
+                    📊 Changes: ${release.stats.filesChanged} files · +${release.stats.additions} · -${release.stats.deletions}
+                </p>
+                <a href="https://github.com/NovaApplications/NovaHalo/releases/tag/v${release.version}" target="_blank" class="release-link">View on GitHub →</a>
             </div>
-        `).join('');
+        `;
+        
+        container.innerHTML = releaseHtml;
     } catch (error) {
         console.error('Error loading releases:', error);
         container.innerHTML = `
@@ -49,50 +56,37 @@ function escapeHtml(text) {
     return text.replace(/[&<>"']/g, m => map[m]);
 }
 
-// Simple markdown to HTML converter for release notes
-function markdownToHtml(markdown) {
-    let html = escapeHtml(markdown);
+// Format release notes from changelog object
+function formatReleaseNotes(changelog, summary) {
+    let html = '';
     
-    // Headers
-    html = html.replace(/^### (.*?)$/gm, '<h4>$1</h4>');
-    html = html.replace(/^## (.*?)$/gm, '<h3>$1</h3>');
-    html = html.replace(/^# (.*?)$/gm, '<h2>$1</h2>');
+    if (summary) {
+        html += `<p>${escapeHtml(summary)}</p>`;
+    }
     
-    // Bold
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    html = html.replace(/__(.+?)__/g, '<strong>$1</strong>');
+    if (changelog.newFeatures && changelog.newFeatures.length > 0) {
+        html += '<h3>✨ New Features</h3><ul>';
+        changelog.newFeatures.forEach(feature => {
+            html += `<li>${escapeHtml(feature)}</li>`;
+        });
+        html += '</ul>';
+    }
     
-    // Italic
-    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    html = html.replace(/_(.+?)_/g, '<em>$1</em>');
+    if (changelog.optimizations && changelog.optimizations.length > 0) {
+        html += '<h3>⚡ Optimizations</h3><ul>';
+        changelog.optimizations.forEach(opt => {
+            html += `<li>${escapeHtml(opt)}</li>`;
+        });
+        html += '</ul>';
+    }
     
-    // Code blocks
-    html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
-    
-    // Inline code
-    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-    
-    // Unordered lists
-    html = html.replace(/^\* (.+)$/gm, '<li>$1</li>');
-    html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
-    html = html.replace(/(<li>.*?<\/li>)/s, '<ul>$1</ul>');
-    
-    // Ordered lists
-    html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
-    
-    // Line breaks
-    html = html.replace(/\n\n/g, '</p><p>');
-    html = html.replace(/\n/g, '<br>');
-    
-    // Wrap in paragraphs if not already in a block element
-    html = '<p>' + html + '</p>';
-    html = html.replace(/<p><\/p>/g, '');
-    html = html.replace(/<p>(<h[1-4])/g, '$1');
-    html = html.replace(/(<\/h[1-4]>)<\/p>/g, '$1');
-    html = html.replace(/<p>(<ul|<ol)/g, '$1');
-    html = html.replace(/(<\/ul>|<\/ol>)<\/p>/g, '$1');
-    html = html.replace(/<p>(<pre)/g, '$1');
-    html = html.replace(/(<\/pre>)<\/p>/g, '$1');
+    if (changelog.bugFixes && changelog.bugFixes.length > 0) {
+        html += '<h3>🐛 Bug Fixes</h3><ul>';
+        changelog.bugFixes.forEach(fix => {
+            html += `<li>${escapeHtml(fix)}</li>`;
+        });
+        html += '</ul>';
+    }
     
     return html;
 }
@@ -100,51 +94,26 @@ function markdownToHtml(markdown) {
 // Add CSS for generated HTML elements
 const style = document.createElement('style');
 style.textContent = `
-    .release-body h2 {
-        font-size: 1.5rem;
-        margin-top: 1.5rem;
-        margin-bottom: 1rem;
-        color: var(--primary-color);
-    }
     .release-body h3 {
         font-size: 1.2rem;
-        margin-top: 1rem;
-        margin-bottom: 0.5rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.8rem;
         color: var(--primary-color);
     }
-    .release-body h4 {
-        font-size: 1rem;
-        margin-top: 0.8rem;
-        margin-bottom: 0.5rem;
-        color: var(--text-dark);
+    .release-body h3:first-child {
+        margin-top: 0;
     }
-    .release-body code {
-        background: var(--bg-light);
-        padding: 2px 6px;
-        border-radius: 3px;
-        font-family: 'Courier New', monospace;
-        font-size: 0.9em;
-    }
-    .release-body pre {
-        background: var(--bg-light);
-        padding: 1rem;
-        border-radius: 6px;
-        overflow-x: auto;
-        margin: 1rem 0;
-    }
-    .release-body pre code {
-        background: none;
-        padding: 0;
-    }
-    .release-body ul, .release-body ol {
-        margin: 1rem 0 1rem 1.5rem;
+    .release-body ul {
+        margin: 0.5rem 0 1rem 1.5rem;
+        list-style-type: disc;
     }
     .release-body li {
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.7rem;
+        line-height: 1.6;
     }
-    .release-body strong {
-        font-weight: 600;
-        color: var(--text-dark);
+    .release-body p {
+        margin: 1rem 0;
+        line-height: 1.8;
     }
 `;
 document.head.appendChild(style);
