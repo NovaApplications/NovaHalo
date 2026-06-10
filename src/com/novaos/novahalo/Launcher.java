@@ -45,6 +45,7 @@ import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -52,7 +53,9 @@ import androidx.core.content.ContextCompat;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.BatteryManager;
 import android.os.Build;
+import android.widget.LinearLayout;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -72,14 +75,19 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.OvershootInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Advanceable;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -327,6 +335,15 @@ public class Launcher extends Activity
     private PendingRequestArgs mPendingRequestArgs;
     public AppInfo mEditingAppInfo;
 
+    private boolean mWorkModeActive = false;
+    private View mWorkModeOverlay;
+    private final BroadcastReceiver mBatteryReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateWorkModeBattery();
+        }
+    };
+
     public ViewGroupFocusHelper mFocusHandler;
 
     @Override
@@ -454,6 +471,153 @@ public class Launcher extends Activity
     public void onInsetsChanged(Rect insets) {
         mDeviceProfile.updateInsets(insets);
         mDeviceProfile.layout(this, true /* notifyListeners */);
+    }
+
+    public void activateWorkModeLauncher() {
+        if (mWorkModeOverlay == null) return;
+        
+        // Hide All Apps immediately
+        showWorkspace(true);
+        
+        mWorkModeActive = true;
+        mWorkModeOverlay.setVisibility(View.VISIBLE);
+        mWorkModeOverlay.setAlpha(0f);
+        
+        View loadingView = findViewById(R.id.work_mode_loading);
+        if (loadingView != null) {
+            loadingView.setVisibility(View.VISIBLE);
+            loadingView.setAlpha(1f);
+        }
+
+        mWorkspace.setVisibility(View.GONE);
+        mHotseat.setVisibility(View.GONE);
+        if (mWorkspace.getPageIndicator() != null) {
+            mWorkspace.getPageIndicator().setVisibility(View.GONE);
+        }
+
+        registerReceiver(mBatteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+
+        // Hide status bar
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        // Populate work apps
+        RecyclerView list = (RecyclerView) findViewById(R.id.work_apps_list);
+        list.setLayoutManager(new GridLayoutManager(this, mDeviceProfile.inv.numColumns));
+        
+        // Add vertical spacing between items
+        int verticalSpacing = Utilities.pxFromDp(16, getResources().getDisplayMetrics());
+        list.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                outRect.bottom = verticalSpacing;
+            }
+        });
+
+        list.setOnLongClickListener(v -> {
+            showExitWorkModeDialog();
+            return true;
+        });
+
+        final List<AppInfo> workApps = new ArrayList<>();
+        if (mAppsView != null) {
+            for (AppInfo app : mAppsView.getApps().getApps()) {
+                if (!app.user.equals(Utilities.myUserHandle())) {
+                    workApps.add(app);
+                }
+            }
+        }
+
+        // Simple adapter for work apps
+        list.setAdapter(new RecyclerView.Adapter<WorkAppViewHolder>() {
+            @NonNull
+            @Override
+            public WorkAppViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                BubbleTextView tv = (BubbleTextView) getLayoutInflater().inflate(R.layout.all_apps_icon, parent, false);
+                return new WorkAppViewHolder(tv);
+            }
+
+            @Override
+            public void onBindViewHolder(@NonNull WorkAppViewHolder holder, int position) {
+                final AppInfo info = workApps.get(position);
+                holder.tv.applyFromApplicationInfo(info);
+                holder.tv.setTextColor(Color.WHITE);
+                holder.tv.setShadowLayer(2.0f, 0, 1.0f, Color.BLACK);
+                holder.tv.setOnClickListener(v -> startActivitySafely(v, info.intent, info));
+            }
+
+            @Override
+            public int getItemCount() {
+                return workApps.size();
+            }
+        });
+
+        // Battery percentage
+        updateWorkModeBattery();
+
+        // Cool "Loading" animation sequence
+        mWorkModeOverlay.animate()
+                .alpha(1f)
+                .setDuration(400)
+                .withEndAction(() -> {
+                    if (loadingView != null) {
+                        loadingView.animate()
+                                .alpha(0f)
+                                .setDuration(600)
+                                .setStartDelay(300)
+                                .withEndAction(() -> loadingView.setVisibility(View.GONE))
+                                .start();
+                    }
+                })
+                .start();
+    }
+
+    private void updateWorkModeBattery() {
+        TextView batteryText = (TextView) findViewById(R.id.work_mode_battery);
+        if (batteryText != null) {
+            IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            Intent batteryStatus = registerReceiver(null, ifilter);
+            if (batteryStatus != null) {
+                int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                int pct = (int) (level * 100 / (float) scale);
+                batteryText.setText(pct + "%");
+            }
+        }
+    }
+
+    private void exitWorkMode() {
+        mWorkModeActive = false;
+        mWorkModeOverlay.setVisibility(View.GONE);
+        mWorkspace.setVisibility(View.VISIBLE);
+        mHotseat.setVisibility(View.VISIBLE);
+        if (mWorkspace.getPageIndicator() != null) {
+            mWorkspace.getPageIndicator().setVisibility(View.VISIBLE);
+        }
+        try {
+            unregisterReceiver(mBatteryReceiver);
+        } catch (Exception ignored) {}
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    }
+
+    private void showExitWorkModeDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Exit Work Mode?")
+                .setMessage("Do you want to return to your personal home screen?")
+                .setPositiveButton("Exit", (dialog, which) -> exitWorkMode())
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    public boolean isWorkModeActive() {
+        return mWorkModeActive;
+    }
+
+    private static class WorkAppViewHolder extends RecyclerView.ViewHolder {
+        BubbleTextView tv;
+        WorkAppViewHolder(BubbleTextView tv) {
+            super(tv);
+            this.tv = tv;
+        }
     }
 
     @Override
@@ -1054,6 +1218,14 @@ public class Launcher extends Activity
         mDropTargetBar.setup(mDragController);
 
         mAllAppsController.setupViews(mAppsView, mHotseat, mWorkspace);
+
+        mWorkModeOverlay = findViewById(R.id.work_mode_overlay);
+        if (mWorkModeOverlay != null) {
+            mWorkModeOverlay.setOnLongClickListener(v -> {
+                showExitWorkModeDialog();
+                return true;
+            });
+        }
     }
 
     private void setupOverviewPanel() {

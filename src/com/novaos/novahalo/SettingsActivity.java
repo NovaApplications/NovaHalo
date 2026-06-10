@@ -3,6 +3,7 @@ package com.novaos.novahalo;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -17,10 +18,6 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
-
-import android.content.DialogInterface;
-import android.widget.EditText;
-import android.widget.Toast;
 
 import com.novaos.novahalo.updates.GitHubUpdateChecker;
 
@@ -317,6 +314,9 @@ public class SettingsActivity extends AppCompatActivity implements
                             });
                         }
                     });
+                    return true;
+                } else if (key.equals("whats_new") && getActivity() != null) {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://novaapplications.github.io/NovaHalo/#releases")));
                     return true;
                 }
             }

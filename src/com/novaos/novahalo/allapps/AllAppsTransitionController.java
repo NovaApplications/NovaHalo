@@ -153,6 +153,9 @@ public class AllAppsTransitionController implements TouchController, VerticalPul
     }
 
     private boolean shouldPossiblyIntercept(MotionEvent ev) {
+        if (mLauncher.isWorkModeActive()) {
+            return false;
+        }
         CellLayout cl = mLauncher.getWorkspace().getCurrentDropLayout();
         if (cl != null) {
             ShortcutAndWidgetContainer c = cl.getShortcutsAndWidgets();

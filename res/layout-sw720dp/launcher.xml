@@ -88,6 +88,11 @@
             android:textSize="12sp"
             android:visibility="gone"
             android:elevation="10dp" />
+
+        <include
+            layout="@layout/work_mode_ui"
+            android:id="@+id/work_mode_overlay"
+            android:visibility="gone" />
     </com.novaos.novahalo.dragndrop.DragLayer>
 
 </com.novaos.novahalo.LauncherRootView>

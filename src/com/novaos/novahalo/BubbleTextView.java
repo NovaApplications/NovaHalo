@@ -442,7 +442,8 @@ public class BubbleTextView extends TextView
             int cellHeightPx = mIconSize + getCompoundDrawablePadding() +
                     (int) Math.ceil(fm.bottom - fm.top);
             int height = MeasureSpec.getSize(heightMeasureSpec);
-            setPadding(getPaddingLeft(), (height - cellHeightPx) / 2, getPaddingRight(),
+            int paddingTop = Math.max(0, (height - cellHeightPx) / 2);
+            setPadding(getPaddingLeft(), paddingTop, getPaddingRight(),
                     getPaddingBottom());
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);

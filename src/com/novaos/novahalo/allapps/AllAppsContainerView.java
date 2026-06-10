@@ -24,6 +24,7 @@ import android.graphics.Rect;
 import androidx.core.graphics.ColorUtils;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
@@ -115,6 +116,7 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
     private TextView mPersonalTab;
     private TextView mWorkTab;
     private View mWorkModeToggle;
+    private Button mLaunchWorkMode;
 
     private final HorizontalPullDetector mHorizontalPullDetector;
 
@@ -191,6 +193,10 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
         mPersonalTab.setAlpha(!isWork ? 1.0f : 0.7f);
         mWorkTab.setTextColor(isWork ? accentColor : inactiveColor);
         mWorkTab.setAlpha(isWork ? 1.0f : 0.7f);
+
+        if (mLaunchWorkMode != null) {
+            mLaunchWorkMode.setVisibility(isWork ? VISIBLE : GONE);
+        }
     }
 
     private void setupWorkModeToggle() {
@@ -237,6 +243,10 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
      */
     public void setApps(List<AppInfo> apps) {
         mApps.setApps(apps);
+    }
+
+    public AlphabeticalAppsList getApps() {
+        return mApps;
     }
 
     /**
@@ -317,6 +327,10 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
         if (mSearchInput != null) {
             mSearchInput.setTextColor(textColor);
             mSearchInput.setHintTextColor(ColorUtils.setAlphaComponent(textColor, 128));
+        }
+
+        if (mLaunchWorkMode != null) {
+            mLaunchWorkMode.setTextColor(textColor);
         }
     }
 
@@ -425,6 +439,8 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
         mPersonalTab = findViewById(R.id.tab_personal);
         mWorkTab = findViewById(R.id.tab_work);
         mWorkModeToggle = findViewById(R.id.work_mode_toggle);
+        mLaunchWorkMode = findViewById(R.id.launch_work_mode);
+        mLaunchWorkMode.setOnClickListener(v -> mLauncher.activateWorkModeLauncher());
         setupTabs();
         setupWorkModeToggle();
 

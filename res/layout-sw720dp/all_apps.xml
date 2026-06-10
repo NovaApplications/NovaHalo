@@ -99,6 +99,16 @@
                     android:textAllCaps="true" />
             </LinearLayout>
 
+            <Button
+                android:id="@+id/launch_work_mode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Activate Work Mode"
+                android:background="@drawable/bg_pill_focused"
+                android:textColor="@android:color/white"
+                android:layout_margin="8dp"
+                android:visibility="gone" />
+
             <!-- DO NOT CHANGE THE ID -->
             <com.novaos.novahalo.allapps.AllAppsRecyclerView
                 android:id="@+id/apps_list_view"

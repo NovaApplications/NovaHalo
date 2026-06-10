@@ -159,7 +159,7 @@ public class Hotseat extends FrameLayout {
         if (enable) {
             mBackground.setAlpha(0);
         } else {
-            mBackground.setAlpha(Color.alpha(mBackgroundColor));
+            mBackground.setAlpha(255);
         }
     }
 
