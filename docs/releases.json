@@ -1,5 +1,31 @@
 [
   {
+    "version": "2.4.2",
+    "versionCode": 30,
+    "previousVersion": "2.4.1",
+    "releaseDate": "2026-06-09",
+    "title": "NovaOS v2.4.2 (Tablet Optimization & Crash Patch)",
+    "summary": "This release delivers crucial tablet UI scaling optimizations for the Nova Touch interface, unlocks edge-to-edge app grid bounds, and implements robust guardrails against random animation lifecycle crashes.",
+    "stats": {
+      "filesChanged": 6,
+      "additions": 56,
+      "deletions": 29
+    },
+    "changelog": {
+      "newFeatures": [
+        "Nova Touch Full-Width Mode: Refactored layouts for wider screen profiles (sw600dp and sw720dp) to use match_parent formatting, letting the App Drawer canvas map seamlessly edge-to-edge across tablet monitors.",
+        "Dynamic Tablet Grids: Upgraded the layout measurement rules inside AllAppsContainerView.java. Tablets now automatically compute two extra columns of icons when rotated into horizontal landscape mode to fully utilize tablet real estate."
+      ],
+      "optimizations": [
+        "Streamlined Tablet Insets: Bypassed background card paddings and search margins when running on non-phone configurations, creating a sleek, integrated look for the tablet interface."
+      ],
+      "bugFixes": [
+        "Overview Mode Null Guardrails: Guarded the launcher overview panels and transitional states against unexpected null pointers during quick navigation adjustments inside Launcher.java.",
+        "Animation Lifecycle Crash Fixes: Injected structural safety logic inside LauncherStateTransitionAnimation.java and WorkspaceStateTransitionAnimation.java to prevent crashes when a user navigates away or clears views right as an alpha fade animation loops."
+      ]
+    }
+  },
+  {
     "version": "2.4.1",
     "versionCode": 29,
     "previousVersion": "2.4",
