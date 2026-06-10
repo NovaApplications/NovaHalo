@@ -1,5 +1,30 @@
 [
   {
+    "version": "2.6.1",
+    "versionCode": 37,
+    "previousVersion": "2.6.0",
+    "releaseDate": "2026-06-10",
+    "title": "NovaOS v2.6.1 (API Fallback & Intent Routing Patch)",
+    "summary": "This patch implements a structural fallback architecture for the GitHub API update engine to prevent 404 endpoint failures, adds mandatory HTTP request header properties, and links background notification handlers directly to the foreground settings wizard.",
+    "stats": {
+      "filesChanged": 4,
+      "additions": 101,
+      "deletions": 4
+    },
+    "changelog": {
+      "newFeatures": [
+        "Automated 404 API Fallback Engine: Added a new fallback method (`checkForAllReleases`) inside GitHubUpdateChecker.java. If the default `/releases/latest` API route returns a 404 exception, the launcher will dynamically query the full `/releases` array stream to pull the newest version, ensuring updates never break.",
+        "Notification Intent Interception: Built out an automated payload interceptor (`handleUpdateIntent`) in SettingsActivity.java alongside standard `onNewIntent` overrides. This lets background update notifications safely pass target URLs and version tags directly into a foreground alert dialog box if the user clicks the notification banner."
+      ],
+      "optimizations": [
+        "GitHub API Compliancy Headers: Injected missing `User-Agent` and `Accept` request parameters into your systemic HttpURLConnection blocks, satisfying GitHub's modern authentication traffic rules to avoid automatic server rate-limiting."
+      ],
+      "bugFixes": [
+        "Synchronized Build Tracking: Incremented core project compilation artifacts safely to versionCode 37."
+      ]
+    }
+  },
+  {
     "version": "2.6.0",
     "versionCode": 36,
     "previousVersion": "2.5.1",
