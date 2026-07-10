@@ -19,6 +19,7 @@ package com.novaos.novaos;
 import android.appwidget.AppWidgetHostView;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -90,9 +91,6 @@ public class DeviceProfile {
 
     public int cellWidthPx;
     public int cellHeightPx;
-
-    private int mHorizontalMarginPx;
-    private int mVerticalMarginPx;
 
     // Folder
     public int folderBackgroundOffset;
@@ -243,10 +241,8 @@ public class DeviceProfile {
         allAppsIconDrawablePaddingPx = iconDrawablePaddingPx;
         allAppsIconTextSizePx = iconTextSizePx;
 
-        // Calculate cell sizes based on available width and columns
-        // We ensure cells don't get too wide on large screens by capping the width
-        int idealCellWidth = (int) (Utilities.pxFromDp(inv.iconSize, dm) * 2.0f);
-        cellWidthPx = Math.min(idealCellWidth, calculateCellWidth(availableWidthPx, numColumns));
+        // Calculate cell sizes to fill the available width
+        cellWidthPx = availableWidthPx / numColumns;
         int textHeight = Utilities.calculateTextHeight(iconTextSizePx);
         
         // On tablets, increase padding between icon and text to prevent overlap/cut-off
@@ -261,12 +257,6 @@ public class DeviceProfile {
         if (!isPhone) {
             cellHeightPx += Utilities.pxFromDp(12, dm);
         }
-
-        // Calculate dynamic margins to keep the grid centered and nicely spaced
-        mHorizontalMarginPx = (availableWidthPx - (numColumns * cellWidthPx)) / 2;
-        mVerticalMarginPx = (availableHeightPx - hotseatBarHeightPx - pageIndicatorHeightPx - topWorkspacePadding
-                - (numRows * cellHeightPx)) / 2;
-        mVerticalMarginPx = Math.max(0, mVerticalMarginPx);
 
         dragViewScale = iconSizePx;
 
@@ -348,11 +338,11 @@ public class DeviceProfile {
         Rect padding = recycle == null ? new Rect() : recycle;
         int paddingBottom = hotseatBarHeightPx + pageIndicatorHeightPx;
 
-        // Use the dynamically calculated margins
-        padding.set(Math.max(edgeMarginPx, mHorizontalMarginPx),
-                topWorkspacePadding + mVerticalMarginPx,
-                Math.max(edgeMarginPx, mHorizontalMarginPx),
-                paddingBottom + mVerticalMarginPx);
+        // Simple phone-style padding that fits the screen
+        padding.set(edgeMarginPx,
+                topWorkspacePadding,
+                edgeMarginPx,
+                paddingBottom);
 
         return padding;
     }
@@ -413,6 +403,37 @@ public class DeviceProfile {
     public void layout(Launcher launcher, boolean notifyListeners) {
         FrameLayout.LayoutParams lp;
 
+        Resources res = launcher.getResources();
+        boolean isLandscape = res.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+
+        // Update dynamic columns for tablets
+        if (isTablet || isLargeTablet) {
+            // For tablets, default to 6 in portrait and 8 in landscape
+            // but respect user overrides if they are set
+            numColumns = isLandscape ? inv.numColumns + 2 : inv.numColumns;
+            numHotseatIcons = numColumns;
+        } else {
+            // For phones, always use the setting (defaults to 4 in XML)
+            numColumns = inv.numColumns;
+            numHotseatIcons = inv.numHotseatIcons;
+        }
+
+        // Recalculate cell dimensions for the current screen size and orientation
+        int currentWidth = isLandscape ? Math.max(widthPx, heightPx) : Math.min(widthPx, heightPx);
+        
+        // Cell width should be the width of the screen divided by columns, minus small edge margins
+        cellWidthPx = (currentWidth - (2 * edgeMarginPx)) / numColumns;
+        
+        int textHeight = Utilities.calculateTextHeight(iconTextSizePx);
+        int iconPadding = iconDrawablePaddingPx;
+        if (!isPhone) {
+            iconPadding = (int) (iconPadding * 1.5f);
+        }
+        cellHeightPx = iconSizePx + iconPadding + textHeight;
+        if (!isPhone) {
+            cellHeightPx += Utilities.pxFromDp(12, res.getDisplayMetrics());
+        }
+
         // Layout the search bar space
         Point searchBarBounds = getSearchBarDimensForWidgetOpts();
         View searchBar = launcher.getDropTargetBar();
@@ -424,6 +445,17 @@ public class DeviceProfile {
 
         // Layout the workspace
         PagedView workspace = (PagedView) launcher.findViewById(R.id.workspace);
+        
+        // Ensure CellLayouts are updated with the current column count and dimensions
+        for (int i = 0; i < workspace.getChildCount(); i++) {
+            View child = workspace.getChildAt(i);
+            if (child instanceof CellLayout) {
+                CellLayout cl = (CellLayout) child;
+                cl.setGridSize(numColumns, numRows);
+                cl.setCellDimensions(cellWidthPx, cellHeightPx);
+            }
+        }
+
         Rect workspacePadding = getWorkspacePadding(null);
         workspace.setPadding(workspacePadding.left, workspacePadding.top, workspacePadding.right,
                 workspacePadding.bottom);
@@ -434,16 +466,12 @@ public class DeviceProfile {
         // Layout the hotseat
         Hotseat hotseat = (Hotseat) launcher.findViewById(R.id.hotseat);
         lp = (FrameLayout.LayoutParams) hotseat.getLayoutParams();
-        // We want the edges of the hotseat to line up with the edges of the workspace, but the
-        // icons in the hotseat are a different size, and so don't line up perfectly. To account for
-        // this, we pad the left and right of the hotseat with half of the difference of a workspace
-        // cell vs a hotseat cell.
-        float workspaceCellWidth = (float) getCurrentWidth() / Math.max(1, numColumns);
-        float hotseatCellWidth = (float) getCurrentWidth() / Math.max(1, numHotseatIcons);
+        
+        // Align hotseat with workspace
+        float workspaceCellWidth = (float) (currentWidth - 2 * edgeMarginPx) / numColumns;
+        float hotseatCellWidth = (float) (currentWidth - 2 * edgeMarginPx) / numHotseatIcons;
         int hotseatAdjustment = Math.round((workspaceCellWidth - hotseatCellWidth) / 2);
 
-        // For all devices, layout the hotseat without any extra bottom margin (except insets)
-        // to ensure it matches the phone look and feel
         lp.gravity = Gravity.BOTTOM;
         lp.width = LayoutParams.MATCH_PARENT;
         lp.height = hotseatBarHeightPx + mInsets.bottom;
