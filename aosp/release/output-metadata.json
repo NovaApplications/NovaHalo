@@ -11,9 +11,9 @@
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 46,
-      "versionName": "3.0.0",
-      "outputFile": "NovaHalo-aosp-release.apk"
+      "versionCode": 56,
+      "versionName": "1.0.0",
+      "outputFile": "NovaOS-aosp-release.apk"
     }
   ],
   "elementType": "File",
@@ -22,14 +22,14 @@
       "minApi": 28,
       "maxApi": 30,
       "baselineProfiles": [
-        "baselineProfiles/1/NovaHalo-aosp-release.dm"
+        "baselineProfiles/1/NovaOS-aosp-release.dm"
       ]
     },
     {
       "minApi": 31,
       "maxApi": 2147483647,
       "baselineProfiles": [
-        "baselineProfiles/0/NovaHalo-aosp-release.dm"
+        "baselineProfiles/0/NovaOS-aosp-release.dm"
       ]
     }
   ],
