@@ -91,6 +91,9 @@ public class DeviceProfile {
     public int cellWidthPx;
     public int cellHeightPx;
 
+    private int mHorizontalMarginPx;
+    private int mVerticalMarginPx;
+
     // Folder
     public int folderBackgroundOffset;
     public int folderIconSizePx;
@@ -240,7 +243,10 @@ public class DeviceProfile {
         allAppsIconDrawablePaddingPx = iconDrawablePaddingPx;
         allAppsIconTextSizePx = iconTextSizePx;
 
-        cellWidthPx = iconSizePx;
+        // Calculate cell sizes based on available width and columns
+        // We ensure cells don't get too wide on large screens by capping the width
+        int idealCellWidth = (int) (Utilities.pxFromDp(inv.iconSize, dm) * 2.0f);
+        cellWidthPx = Math.min(idealCellWidth, calculateCellWidth(availableWidthPx, numColumns));
         int textHeight = Utilities.calculateTextHeight(iconTextSizePx);
         
         // On tablets, increase padding between icon and text to prevent overlap/cut-off
@@ -255,6 +261,13 @@ public class DeviceProfile {
         if (!isPhone) {
             cellHeightPx += Utilities.pxFromDp(12, dm);
         }
+
+        // Calculate dynamic margins to keep the grid centered and nicely spaced
+        mHorizontalMarginPx = (availableWidthPx - (numColumns * cellWidthPx)) / 2;
+        mVerticalMarginPx = (availableHeightPx - hotseatBarHeightPx - pageIndicatorHeightPx - topWorkspacePadding
+                - (numRows * cellHeightPx)) / 2;
+        mVerticalMarginPx = Math.max(0, mVerticalMarginPx);
+
         dragViewScale = iconSizePx;
 
         // Hotseat
@@ -335,11 +348,11 @@ public class DeviceProfile {
         Rect padding = recycle == null ? new Rect() : recycle;
         int paddingBottom = hotseatBarHeightPx + pageIndicatorHeightPx;
 
-        // Pad the top and bottom of the workspace with search/hotseat bar sizes
-        padding.set(desiredWorkspaceLeftRightMarginPx,
-                topWorkspacePadding,
-                desiredWorkspaceLeftRightMarginPx,
-                paddingBottom);
+        // Use the dynamically calculated margins
+        padding.set(Math.max(edgeMarginPx, mHorizontalMarginPx),
+                topWorkspacePadding + mVerticalMarginPx,
+                Math.max(edgeMarginPx, mHorizontalMarginPx),
+                paddingBottom + mVerticalMarginPx);
 
         return padding;
     }

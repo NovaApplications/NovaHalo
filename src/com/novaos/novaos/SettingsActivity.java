@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -356,7 +357,18 @@ public class SettingsActivity extends AppCompatActivity implements
 
             // Restart Launcher
             Toast.makeText(context, "Launcher reset. Restarting...", Toast.LENGTH_SHORT).show();
-            android.os.Process.killProcess(android.os.Process.myPid());
+            
+            Intent intent = new Intent(context, Launcher.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            context.startActivity(intent);
+            
+            if (getActivity() != null) {
+                getActivity().finish();
+            }
+            
+            // Still kill the process after a short delay to ensure everything is cleared, 
+            // but the new activity will start in a clean state.
+            new Handler().postDelayed(() -> android.os.Process.killProcess(android.os.Process.myPid()), 500);
         }
     }
 }

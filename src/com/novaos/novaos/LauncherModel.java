@@ -428,9 +428,10 @@ public class LauncherModel extends BroadcastReceiver
     private static boolean findNextAvailableIconSpaceInScreen(ArrayList<ItemInfo> occupiedPos,
                                                               int[] xy, int spanX, int spanY) {
         LauncherAppState app = LauncherAppState.getInstance();
-        InvariantDeviceProfile profile = app.getInvariantDeviceProfile();
+        InvariantDeviceProfile inv = app.getInvariantDeviceProfile();
+        DeviceProfile grid = inv.profile;
 
-        GridOccupancy occupied = new GridOccupancy(profile.numColumns, profile.numRows);
+        GridOccupancy occupied = new GridOccupancy(grid.numColumns, grid.numRows);
         if (occupiedPos != null) {
             for (ItemInfo r : occupiedPos) {
                 occupied.markCells(r, true);

@@ -203,6 +203,10 @@
             android:key="build" />
 
         <Preference
+            android:title="@string/nova_check_for_update_title"
+            android:key="check_for_update" />
+
+        <Preference
             android:title="What\'s New"
             android:key="whats_new"
             android:summary="See the latest changes and features" />
