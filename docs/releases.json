@@ -1,5 +1,32 @@
 [
   {
+    "version": "3.0.0",
+    "versionCode": 42,
+    "previousVersion": "2.6.5",
+    "releaseDate": "2026-06-10",
+    "title": "NovaOS v3.0.0 (The Hub & Work Profile Update)",
+    "summary": "This major milestone release introduces an intelligent, enterprise-ready Work Home Page accessible exclusively under managed profiles, completely modernizes the web deployment infrastructure with local dynamic timeline tracking, and streamlines repository licensing parameters.",
+    "stats": {
+      "filesChanged": 8,
+      "additions": 315,
+      "deletions": 48
+    },
+    "changelog": {
+      "newFeatures": [
+        "Exclusive Work Home Page: Engineered a brand-new, sandboxed workspace layer that automatically isolates enterprise applications. This special home screen layout is restricted behind an active user-handle verification system and reveals itself only when a validated Work Profile is running on the device.",
+        "Dynamic Release History Center: Migrated your public documentation platform from rigid static files down to this unified web interface, allowing your site to loop through comprehensive build stats, asset sizes, and commit categories completely on the fly."
+      ],
+      "optimizations": [
+        "Web Deployment Modernization: Overhauled the core styling, scripting, and configuration properties (`_config.yml`) inside your web layout files, utilizing cache-busting fetching mechanics to guarantee client-side updates render instantly without server delays.",
+        "Repository Component Thinning: Deprecated and deleted loose localized update documents (`docs/RELEASES.md`) to keep the primary source structure clean, lightweight, and focused."
+      ],
+      "bugFixes": [
+        "License File Cleanup: Removed obsolete Apache License headers from the primary workspace container to align configuration rules precisely with your project-wide deployment objectives.",
+        "JSON Parser Validation: Patched structural trailing anomalies and formatting discrepancies inside the main script pipeline, ensuring zero-fault parsing transitions across all desktop web browser variations."
+      ]
+    }
+  },
+  {
     "version": "2.6.5",
     "versionCode": 41,
     "previousVersion": "2.6.4",
