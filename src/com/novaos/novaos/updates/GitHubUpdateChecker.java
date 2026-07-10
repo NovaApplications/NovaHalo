@@ -28,7 +28,6 @@ public class GitHubUpdateChecker {
 
     private static final String TAG = "GitHubUpdateChecker";
     private static final String GITHUB_REPO = "NovaApplications/NovaHalo";
-    private static final String GITHUB_TOKEN = "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";
     private static final String API_URL = "https://api.github.com/repos/" + GITHUB_REPO + "/releases/latest";
 
     public interface UpdateCheckCallback {
@@ -49,7 +48,6 @@ public class GitHubUpdateChecker {
                     connection.setReadTimeout(10000);
                     connection.setRequestProperty("User-Agent", "NovaOS-Launcher");
                     connection.setRequestProperty("Accept", "application/vnd.github.v3+json");
-                    connection.setRequestProperty("Authorization", "token " + GITHUB_TOKEN);
 
                     if (connection.getResponseCode() == 200) {
                         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -111,7 +109,6 @@ public class GitHubUpdateChecker {
                     connection.setConnectTimeout(10000);
                     connection.setReadTimeout(10000);
                     connection.setRequestProperty("User-Agent", "NovaOS-Launcher");
-                    connection.setRequestProperty("Authorization", "token " + GITHUB_TOKEN);
 
                     if (connection.getResponseCode() == 200) {
                         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -188,7 +185,6 @@ public class GitHubUpdateChecker {
         }
 
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
-        request.addRequestHeader("Authorization", "token " + GITHUB_TOKEN);
         String name = context.getString(R.string.launcher_name);
         request.setTitle(name + " Update " + version);
         request.setDescription("Downloading update...");
