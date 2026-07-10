@@ -13,6 +13,6 @@
      limitations under the License.
 -->
 
-<com.novaos.novahalo.BubbleTextView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.novaos.novaos.BubbleTextView xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/Icon"
     android:focusable="true" />

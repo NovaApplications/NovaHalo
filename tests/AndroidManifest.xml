@@ -26,5 +26,5 @@
         android:functionalTest="false"
         android:handleProfiling="false"
         android:name="androidx.test.runner.AndroidJUnitRunner"
-        android:targetPackage="com.novaos.novahalo" />
+        android:targetPackage="com.novaos.novaos" />
 </manifest>

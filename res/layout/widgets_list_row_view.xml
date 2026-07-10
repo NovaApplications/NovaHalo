@@ -24,7 +24,7 @@
 
     <!-- Section info -->
 
-    <com.novaos.novahalo.BubbleTextView
+    <com.novaos.novaos.BubbleTextView
         android:id="@+id/section"
         android:layout_width="match_parent"
         android:layout_height="@dimen/widget_section_height"

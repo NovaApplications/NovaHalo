@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<com.novaos.novahalo.DropTargetBar xmlns:android="http://schemas.android.com/apk/res/android"
+<com.novaos.novaos.DropTargetBar xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:launcher="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="@dimen/dynamic_grid_drop_target_size"
@@ -27,7 +27,7 @@
 
         <!-- Delete target -->
 
-        <com.novaos.novahalo.DeleteDropTarget
+        <com.novaos.novaos.DeleteDropTarget
             launcher:hideParentOnDisable="true"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -45,7 +45,7 @@
 
         <!-- App Info -->
 
-        <com.novaos.novahalo.InfoDropTarget
+        <com.novaos.novaos.InfoDropTarget
             launcher:hideParentOnDisable="true"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -63,7 +63,7 @@
 
         <!-- Hide target -->
 
-        <com.novaos.novahalo.EditDropTarget
+        <com.novaos.novaos.EditDropTarget
             launcher:hideParentOnDisable="true"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -81,7 +81,7 @@
 
         <!-- Uninstall target -->
 
-        <com.novaos.novahalo.UninstallDropTarget
+        <com.novaos.novaos.UninstallDropTarget
             launcher:hideParentOnDisable="true"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -92,4 +92,4 @@
             android:text="@string/uninstall_drop_target_label" />
     </FrameLayout>
 
-</com.novaos.novahalo.DropTargetBar>
+</com.novaos.novaos.DropTargetBar>

@@ -12,13 +12,13 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<com.novaos.novahalo.Hotseat xmlns:android="http://schemas.android.com/apk/res/android"
+<com.novaos.novaos.Hotseat xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="match_parent">
 
-    <com.novaos.novahalo.CellLayout
+    <com.novaos.novaos.CellLayout
         android:id="@+id/layout"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="center" />
-</com.novaos.novahalo.Hotseat>
+</com.novaos.novaos.Hotseat>

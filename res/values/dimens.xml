@@ -165,6 +165,8 @@
     <!-- Approximates the system status bar height. Not guaranteed to be always be correct. -->
     <dimen name="status_bar_height">24dp</dimen>
 
+    <dimen name="taskbar_height">64dp</dimen>
+
     <!-- Wallpaper picker -->
     <dimen name="wallpaperThumbnailWidth">106.5dp</dimen>
     <dimen name="wallpaperThumbnailHeight">94.5dp</dimen>

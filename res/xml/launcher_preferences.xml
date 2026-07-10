@@ -19,9 +19,9 @@
 
     <PreferenceScreen
         android:key="pref_screen_ui"
-        android:title="UI">
+        android:title="@string/personalization_title">
 
-        <com.novaos.novahalo.preferences.IconPackPreference
+        <com.novaos.novaos.preferences.IconPackPreference
             android:key="pref_iconPackPackage"
             android:title="Icon Pack"
             android:summary="Select an icon Pack"
@@ -51,7 +51,7 @@
             android:defaultValue="5"
             android:persistent="true" />
 
-        <com.novaos.novahalo.preferences.SeekbarPreference
+        <com.novaos.novaos.preferences.SeekbarPreference
             android:key="pref_allAppsOpacitySB"
             android:title="All apps opacity"
             app:minValue="0"
@@ -61,31 +61,7 @@
             app:summaryMultiplier="100"
             android:persistent="true" />
 
-        <ListPreference
-            android:key="pref_numCols"
-            android:title="Number of columns"
-            android:entries="@array/numColsTexts"
-            android:entryValues="@array/numColsValues"
-            android:defaultValue="@string/generalDefault"
-            android:persistent="true" />
-
-        <ListPreference
-            android:key="pref_numRows"
-            android:title="Number of rows"
-            android:entryValues="@array/numRowsValues"
-            android:entries="@array/numRowsTexts"
-            android:defaultValue="@string/generalDefault"
-            android:persistent="true" />
-
-        <ListPreference
-            android:key="pref_numHotseatIcons"
-            android:title="Number of icons in tray"
-            android:entryValues="@array/numHotseatIconsValues"
-            android:entries="@array/numHotseatIconsTexts"
-            android:defaultValue="@string/generalDefault"
-            android:persistent="true" />
-
-        <com.novaos.novahalo.preferences.SeekbarPreference
+        <com.novaos.novaos.preferences.SeekbarPreference
             android:key="pref_iconScaleSB"
             android:title="Icon Scale"
             app:minValue="0.3"
@@ -95,7 +71,7 @@
             app:defaultValue="1.0"
             android:persistent="true" />
 
-        <com.novaos.novahalo.preferences.SeekbarPreference
+        <com.novaos.novaos.preferences.SeekbarPreference
             android:key="pref_iconTextScaleSB"
             android:title="Icon Text Scale"
             app:minValue="0.3"
@@ -118,7 +94,7 @@
             android:title="@string/pref_taskbar_transparency_title"
             android:entries="@array/taskbar_transparency_entries"
             android:entryValues="@array/taskbar_transparency_values"
-            android:defaultValue="1.0"
+            android:defaultValue="0.25"
             android:persistent="true" />
 
         <ListPreference
@@ -128,11 +104,19 @@
             android:entryValues="@array/icon_shape_values"
             android:defaultValue="system"
             android:persistent="true" />
+
+        <SwitchPreference
+            android:key="pref_showHidden"
+            android:title="Show Hidden Apps"
+            android:summaryOn="Hidden apps will be shown to change visibility settings"
+            android:summaryOff="Hidden apps won\'t be visible"
+            android:defaultValue="false"
+            android:persistent="true" />
     </PreferenceScreen>
 
     <PreferenceScreen
-        android:key="pref_screen_behavior"
-        android:title="Behavior">
+        android:key="pref_screen_gestures"
+        android:title="@string/gestures_title">
 
         <SwitchPreference
             android:key="pref_pinchToOverview"
@@ -169,13 +153,34 @@
             android:summary="Saves the scroll position in the app tray"
             android:defaultValue="false"
             android:persistent="true" />
+    </PreferenceScreen>
 
-        <SwitchPreference
-            android:key="pref_showHidden"
-            android:title="Show Hidden Apps"
-            android:summaryOn="Hidden apps will be shown to change visibility settings"
-            android:summaryOff="Hidden apps won't be visible"
-            android:defaultValue="false"
+    <PreferenceScreen
+        android:key="pref_screen_display"
+        android:title="@string/display_title">
+
+        <ListPreference
+            android:key="pref_numCols"
+            android:title="Number of columns"
+            android:entries="@array/numColsTexts"
+            android:entryValues="@array/numColsValues"
+            android:defaultValue="@string/generalDefault"
+            android:persistent="true" />
+
+        <ListPreference
+            android:key="pref_numRows"
+            android:title="Number of rows"
+            android:entryValues="@array/numRowsValues"
+            android:entries="@array/numRowsTexts"
+            android:defaultValue="@string/generalDefault"
+            android:persistent="true" />
+
+        <ListPreference
+            android:key="pref_numHotseatIcons"
+            android:title="Number of icons in tray"
+            android:entryValues="@array/numHotseatIconsValues"
+            android:entries="@array/numHotseatIconsTexts"
+            android:defaultValue="@string/generalDefault"
             android:persistent="true" />
     </PreferenceScreen>
 
@@ -198,13 +203,14 @@
             android:key="build" />
 
         <Preference
-            android:title="@string/nova_check_for_update_title"
-            android:key="check_for_update" />
-
-        <Preference
             android:title="What\'s New"
             android:key="whats_new"
             android:summary="See the latest changes and features" />
+
+        <Preference
+            android:title="@string/reset_launcher_title"
+            android:key="reset_launcher"
+            android:summary="@string/reset_launcher_summary" />
 
     </PreferenceScreen>
 
@@ -213,18 +219,27 @@
         android:title="Developer">
 
         <SwitchPreference
+            android:key="pref_dev_mode"
+            android:title="@string/pref_enable_developer_title"
+            android:summary="@string/pref_enable_developer_summary"
+            android:defaultValue="true" />
+
+        <SwitchPreference
             android:key="pref_show_build_info"
+            android:dependency="pref_dev_mode"
             android:title="Show Build Info on Home"
             android:summary="Display version and build number in top-left corner"
             android:defaultValue="true" />
 
         <Preference
             android:key="pref_export_logs"
+            android:dependency="pref_dev_mode"
             android:title="Export Crash Logs"
             android:summary="Save logs to a file for developer support" />
 
         <Preference
             android:key="pref_clear_logs"
+            android:dependency="pref_dev_mode"
             android:title="Clear Crash Logs"
             android:summary="Delete all saved crash reports" />
 

@@ -108,22 +108,32 @@
     <string name="week_day_format">%1$s, %2$s</string>
 
     <!-- Settings & About -->
+    <string name="personalization_title">Personalization</string>
+    <string name="gestures_title">Gestures</string>
+    <string name="display_title">Display</string>
+    <string name="pref_enable_developer_title">Enable Developer Options</string>
+    <string name="pref_enable_developer_summary">Turn off to disable all developer features</string>
+
     <string name="about_title">About</string>
-    <string name="about_text">Nova Halo is an open-source launcher based on Lawnchair.</string>
+    <string name="reset_launcher_title">Reset Launcher</string>
+    <string name="reset_launcher_summary">Clear all settings and layout to defaults</string>
+    <string name="reset_launcher_confirmation">Are you sure you want to reset the launcher? This will clear your layout and all settings.</string>
+    <string name="about_text">NovaOS is an open-source launcher based on Lawnchair.</string>
     <string name="nova_version_title">Version</string>
     <string name="nova_build_title">Build</string>
     <string name="nova_check_for_update_title">Check for updates</string>
     <string name="all_apps_personal_tab">Personal</string>
     <string name="all_apps_work_tab">Work</string>
     <string name="work_mode_toggle_description">Toggle Work Mode</string>
-    <string name="launcher_name">Nova Halo</string>
+    <string name="launcher_name">NovaOS</string>
+    <string name="start_menu_title">Start</string>
 
     <string name="swipe_down_action_title">Swipe Down Action</string>
     <string name="swipe_down_action_search">Search</string>
     <string name="swipe_down_action_notifications">Notifications</string>
     <string name="swipe_down_action_none">None</string>
 
-    <string name="pref_taskbar_color_title">Taskbar Color</string>
+    <string name="pref_taskbar_color_title">Dock Color</string>
     <string name="taskbar_color_default">Default</string>
     <string name="taskbar_color_red">Red</string>
     <string name="taskbar_color_blue">Blue</string>
@@ -137,7 +147,7 @@
     <string name="icon_shape_squircle">Squircle</string>
     <string name="icon_shape_teardrop">Teardrop</string>
 
-    <string name="pref_taskbar_transparency_title">Taskbar Transparency</string>
+    <string name="pref_taskbar_transparency_title">Dock Transparency</string>
     <string name="taskbar_transparency_0">0% (Solid)</string>
     <string name="taskbar_transparency_25">25%</string>
     <string name="taskbar_transparency_50">50%</string>

@@ -14,7 +14,7 @@
 --><!-- The top and bottom paddings are defined in this container, but since we want
      the list view to span the full width (for touch interception purposes), we
      will bake the left/right padding into that view's background itself. -->
-<com.novaos.novahalo.allapps.AllAppsContainerView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.novaos.novaos.allapps.AllAppsContainerView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:launcher="http://schemas.android.com/apk/res-auto"
     android:id="@+id/apps_view"
     android:layout_width="match_parent"
@@ -31,7 +31,7 @@
         android:visibility="invisible" />
 
 
-    <com.novaos.novahalo.allapps.AllAppsRecyclerViewContainerView
+    <com.novaos.novaos.allapps.AllAppsRecyclerViewContainerView
         android:id="@+id/main_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -52,7 +52,7 @@
                 android:layout_height="@dimen/all_apps_search_bar_height"
                 android:saveEnabled="false">
 
-                <com.novaos.novahalo.ExtendedEditText
+                <com.novaos.novaos.ExtendedEditText
                     android:id="@+id/search_box_input"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -110,7 +110,7 @@
                 android:visibility="gone" />
 
             <!-- DO NOT CHANGE THE ID -->
-            <com.novaos.novahalo.allapps.AllAppsRecyclerView
+            <com.novaos.novaos.allapps.AllAppsRecyclerView
                 android:id="@+id/apps_list_view"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -121,7 +121,7 @@
                 android:theme="@style/CustomOverscroll.Light" />
         </LinearLayout>
 
-    </com.novaos.novahalo.allapps.AllAppsRecyclerViewContainerView>
+    </com.novaos.novaos.allapps.AllAppsRecyclerViewContainerView>
 
     <View
         android:id="@+id/nav_bar_bg"
@@ -145,4 +145,4 @@
         android:contentDescription="@string/work_mode_toggle_description"
         android:visibility="gone"
         android:elevation="6dp" />
-</com.novaos.novahalo.allapps.AllAppsContainerView>
+</com.novaos.novaos.allapps.AllAppsContainerView>

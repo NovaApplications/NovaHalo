@@ -6,6 +6,6 @@
         path="launcher.db" />
     <include
         domain="sharedpref"
-        path="com.novaos.novahalo.prefs.xml" />
+        path="com.novaos.novaos.prefs.xml" />
 
 </full-backup-content>

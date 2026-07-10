@@ -1,8 +1,8 @@
 # GitHub Pages Jekyll Configuration
 title: NovaOS
 description: An Android Luncher
-url: "https://novaapplications.github.io/NovaHalo"
-repository: "NovaApplications/NovaHalo"
+url: "https://novaapplications.github.io/NovaOS"
+repository: "NovaApplications/NovaOS"
 theme: jekyll-theme-minimal
 
 # Exclude Jekyll processing

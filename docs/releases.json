@@ -30,7 +30,7 @@
     "previousVersion": "2.6.3",
     "releaseDate": "2026-06-10",
     "title": "NovaOS v2.6.4 (Dynamic Branding & Dock Alpha Patch)",
-    "summary": "This release implements dynamic resource string mapping to automatically switch user interface text between Nova Halo and Nova Touch depending on device screen size, and squashes an alpha transparency rendering bug in the hotseat dock background.",
+    "summary": "This release implements dynamic resource string mapping to automatically switch user interface text between NovaOS and NovaOS depending on device screen size, and squashes an alpha transparency rendering bug in the hotseat dock background.",
     "stats": {
       "filesChanged": 8,
       "additions": 23,
@@ -260,7 +260,7 @@
     "previousVersion": "2.4.1",
     "releaseDate": "2026-06-09",
     "title": "NovaOS v2.4.2 (Tablet Optimization & Crash Patch)",
-    "summary": "This release delivers crucial tablet UI scaling optimizations for the Nova Touch interface, unlocks edge-to-edge app grid bounds, and implements robust guardrails against random animation lifecycle crashes.",
+    "summary": "This release delivers crucial tablet UI scaling optimizations for the NovaOS interface, unlocks edge-to-edge app grid bounds, and implements robust guardrails against random animation lifecycle crashes.",
     "stats": {
       "filesChanged": 6,
       "additions": 56,
@@ -268,7 +268,7 @@
     },
     "changelog": {
       "newFeatures": [
-        "Nova Touch Full-Width Mode: Refactored layouts for wider screen profiles (sw600dp and sw720dp) to use match_parent formatting, letting the App Drawer canvas map seamlessly edge-to-edge across tablet monitors.",
+        "NovaOS Full-Width Mode: Refactored layouts for wider screen profiles (sw600dp and sw720dp) to use match_parent formatting, letting the App Drawer canvas map seamlessly edge-to-edge across tablet monitors.",
         "Dynamic Tablet Grids: Upgraded the layout measurement rules inside AllAppsContainerView.java. Tablets now automatically compute two extra columns of icons when rotated into horizontal landscape mode to fully utilize tablet real estate."
       ],
       "optimizations": [

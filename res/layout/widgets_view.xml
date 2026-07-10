@@ -14,7 +14,7 @@
 --><!-- The top and bottom paddings are defined in this container, but since we want
      the list view to span the full width (for touch interception purposes), we
      will bake the left/right padding into that view's background itself. -->
-<com.novaos.novahalo.widget.WidgetsContainerView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.novaos.novaos.widget.WidgetsContainerView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:launcher="http://schemas.android.com/apk/res-auto"
     android:id="@+id/widgets_view"
     android:layout_width="match_parent"
@@ -40,7 +40,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.novaos.novahalo.widget.WidgetsRecyclerView
+        <com.novaos.novaos.widget.WidgetsRecyclerView
             android:id="@+id/widgets_list_view"
             android:theme="@style/CustomOverscroll.Light"
             android:layout_width="match_parent"
@@ -54,4 +54,4 @@
     </FrameLayout>
 
 
-</com.novaos.novahalo.widget.WidgetsContainerView>
+</com.novaos.novaos.widget.WidgetsContainerView>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/work_mode_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -34,15 +35,81 @@
                 android:format12Hour="hh:mm a"
                 android:format24Hour="HH:mm" />
 
-            <TextView
-                android:id="@+id/work_mode_battery"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textColor="@android:color/white"
-                android:drawableStart="@drawable/ic_battery"
-                android:drawablePadding="6dp"
-                android:gravity="center_vertical" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/work_mode_ringer_icon"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginEnd="8dp"
+                    app:tint="@android:color/white"
+                    android:contentDescription="@null"
+                    android:visibility="gone" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/work_mode_wifi_icon"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@drawable/ic_wifi"
+                    app:tint="@android:color/white"
+                    android:contentDescription="@null"
+                    android:visibility="gone" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/work_mode_bluetooth_icon"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@drawable/ic_bluetooth"
+                    app:tint="@android:color/white"
+                    android:contentDescription="@null"
+                    android:visibility="gone" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/work_mode_status_icon"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginEnd="12dp"
+                    android:src="@drawable/ic_work"
+                    app:tint="@android:color/white"
+                    android:contentDescription="@null" />
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp">
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/work_mode_battery_icon"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/battery_level"
+                        app:tint="@android:color/white"
+                        android:contentDescription="@null" />
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/work_mode_battery_bolt"
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="1dp"
+                        android:src="@drawable/ic_charging_bolt"
+                        app:tint="@android:color/white"
+                        android:contentDescription="@null"
+                        android:visibility="gone" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/work_mode_battery"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textColor="@android:color/white"
+                    android:gravity="center_vertical" />
+            </LinearLayout>
         </LinearLayout>
 
         <TextView
