@@ -143,7 +143,8 @@ import com.novaos.novaos.widget.WidgetsContainerView;
 public class Launcher extends Activity
         implements View.OnClickListener, OnLongClickListener,
         LauncherModel.Callbacks, View.OnTouchListener, LauncherProviderChangeListener,
-        AccessibilityManager.AccessibilityStateChangeListener {
+        AccessibilityManager.AccessibilityStateChangeListener,
+        SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String TAG = "Launcher";
 
     private static final int REQUEST_CREATE_SHORTCUT = 1;
@@ -362,6 +363,7 @@ public class Launcher extends Activity
         mDeviceProfile = app.getInvariantDeviceProfile().profile;
 
         mSharedPrefs = Utilities.getPrefs(this);
+        mSharedPrefs.registerOnSharedPreferenceChangeListener(this);
         mIsSafeModeEnabled = getPackageManager().isSafeMode();
         mModel = app.setLauncher(this);
         mIconCache = app.getIconCache();
@@ -483,6 +485,12 @@ public class Launcher extends Activity
                     }
                 }
             }
+        }
+        
+        // Also update open folder
+        Folder openFolder = mWorkspace != null ? mWorkspace.getOpenFolder() : null;
+        if (openFolder != null) {
+            openFolder.updateBackground();
         }
         
         // Also update hotseat
@@ -1917,8 +1925,17 @@ public class Launcher extends Activity
     }
 
     @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if ("pref_taskbarTransparency".equals(key) || "pref_taskbarColor".equals(key) || 
+            "pref_hotseatShouldUseExtractedColors".equals(key)) {
+            loadExtractedColorsAndColorItems();
+        }
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
+        mSharedPrefs.unregisterOnSharedPreferenceChangeListener(this);
 
         // Remove all pending runnables
         mHandler.removeMessages(ADVANCE_MSG);
@@ -2837,6 +2854,7 @@ public class Launcher extends Activity
             Log.w(TAG, "Opening folder (" + folder + ") which already has a parent (" +
                     folder.getParent() + ").");
         }
+        folder.updateBackground();
         folder.animateOpen();
 
         growAndFadeOutFolderIcon(folderIcon);
@@ -3794,6 +3812,7 @@ public class Launcher extends Activity
         mWorkspace.restoreInstanceStateForRemainingPages();
 
         setWorkspaceLoading(false);
+        updateIconTextColors();
 
         if (mPendingActivityResult != null) {
             handleActivityResult(mPendingActivityResult.requestCode,

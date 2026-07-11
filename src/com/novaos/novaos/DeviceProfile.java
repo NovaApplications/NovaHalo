@@ -179,6 +179,10 @@ public class DeviceProfile {
 
         numRows = inv.numRows;
         numHotseatIcons = inv.numHotseatIcons;
+        numColumns = inv.numColumns;
+
+        // Calculate the remaining vars
+        numHotseatIcons = inv.numHotseatIcons;
         if (isTablet || isLargeTablet) {
             // For tablets, use more columns in landscape
             numColumns = widthPx > heightPx ? inv.numColumns + 2 : inv.numColumns;
@@ -405,18 +409,6 @@ public class DeviceProfile {
 
         Resources res = launcher.getResources();
         boolean isLandscape = res.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-
-        // Update dynamic columns for tablets
-        if (isTablet || isLargeTablet) {
-            // For tablets, default to 6 in portrait and 8 in landscape
-            // but respect user overrides if they are set
-            numColumns = isLandscape ? inv.numColumns + 2 : inv.numColumns;
-            numHotseatIcons = numColumns;
-        } else {
-            // For phones, always use the setting (defaults to 4 in XML)
-            numColumns = inv.numColumns;
-            numHotseatIcons = inv.numHotseatIcons;
-        }
 
         // Recalculate cell dimensions for the current screen size and orientation
         int currentWidth = isLandscape ? Math.max(widthPx, heightPx) : Math.min(widthPx, heightPx);

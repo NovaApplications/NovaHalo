@@ -167,27 +167,72 @@ public class GitHubUpdateChecker {
     }
 
     private static boolean isNewerVersion(String latest, String current) {
-        // Strip suffixes like -beta or -release for comparison
-        String latestClean = latest.split("-")[0];
-        String currentClean = current.split("-")[0];
+        if (latest == null || current == null) return false;
 
-        String[] latestParts = latestClean.split("\\.");
-        String[] currentParts = currentClean.split("\\.");
-        int length = Math.max(latestParts.length, currentParts.length);
+        // Clean up versions (remove 'v' prefix if present)
+        String v1 = latest.toLowerCase().replace("v", "").trim();
+        String v2 = current.toLowerCase().replace("v", "").trim();
+
+        // If versions are identical, no update
+        if (v1.equals(v2)) return false;
+
+        // Extract base version and beta number
+        // Expected format: "1.0.0 beta 7" or "1.0.0"
+        String base1 = v1.split("beta")[0].split("-")[0].trim();
+        String base2 = v2.split("beta")[0].split("-")[0].trim();
+
+        String[] parts1 = base1.split("\\.");
+        String[] parts2 = base2.split("\\.");
+        int length = Math.max(parts1.length, parts2.length);
+
         for (int i = 0; i < length; i++) {
-            try {
-                int latestPart = i < latestParts.length ? Integer.parseInt(latestParts[i]) : 0;
-                int currentPart = i < currentParts.length ? Integer.parseInt(currentParts[i]) : 0;
-                if (latestPart > currentPart) return true;
-                if (latestPart < currentPart) return false;
-            } catch (NumberFormatException e) {
-                // If we can't parse, just compare as strings
-                int res = latestParts[i].compareTo(currentParts[i]);
-                if (res > 0) return true;
-                if (res < 0) return false;
-            }
+            int p1 = i < parts1.length ? parseSafeInt(parts1[i]) : 0;
+            int p2 = i < parts2.length ? parseSafeInt(parts2[i]) : 0;
+
+            if (p1 > p2) return true;
+            if (p1 < p2) return false;
         }
+
+        // Base versions are equal, check for beta status
+        boolean isBeta1 = v1.contains("beta");
+        boolean isBeta2 = v2.contains("beta");
+
+        if (isBeta1 && !isBeta2) {
+            // "1.0.0 beta 7" vs "1.0.0" -> latest is beta, current is stable. Stable is newer.
+            return false;
+        }
+        if (!isBeta1 && isBeta2) {
+            // "1.0.0" vs "1.0.0 beta 7" -> latest is stable, current is beta. Stable is newer.
+            return true;
+        }
+        if (isBeta1 && isBeta2) {
+            // Both are betas, compare beta numbers
+            int betaNum1 = parseBetaNumber(v1);
+            int betaNum2 = parseBetaNumber(v2);
+            return betaNum1 > betaNum2;
+        }
+
         return false;
+    }
+
+    private static int parseSafeInt(String s) {
+        try {
+            return Integer.parseInt(s.replaceAll("[^0-9]", ""));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private static int parseBetaNumber(String version) {
+        try {
+            String[] parts = version.split("beta");
+            if (parts.length > 1) {
+                return Integer.parseInt(parts[1].replaceAll("[^0-9]", "").trim());
+            }
+        } catch (Exception e) {
+            // Fallback
+        }
+        return 0;
     }
 
     public static void downloadAndInstall(final Context context, String downloadUrl, String version) {

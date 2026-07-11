@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="launcher_name">NovaOS</string>
-    <string name="about_text">NovaOS is an open-source launcher based on Lawnchair.</string>
-</resources>

@@ -489,6 +489,8 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         } else {
             mFolderName.setText("");
         }
+        
+        updateBackground();
 
         // In case any children didn't come across during loading, clean up the folder accordingly
         mFolderIcon.post(new Runnable() {
@@ -1493,6 +1495,27 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         public void close() {
             mInfo.addListener(Folder.this);
             updateTextViewFocus();
+        }
+    }
+
+    public void updateBackground() {
+        if (mLauncher.getExtractedColors() == null) {
+            return;
+        }
+        int color = mLauncher.getExtractedColors().getHotseatColor(getContext());
+        setBackgroundColor(color);
+
+        int textColor = Utilities.getTextColorForBackground(color);
+        mFolderName.setTextColor(textColor);
+        mFolderName.setHintTextColor(androidx.core.graphics.ColorUtils.setAlphaComponent(textColor, 128));
+
+        for (View v : getItemsInReadingOrder()) {
+            if (v instanceof BubbleTextView) {
+                BubbleTextView btv = (BubbleTextView) v;
+                btv.setTextColor(textColor);
+                btv.setShadowLayer(textColor == android.graphics.Color.WHITE ? 2.0f : 0, 0, textColor == android.graphics.Color.WHITE ? 1.0f : 0,
+                        textColor == android.graphics.Color.WHITE ? 0xB0000000 : android.graphics.Color.TRANSPARENT);
+            }
         }
     }
 }

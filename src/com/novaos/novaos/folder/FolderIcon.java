@@ -568,8 +568,9 @@ public class FolderIcon extends FrameLayout implements FolderListener {
             paint.setXfermode(null);
             paint.setAntiAlias(true);
 
-            int alpha = (int) Math.min(MAX_BG_OPACITY, BG_OPACITY * mColorMultiplier);
-            paint.setColor(Color.argb(alpha, BG_INTENSITY, BG_INTENSITY, BG_INTENSITY));
+            int color = Launcher.getLauncher(mInvalidateDelegate.getContext()).getExtractedColors().getHotseatColor(mInvalidateDelegate.getContext());
+            int alpha = (int) (android.graphics.Color.alpha(color) * mColorMultiplier);
+            paint.setColor(androidx.core.graphics.ColorUtils.setAlphaComponent(color, alpha));
 
             canvas.drawPath(mClipPath, paint);
             canvas.clipPath(mClipPath, Region.Op.DIFFERENCE);
@@ -588,7 +589,8 @@ public class FolderIcon extends FrameLayout implements FolderListener {
 
             paint.reset();
             paint.setAntiAlias(true);
-            paint.setColor(Color.argb(255, BG_INTENSITY, BG_INTENSITY, BG_INTENSITY));
+            int color = Launcher.getLauncher(mInvalidateDelegate.getContext()).getExtractedColors().getHotseatColor(mInvalidateDelegate.getContext());
+            paint.setColor(androidx.core.graphics.ColorUtils.setAlphaComponent(color, 255));
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(mStrokeWidth);
 
@@ -606,7 +608,8 @@ public class FolderIcon extends FrameLayout implements FolderListener {
 
             paint.reset();
             paint.setAntiAlias(true);
-            paint.setColor(Color.argb(160, 245, 245, 245));
+            int color = Launcher.getLauncher(mInvalidateDelegate.getContext()).getExtractedColors().getHotseatColor(mInvalidateDelegate.getContext());
+            paint.setColor(androidx.core.graphics.ColorUtils.setAlphaComponent(color, 160));
 
             canvas.drawPath(mClipPath, paint);
 

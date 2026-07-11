@@ -119,7 +119,7 @@
     <string name="reset_launcher_summary">Clear all settings and layout to defaults</string>
     <string name="reset_launcher_confirmation">Are you sure you want to reset the launcher? This will clear your layout and all settings.</string>
     <string name="about_text">NovaOS is an open-source launcher based on Lawnchair.</string>
-    <string name="nova_version_title">Version 1.0.0 beta 7</string>
+    <string name="nova_version_title">Version 1.0.0 beta 8</string>
     <string name="nova_build_title">Build</string>
     <string name="nova_check_for_update_title">Check for updates</string>
     <string name="all_apps_personal_tab">Personal</string>
