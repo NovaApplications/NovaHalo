@@ -29,6 +29,7 @@ public final class FeatureFlags {
     private static final String KEY_PREF_PINCH_TO_OVERVIEW = "pref_pinchToOverview";
     private static final String KEY_PREF_SWIPE_DOWN_ACTION = "pref_swipeDownAction";
     private static final String KEY_PREF_ICON_SHAPE = "pref_iconShape";
+    private static final String KEY_PREF_FOLDER_SHAPE = "pref_folderShape";
     private static final String KEY_PREF_TASKBAR_TRANSPARENCY = "pref_taskbarTransparency";
     private static final String KEY_PREF_HOTSEAT_EXTRACTED_COLORS = "pref_hotseatShouldUseExtractedColors";
     private static final String KEY_PREF_HAPTIC_FEEDBACK = "pref_enableHapticFeedback";
@@ -36,13 +37,18 @@ public final class FeatureFlags {
     private static final String KEY_FULL_WIDTH_SEARCHBAR = "pref_fullWidthSearchbar";
     private static final String KEY_SHOW_PIXEL_BAR = "pref_showPixelBar";
     public static final String KEY_SHOW_VOICE_SEARCH_BUTTON = "pref_showMic";
-    private static final String KEY_PREF_APP_DRAWER_ENABLED = "pref_appDrawerEnabled";
+    private static final String KEY_PREF_APP_DRAWER_ENABLED = "pref_app_drawer_enabled";
+    private static final String KEY_ADD_NEW_APPS_TO_HOME = "pref_add_new_apps_to_home";
 
     private FeatureFlags() {
     }
 
     public static boolean isAppDrawerEnabled(Context context) {
-        return Utilities.getPrefs(context).getBoolean(KEY_PREF_APP_DRAWER_ENABLED, false);
+        return Utilities.getPrefs(context).getBoolean(KEY_PREF_APP_DRAWER_ENABLED, true);
+    }
+
+    public static boolean addNewAppsToHome(Context context) {
+        return Utilities.getPrefs(context).getBoolean(KEY_ADD_NEW_APPS_TO_HOME, true);
     }
 
     // Returns the action to perform on swipe down gesture on the first workspace.
@@ -52,6 +58,10 @@ public final class FeatureFlags {
 
     public static String iconShape(Context context) {
         return Utilities.getPrefs(context).getString(KEY_PREF_ICON_SHAPE, "system");
+    }
+
+    public static String folderShape(Context context) {
+        return Utilities.getPrefs(context).getString(KEY_PREF_FOLDER_SHAPE, "circle");
     }
 
     public static float taskbarTransparency(Context context) {

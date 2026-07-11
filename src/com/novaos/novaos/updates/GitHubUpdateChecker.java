@@ -59,7 +59,7 @@ public class GitHubUpdateChecker {
                         reader.close();
 
                         JSONObject json = new JSONObject(response.toString());
-                        String latestVersion = json.getString("tag_name").replace("v", "");
+                        String latestVersion = json.getString("tag_name").trim().replace("v", "");
                         
                         if (isNewerVersion(latestVersion, BuildConfig.VERSION_NAME)) {
                             JSONArray assets = json.getJSONArray("assets");
@@ -80,14 +80,22 @@ public class GitHubUpdateChecker {
                             callback.onNoUpdate();
                         }
                         connection.disconnect();
-                    } else if (connection.getResponseCode() == 404) {
-                        // If 'latest' returns 404, maybe there are only pre-releases. 
-                        // Try fetching the list of all releases instead.
-                        checkForAllReleases(context, callback);
-                        connection.disconnect();
-                        return;
                     } else {
-                        callback.onError("Server error: " + connection.getResponseCode());
+                        // Log error response for debugging
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+                        StringBuilder errorResponse = new StringBuilder();
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            errorResponse.append(line);
+                        }
+                        reader.close();
+                        Log.e(TAG, "Server error " + connection.getResponseCode() + ": " + errorResponse.toString());
+
+                        if (connection.getResponseCode() == 404) {
+                            checkForAllReleases(context, callback);
+                        } else {
+                            callback.onError("Server error: " + connection.getResponseCode());
+                        }
                     }
                     connection.disconnect();
                 } catch (Exception e) {
@@ -159,14 +167,25 @@ public class GitHubUpdateChecker {
     }
 
     private static boolean isNewerVersion(String latest, String current) {
-        String[] latestParts = latest.split("\\.");
-        String[] currentParts = current.split("\\.");
+        // Strip suffixes like -beta or -release for comparison
+        String latestClean = latest.split("-")[0];
+        String currentClean = current.split("-")[0];
+
+        String[] latestParts = latestClean.split("\\.");
+        String[] currentParts = currentClean.split("\\.");
         int length = Math.max(latestParts.length, currentParts.length);
         for (int i = 0; i < length; i++) {
-            int latestPart = i < latestParts.length ? Integer.parseInt(latestParts[i]) : 0;
-            int currentPart = i < currentParts.length ? Integer.parseInt(currentParts[i]) : 0;
-            if (latestPart > currentPart) return true;
-            if (latestPart < currentPart) return false;
+            try {
+                int latestPart = i < latestParts.length ? Integer.parseInt(latestParts[i]) : 0;
+                int currentPart = i < currentParts.length ? Integer.parseInt(currentParts[i]) : 0;
+                if (latestPart > currentPart) return true;
+                if (latestPart < currentPart) return false;
+            } catch (NumberFormatException e) {
+                // If we can't parse, just compare as strings
+                int res = latestParts[i].compareTo(currentParts[i]);
+                if (res > 0) return true;
+                if (res < 0) return false;
+            }
         }
         return false;
     }

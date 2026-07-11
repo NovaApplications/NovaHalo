@@ -23,8 +23,8 @@ import com.novaos.novaos.LauncherAnimUtils;
 import com.novaos.novaos.LauncherAppWidgetHostView;
 import com.novaos.novaos.R;
 import com.novaos.novaos.ShortcutAndWidgetContainer;
+import com.novaos.novaos.Utilities;
 import com.novaos.novaos.Workspace;
-import com.novaos.novaos.config.FeatureFlags;
 import com.novaos.novaos.util.TouchController;
 
 /**
@@ -110,7 +110,13 @@ public class AllAppsTransitionController implements TouchController, VerticalPul
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             mNoIntercept = false;
-            if (!FeatureFlags.isAppDrawerEnabled(mLauncher)) {
+            
+            // Ignore swipes starting from the bottom gesture zone (bottom 24dp) 
+            // to allow system navigation (Home/Recents) to work properly.
+            float gestureZoneHeight = Utilities.pxFromDp(24, mLauncher.getResources().getDisplayMetrics());
+            if (ev.getY() > mLauncher.getDragLayer().getHeight() - gestureZoneHeight) {
+                mNoIntercept = true;
+            } else if (!com.novaos.novaos.config.FeatureFlags.isAppDrawerEnabled(mLauncher)) {
                 mNoIntercept = true;
             } else if (!mLauncher.isAllAppsVisible() && mLauncher.getWorkspace().workspaceInModalState()) {
                 mNoIntercept = true;

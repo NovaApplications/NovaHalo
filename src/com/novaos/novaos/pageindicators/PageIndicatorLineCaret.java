@@ -20,7 +20,6 @@ import android.widget.ImageView;
 import com.novaos.novaos.Launcher;
 import com.novaos.novaos.R;
 import com.novaos.novaos.Utilities;
-import com.novaos.novaos.config.FeatureFlags;
 import com.novaos.novaos.dynamicui.ExtractedColors;
 
 /**
@@ -131,9 +130,6 @@ public class PageIndicatorLineCaret extends PageIndicator {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mAllAppsHandle = (ImageView) findViewById(R.id.all_apps_handle);
-        if (!FeatureFlags.isAppDrawerEnabled(mLauncher)) {
-            mAllAppsHandle.setVisibility(GONE);
-        }
         mAllAppsHandle.setImageDrawable(getCaretDrawable());
         mAllAppsHandle.setOnTouchListener(mLauncher.getHapticFeedbackTouchListener());
         mAllAppsHandle.setOnClickListener(mLauncher);
@@ -173,6 +169,11 @@ public class PageIndicatorLineCaret extends PageIndicator {
         if (getAlpha() == 0) {
             return;
         }
+
+        if (mAllAppsHandle != null) {
+            mAllAppsHandle.setVisibility(com.novaos.novaos.config.FeatureFlags.isAppDrawerEnabled(mLauncher) ? VISIBLE : GONE);
+        }
+
         animateLineToAlpha(mActiveAlpha);
 
         mCurrentScroll = currentScroll;

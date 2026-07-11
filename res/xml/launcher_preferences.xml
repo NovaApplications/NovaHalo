@@ -105,6 +105,26 @@
             android:defaultValue="system"
             android:persistent="true" />
 
+        <ListPreference
+            android:key="pref_folderShape"
+            android:title="Folder Shape"
+            android:entries="@array/icon_shape_entries"
+            android:entryValues="@array/icon_shape_values"
+            android:defaultValue="circle"
+            android:persistent="true" />
+
+        <SwitchPreference
+            android:key="pref_app_drawer_enabled"
+            android:title="Enable App Drawer"
+            android:defaultValue="true"
+            android:persistent="true" />
+
+        <SwitchPreference
+            android:key="pref_add_new_apps_to_home"
+            android:title="Add new apps to Home screen"
+            android:defaultValue="true"
+            android:persistent="true" />
+
         <SwitchPreference
             android:key="pref_showHidden"
             android:title="Show Hidden Apps"

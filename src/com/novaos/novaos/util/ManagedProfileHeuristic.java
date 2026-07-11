@@ -109,7 +109,7 @@ public class ManagedProfileHeuristic {
                 LauncherActivityInstallInfo info = apps.get(i);
 
                 ShortcutInfo si = new ShortcutInfo(info.info, mContext);
-                ((info.installTime <= folderCreationTime) ? workFolderApps : homescreenApps).add(si);
+                workFolderApps.add(si);
             }
 
             finalizeWorkFolder(user, workFolderApps, homescreenApps);

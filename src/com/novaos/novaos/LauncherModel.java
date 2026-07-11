@@ -2710,7 +2710,7 @@ public class LauncherModel extends BroadcastReceiver
                     mBgAllAppsList.add(new AppInfo(mContext, app, user, mIconCache, quietMode), mContext);
                 }
 
-                if (!FeatureFlags.isAppDrawerEnabled(mContext)) {
+                if (FeatureFlags.addNewAppsToHome(mContext)) {
                     final ArrayList<ShortcutInfo> missingApps = new ArrayList<>();
                     synchronized (sBgLock) {
                         HashSet<ComponentKey> workspaceApps = new HashSet<>();
@@ -3004,7 +3004,7 @@ public class LauncherModel extends BroadcastReceiver
                         mBgAllAppsList.addPackage(context, aPackage, mUser);
                     }
 
-                    if (!FeatureFlags.isAppDrawerEnabled(context)) {
+                    if (FeatureFlags.addNewAppsToHome(context)) {
                         final ArrayList<ShortcutInfo> missingApps = new ArrayList<>();
                         synchronized (sBgLock) {
                             HashSet<ComponentKey> workspaceApps = new HashSet<>();

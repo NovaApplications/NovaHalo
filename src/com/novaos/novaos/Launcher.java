@@ -3103,7 +3103,7 @@ public class Launcher extends Activity
      */
     public void showAppsView(boolean animated,
                              boolean focusSearchBar) {
-        if (!FeatureFlags.isAppDrawerEnabled(this)) return;
+        if (!com.novaos.novaos.config.FeatureFlags.isAppDrawerEnabled(this)) return;
         markAppsViewShown();
         showAppsOrWidgets(State.APPS, animated, focusSearchBar);
     }

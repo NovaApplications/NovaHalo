@@ -195,7 +195,7 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
         mWorkTab.setAlpha(isWork ? 1.0f : 0.7f);
 
         if (mLaunchWorkMode != null) {
-            mLaunchWorkMode.setVisibility(isWork ? VISIBLE : GONE);
+            mLaunchWorkMode.setVisibility(GONE);
         }
     }
 
@@ -212,7 +212,7 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
 
         if (workProfile != null) {
             final UserHandle finalWorkProfile = workProfile;
-            mWorkModeToggle.setVisibility(View.VISIBLE);
+            mWorkModeToggle.setVisibility(View.GONE);
             updateWorkModeToggleState(userManager, finalWorkProfile);
             mWorkModeToggle.setOnClickListener(v -> {
                 boolean isQuietMode = userManager.isQuietModeEnabled(finalWorkProfile);
@@ -441,6 +441,10 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
         mWorkModeToggle = findViewById(R.id.work_mode_toggle);
         mLaunchWorkMode = findViewById(R.id.launch_work_mode);
         mLaunchWorkMode.setOnClickListener(v -> mLauncher.activateWorkModeLauncher());
+        
+        mWorkModeToggle.setVisibility(View.GONE);
+        mLaunchWorkMode.setVisibility(View.GONE);
+
         setupTabs();
         setupWorkModeToggle();
 

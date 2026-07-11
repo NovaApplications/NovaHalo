@@ -176,6 +176,27 @@ public class SettingsActivity extends AppCompatActivity implements
                     });
                 }
             }
+
+            // Listen for shape changes to reload the launcher
+            Preference iconShapePref = findPreference("pref_iconShape");
+            if (iconShapePref != null) {
+                iconShapePref.setOnPreferenceChangeListener((preference, newValue) -> {
+                    reloadLauncher();
+                    return true;
+                });
+            }
+
+            Preference folderShapePref = findPreference("pref_folderShape");
+            if (folderShapePref != null) {
+                folderShapePref.setOnPreferenceChangeListener((preference, newValue) -> {
+                    reloadLauncher();
+                    return true;
+                });
+            }
+        }
+
+        private void reloadLauncher() {
+            LauncherAppState.getInstance().reloadAll(true);
         }
 
         private void updateDevOptionsVisibility(Preference category) {
@@ -326,7 +347,7 @@ public class SettingsActivity extends AppCompatActivity implements
                     });
                     return true;
                 } else if (key.equals("whats_new") && getActivity() != null) {
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://novaapplications.github.io/NovaOS/#releases")));
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://novaapplications.github.io/NovaHalo/#releases")));
                     return true;
                 } else if (key.equals("reset_launcher") && getActivity() != null) {
                     showResetConfirmationDialog();
