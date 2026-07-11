@@ -29,7 +29,6 @@ public final class FeatureFlags {
     private static final String KEY_PREF_PINCH_TO_OVERVIEW = "pref_pinchToOverview";
     private static final String KEY_PREF_SWIPE_DOWN_ACTION = "pref_swipeDownAction";
     private static final String KEY_PREF_ICON_SHAPE = "pref_iconShape";
-    private static final String KEY_PREF_FOLDER_SHAPE = "pref_folderShape";
     private static final String KEY_PREF_TASKBAR_TRANSPARENCY = "pref_taskbarTransparency";
     private static final String KEY_PREF_HOTSEAT_EXTRACTED_COLORS = "pref_hotseatShouldUseExtractedColors";
     private static final String KEY_PREF_HAPTIC_FEEDBACK = "pref_enableHapticFeedback";
@@ -58,10 +57,6 @@ public final class FeatureFlags {
 
     public static String iconShape(Context context) {
         return Utilities.getPrefs(context).getString(KEY_PREF_ICON_SHAPE, "system");
-    }
-
-    public static String folderShape(Context context) {
-        return Utilities.getPrefs(context).getString(KEY_PREF_FOLDER_SHAPE, "circle");
     }
 
     public static float taskbarTransparency(Context context) {

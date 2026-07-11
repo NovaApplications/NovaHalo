@@ -487,12 +487,6 @@ public class Launcher extends Activity
             }
         }
         
-        // Also update open folder
-        Folder openFolder = mWorkspace != null ? mWorkspace.getOpenFolder() : null;
-        if (openFolder != null) {
-            openFolder.updateBackground();
-        }
-        
         // Also update hotseat
         if (mHotseat != null) {
             ShortcutAndWidgetContainer container = mHotseat.getLayout().getShortcutsAndWidgets();
@@ -2854,7 +2848,6 @@ public class Launcher extends Activity
             Log.w(TAG, "Opening folder (" + folder + ") which already has a parent (" +
                     folder.getParent() + ").");
         }
-        folder.updateBackground();
         folder.animateOpen();
 
         growAndFadeOutFolderIcon(folderIcon);

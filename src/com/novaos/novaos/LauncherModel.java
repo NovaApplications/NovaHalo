@@ -445,11 +445,11 @@ public class LauncherModel extends BroadcastReceiver
      *
      * @return screenId and the coordinates for the item.
      */
-    @Thunk
     Pair<Long, int[]> findSpaceForItem(
             Context context,
             ArrayList<Long> workspaceScreens,
             ArrayList<Long> addedWorkspaceScreensFinal,
+            ArrayList<ItemInfo> assignedItems,
             int spanX, int spanY) {
         LongSparseArray<ArrayList<ItemInfo>> screenItems = new LongSparseArray<>();
 
@@ -464,6 +464,18 @@ public class LauncherModel extends BroadcastReceiver
                     }
                     items.add(info);
                 }
+            }
+        }
+
+        // Add items assigned in this session
+        if (assignedItems != null) {
+            for (ItemInfo info : assignedItems) {
+                ArrayList<ItemInfo> items = screenItems.get(info.screenId);
+                if (items == null) {
+                    items = new ArrayList<>();
+                    screenItems.put(info.screenId, items);
+                }
+                items.add(info);
             }
         }
 
@@ -504,11 +516,9 @@ public class LauncherModel extends BroadcastReceiver
             workspaceScreens.add(screenId);
             addedWorkspaceScreensFinal.add(screenId);
 
-            // If we still can't find an empty space, then God help us all!!!
-            if (!findNextAvailableIconSpaceInScreen(
-                    screenItems.get(screenId), cordinates, spanX, spanY)) {
-                throw new RuntimeException("Can't find space to add the item");
-            }
+            // New screen is empty, so it's always vacant
+            cordinates[0] = 0;
+            cordinates[1] = 0;
         }
         return Pair.create(screenId, cordinates);
     }
@@ -533,8 +543,15 @@ public class LauncherModel extends BroadcastReceiver
                 // can not use sBgWorkspaceScreens because loadWorkspace() may not have been
                 // called.
                 ArrayList<Long> workspaceScreens = loadWorkspaceScreensDb(context);
+                final ArrayList<ItemInfo> assignedItems = new ArrayList<>();
+
                 synchronized (sBgLock) {
                     for (ItemInfo item : workspaceApps) {
+                        if (item.user != null && !item.user.equals(Utilities.myUserHandle())) {
+                            // This is a Work Profile app, it belongs in the folder, not on home
+                            continue;
+                        }
+
                         if (item instanceof ShortcutInfo) {
                             // Short-circuit this logic if the icon exists somewhere on the workspace
                             if (shortcutExists(item.getIntent(), item.user)) {
@@ -544,7 +561,7 @@ public class LauncherModel extends BroadcastReceiver
 
                         // Find appropriate space for the item.
                         Pair<Long, int[]> coords = findSpaceForItem(context,
-                                workspaceScreens, addedWorkspaceScreensFinal, 1, 1);
+                                workspaceScreens, addedWorkspaceScreensFinal, assignedItems, 1, 1);
                         long screenId = coords.first;
                         int[] cordinates = coords.second;
 
@@ -556,6 +573,12 @@ public class LauncherModel extends BroadcastReceiver
                         } else {
                             throw new RuntimeException("Unexpected info type");
                         }
+
+                        itemInfo.screenId = screenId;
+                        itemInfo.cellX = cordinates[0];
+                        itemInfo.cellY = cordinates[1];
+                        itemInfo.container = LauncherSettings.Favorites.CONTAINER_DESKTOP;
+                        assignedItems.add(itemInfo);
 
                         // Add the shortcut to the db
                         addItemToDatabase(context, itemInfo,

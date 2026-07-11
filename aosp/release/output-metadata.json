@@ -11,8 +11,8 @@
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 60,
-      "versionName": "1.0.0 beta 8",
+      "versionCode": 61,
+      "versionName": "1.0.0 beta 9",
       "outputFile": "NovaOS-aosp-release.apk"
     }
   ],

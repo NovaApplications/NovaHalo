@@ -185,14 +185,6 @@ public class SettingsActivity extends AppCompatActivity implements
                     return true;
                 });
             }
-
-            Preference folderShapePref = findPreference("pref_folderShape");
-            if (folderShapePref != null) {
-                folderShapePref.setOnPreferenceChangeListener((preference, newValue) -> {
-                    reloadLauncher();
-                    return true;
-                });
-            }
         }
 
         private void reloadLauncher() {

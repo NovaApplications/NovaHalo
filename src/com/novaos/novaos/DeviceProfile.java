@@ -178,18 +178,8 @@ public class DeviceProfile {
         availableHeightPx = maxSize.y;
 
         numRows = inv.numRows;
-        numHotseatIcons = inv.numHotseatIcons;
         numColumns = inv.numColumns;
-
-        // Calculate the remaining vars
         numHotseatIcons = inv.numHotseatIcons;
-        if (isTablet || isLargeTablet) {
-            // For tablets, use more columns in landscape
-            numColumns = widthPx > heightPx ? inv.numColumns + 2 : inv.numColumns;
-            numHotseatIcons = widthPx > heightPx ? inv.numHotseatIcons + 2 : inv.numHotseatIcons;
-        } else {
-            numColumns = inv.numColumns;
-        }
 
         // Calculate the remaining vars
         updateAvailableDimensions(dm, res);

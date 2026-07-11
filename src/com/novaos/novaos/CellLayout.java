@@ -205,6 +205,7 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
         mCellWidth = mCellHeight = -1;
         mFixedCellWidth = mFixedCellHeight = -1;
         mOriginalWidthGap = mOriginalHeightGap = -1;
+        mWidthGap = mHeightGap = 0;
         mMaxGap = Integer.MAX_VALUE;
 
         mCountX = grid.numColumns;
@@ -361,11 +362,19 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
     }
 
     public void setGridSize(int x, int y) {
+        if (mCountX == x && mCountY == y) return;
         mCountX = x;
         mCountY = y;
         mOccupied = new GridOccupancy(mCountX, mCountY);
         mTmpOccupied = new GridOccupancy(mCountX, mCountY);
         mTempRectStack.clear();
+
+        for (int i = 0; i < mShortcutsAndWidgets.getChildCount(); i++) {
+            View child = mShortcutsAndWidgets.getChildAt(i);
+            LayoutParams lp = (LayoutParams) child.getLayoutParams();
+            mOccupied.markCells(lp.cellX, lp.cellY, lp.cellHSpan, lp.cellVSpan, true);
+        }
+
         mShortcutsAndWidgets.setCellDimensions(mCellWidth, mCellHeight, mWidthGap, mHeightGap,
                 mCountX);
         requestLayout();
@@ -791,8 +800,8 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
             int vSpace = childHeightSize;
             int hFreeSpace = hSpace - (mCountX * mCellWidth);
             int vFreeSpace = vSpace - (mCountY * mCellHeight);
-            mWidthGap = Math.min(mMaxGap, numWidthGaps > 0 ? (hFreeSpace / numWidthGaps) : 0);
-            mHeightGap = Math.min(mMaxGap, numHeightGaps > 0 ? (vFreeSpace / numHeightGaps) : 0);
+            mWidthGap = Math.min(mMaxGap, numWidthGaps > 0 ? (Math.max(0, hFreeSpace) / numWidthGaps) : 0);
+            mHeightGap = Math.min(mMaxGap, numHeightGaps > 0 ? (Math.max(0, vFreeSpace) / numHeightGaps) : 0);
             mShortcutsAndWidgets.setCellDimensions(mCellWidth, mCellHeight, mWidthGap,
                     mHeightGap, mCountX);
         } else {
@@ -823,7 +832,9 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         int left = getPaddingLeft();
+        left += (int) Math.ceil(getUnusedHorizontalSpace() / 2f);
         int right = r - l - getPaddingRight();
+        right -= (int) Math.ceil(getUnusedHorizontalSpace() / 2f);
 
         int top = getPaddingTop();
         int bottom = b - t - getPaddingBottom();
@@ -1144,8 +1155,8 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
         for (int y = 0; y < countY - (minSpanY - 1); y++) {
             inner:
             for (int x = 0; x < countX - (minSpanX - 1); x++) {
-                int ySize = -1;
-                int xSize = -1;
+                int ySize = spanY;
+                int xSize = spanX;
                 if (ignoreOccupied) {
                     // First, let's see if this thing fits anywhere
                     for (int i = 0; i < minSpanX; i++) {
