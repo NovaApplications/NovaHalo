@@ -536,7 +536,14 @@ public class FolderIcon extends FrameLayout implements FolderListener {
         void invalidate() {
             int radius = getScaledRadius();
             mClipPath.reset();
-            mClipPath.addCircle(radius, radius, radius, Path.Direction.CW);
+            
+            if (mInvalidateDelegate != null) {
+                String shape = com.novaos.novaos.config.FeatureFlags.folderShape(mInvalidateDelegate.getContext());
+                int size = (int) (mScale * previewSize);
+                mClipPath = Utilities.getShapePath(shape, size, size);
+            } else {
+                mClipPath.addCircle(radius, radius, radius, Path.Direction.CW);
+            }
 
             if (mInvalidateDelegate != null) {
                 mInvalidateDelegate.invalidate();
@@ -564,15 +571,13 @@ public class FolderIcon extends FrameLayout implements FolderListener {
             int alpha = (int) Math.min(MAX_BG_OPACITY, BG_OPACITY * mColorMultiplier);
             paint.setColor(android.graphics.Color.argb(alpha, BG_INTENSITY, BG_INTENSITY, BG_INTENSITY));
 
-            float radius = getScaledRadius();
-
-            canvas.drawCircle(radius, radius, radius, paint);
+            canvas.drawPath(mClipPath, paint);
             canvas.clipPath(mClipPath, android.graphics.Region.Op.DIFFERENCE);
 
             paint.setStyle(Paint.Style.STROKE);
             paint.setColor(android.graphics.Color.TRANSPARENT);
             paint.setShadowLayer(mStrokeWidth, 0, mStrokeWidth, android.graphics.Color.argb(SHADOW_OPACITY, 0, 0, 0));
-            canvas.drawCircle(radius, radius, radius, paint);
+            canvas.drawPath(mClipPath, paint);
 
             canvas.restore();
         }
@@ -587,8 +592,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(mStrokeWidth);
 
-            float radius = getScaledRadius();
-            canvas.drawCircle(radius, radius, radius - 1, paint);
+            canvas.drawPath(mClipPath, paint);
 
             canvas.restore();
         }
@@ -604,8 +608,7 @@ public class FolderIcon extends FrameLayout implements FolderListener {
             paint.setAntiAlias(true);
             paint.setColor(Color.argb(160, 245, 245, 245));
 
-            float radius = getScaledRadius();
-            canvas.drawCircle(radius, radius, radius, paint);
+            canvas.drawPath(mClipPath, paint);
 
             canvas.restore();
             mScale = originalScale;
