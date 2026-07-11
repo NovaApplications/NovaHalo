@@ -18,8 +18,8 @@ android {
     defaultConfig {
         minSdkVersion 23
         targetSdkVersion 35
-        versionCode 58
-        versionName "1.0.0 beta 6"
+        versionCode 59
+        versionName "1.0.0 beta 7"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -27,7 +27,8 @@ android {
             abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
         }
 
-        buildConfigField "String", "BUILD_NUMBER", "\"100.260710.2248\""
+        def date = new Date().format('yyMMdd.HHmm')
+        buildConfigField "String", "BUILD_NUMBER", "\"100.${date}\""
     }
 
     compileOptions {

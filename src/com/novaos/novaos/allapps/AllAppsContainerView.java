@@ -305,14 +305,10 @@ public class AllAppsContainerView extends BaseContainerView implements DragSourc
             return;
         }
         int color = mLauncher.getExtractedColors().getHotseatColor(getContext());
-        // Increase alpha for all apps background as it looks too thin otherwise
-        int alpha = Color.alpha(color);
-        int targetAlpha = Math.min(255, (int) (alpha * 1.5f));
-        int finalColor = ColorUtils.setAlphaComponent(color, targetAlpha);
-        getContentView().setBackgroundColor(finalColor);
-        setRevealDrawableColor(finalColor);
+        getContentView().setBackgroundColor(color);
+        setRevealDrawableColor(color);
         
-        int textColor = Utilities.getTextColorForBackground(finalColor);
+        int textColor = Utilities.getTextColorForBackground(color);
         if (mAdapter != null) {
             mAdapter.setTextColor(textColor);
         }

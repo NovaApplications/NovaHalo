@@ -52,8 +52,8 @@ public class ExtractedColors {
     private static final int HOTSEAT_DARK_MUTED_INDEX = 12;
     private static final int HOTSEAT_LIGHT_VIBRANT_INDEX = 13;
     private static final int HOTSEAT_DARK_VIBRANT_INDEX = 14;
-    private static final int IS_SUPER_LIGHT = 15;
-    private static final int IS_SUPER_DARK = 16;
+    public static final int IS_SUPER_LIGHT = 15;
+    public static final int IS_SUPER_DARK = 16;
 
     public static final int NUM_COLOR_PROFILES = 16;
     private static final int VERSION = 7;

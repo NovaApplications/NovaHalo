@@ -457,9 +457,46 @@ public class Launcher extends Activity
         if (mAppsView != null) {
             mAppsView.updateBackground();
         }
+        updateIconTextColors();
         // It's possible that All Apps is visible when this is run,
         // so always use light status bar in that case.
         activateLightStatusBar(isAllAppsVisible());
+    }
+
+    private void updateIconTextColors() {
+        if (mExtractedColors == null || mWorkspace == null) return;
+
+        boolean isLight = mExtractedColors.getColor(com.novaos.novaos.dynamicui.ExtractedColors.IS_SUPER_LIGHT, 0) == 1;
+        int textColor = isLight ? Color.BLACK : Color.WHITE;
+        int shadowColor = isLight ? Color.TRANSPARENT : 0xB0000000;
+
+        for (int i = 0; i < mWorkspace.getChildCount(); i++) {
+            View child = mWorkspace.getChildAt(i);
+            if (child instanceof CellLayout) {
+                ShortcutAndWidgetContainer container = ((CellLayout) child).getShortcutsAndWidgets();
+                for (int j = 0; j < container.getChildCount(); j++) {
+                    View v = container.getChildAt(j);
+                    if (v instanceof BubbleTextView) {
+                        BubbleTextView btv = (BubbleTextView) v;
+                        btv.setTextColor(textColor);
+                        btv.setShadowLayer(isLight ? 0 : 2.0f, 0, isLight ? 0 : 1.0f, shadowColor);
+                    }
+                }
+            }
+        }
+        
+        // Also update hotseat
+        if (mHotseat != null) {
+            ShortcutAndWidgetContainer container = mHotseat.getLayout().getShortcutsAndWidgets();
+            for (int i = 0; i < container.getChildCount(); i++) {
+                View v = container.getChildAt(i);
+                if (v instanceof BubbleTextView) {
+                    BubbleTextView btv = (BubbleTextView) v;
+                    btv.setTextColor(textColor);
+                    btv.setShadowLayer(isLight ? 0 : 2.0f, 0, isLight ? 0 : 1.0f, shadowColor);
+                }
+            }
+        }
     }
 
     public ExtractedColors getExtractedColors() {
