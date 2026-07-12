@@ -46,7 +46,7 @@
     <string name="folder_name_format">Folder: <xliff:g example="Games" id="name">%1$s</xliff:g></string>
     <string name="widget_button_text">Widgets</string>
     <string name="wallpaper_button_text">Wallpapers</string>
-    <string name="settings_button_text">Settings</string>
+    <string name="settings_button_text">Launcher Settings</string>
     <string name="msg_disabled_by_admin">Disabled by your admin</string>
     <string name="accessibility_action_overview">Overview</string>
     <string name="package_state_unknown">Unknown</string>
@@ -119,7 +119,7 @@
     <string name="reset_launcher_summary">Clear all settings and layout to defaults</string>
     <string name="reset_launcher_confirmation">Are you sure you want to reset the launcher? This will clear your layout and all settings.</string>
     <string name="about_text">NovaOS is an open-source launcher based on Lawnchair.</string>
-    <string name="nova_version_title">Version 1.0.0 beta 9</string>
+    <string name="nova_version_title">Version 1.0.0 beta 11</string>
     <string name="nova_build_title">Build</string>
     <string name="nova_check_for_update_title">Check for updates</string>
     <string name="all_apps_personal_tab">Personal</string>
@@ -149,6 +149,8 @@
     <string name="icon_shape_teardrop">Teardrop</string>
 
     <string name="pref_taskbar_transparency_title">Dock Transparency</string>
+    <string name="pref_show_pixel_bar_title">Pixel Now Bar</string>
+    <string name="pref_show_pixel_bar_summary">Show search bar on the first page</string>
     <string name="taskbar_transparency_0">0% (Solid)</string>
     <string name="taskbar_transparency_25">25%</string>
     <string name="taskbar_transparency_50">50%</string>

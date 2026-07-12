@@ -299,14 +299,6 @@ public class DeviceProfile {
         mInsets.set(insets);
     }
 
-    /**
-     * Returns the width and height of the search bar, ignoring any padding.
-     */
-    public Point getSearchBarDimensForWidgetOpts() {
-        int gap = desiredWorkspaceLeftRightMarginPx - defaultWidgetPadding.right;
-        return new Point(availableWidthPx - 2 * gap, dropTargetBarSizePx);
-    }
-
     public Point getCellSize() {
         Point result = new Point();
         // Since we are only concerned with the overall padding, layout direction does
@@ -365,13 +357,6 @@ public class DeviceProfile {
         }
     }
 
-    int getOverviewModeButtonBarHeight() {
-        int zoneHeight = (int) (overviewModeIconZoneRatio * availableHeightPx);
-        zoneHeight = Math.min(overviewModeMaxIconZoneHeightPx,
-                Math.max(overviewModeMinIconZoneHeightPx, zoneHeight));
-        return zoneHeight;
-    }
-
     public static int calculateCellWidth(int width, int countX) {
         return width / Math.max(1, countX);
     }
@@ -402,9 +387,14 @@ public class DeviceProfile {
 
         // Recalculate cell dimensions for the current screen size and orientation
         int currentWidth = isLandscape ? Math.max(widthPx, heightPx) : Math.min(widthPx, heightPx);
+        int currentHeight = isLandscape ? Math.min(widthPx, heightPx) : Math.max(widthPx, heightPx);
+
+        // Update available dimensions for the current orientation
+        int curAvailableWidthPx = currentWidth - mInsets.left - mInsets.right;
+        int curAvailableHeightPx = currentHeight - mInsets.top - mInsets.bottom;
         
         // Cell width should be the width of the screen divided by columns, minus small edge margins
-        cellWidthPx = (currentWidth - (2 * edgeMarginPx)) / numColumns;
+        cellWidthPx = (curAvailableWidthPx - (2 * edgeMarginPx)) / numColumns;
         
         int textHeight = Utilities.calculateTextHeight(iconTextSizePx);
         int iconPadding = iconDrawablePaddingPx;
@@ -417,7 +407,7 @@ public class DeviceProfile {
         }
 
         // Layout the search bar space
-        Point searchBarBounds = getSearchBarDimensForWidgetOpts();
+        Point searchBarBounds = getSearchBarDimensForWidgetOpts(curAvailableWidthPx);
         View searchBar = launcher.getDropTargetBar();
         lp = (FrameLayout.LayoutParams) searchBar.getLayoutParams();
         lp.width = searchBarBounds.x;
@@ -450,8 +440,8 @@ public class DeviceProfile {
         lp = (FrameLayout.LayoutParams) hotseat.getLayoutParams();
         
         // Align hotseat with workspace
-        float workspaceCellWidth = (float) (currentWidth - 2 * edgeMarginPx) / numColumns;
-        float hotseatCellWidth = (float) (currentWidth - 2 * edgeMarginPx) / numHotseatIcons;
+        float workspaceCellWidth = (float) (curAvailableWidthPx - 2 * edgeMarginPx) / numColumns;
+        float hotseatCellWidth = (float) (curAvailableWidthPx - 2 * edgeMarginPx) / numHotseatIcons;
         int hotseatAdjustment = Math.round((workspaceCellWidth - hotseatCellWidth) / 2);
 
         lp.gravity = Gravity.BOTTOM;
@@ -483,10 +473,10 @@ public class DeviceProfile {
             int totalItemWidth = visibleChildCount * overviewModeBarItemWidthPx;
             int maxWidth = totalItemWidth + (visibleChildCount - 1) * overviewModeBarSpacerWidthPx;
 
-            lp.width = Math.min(availableWidthPx, maxWidth);
-            lp.height = getOverviewModeButtonBarHeight();
+            lp.width = Math.min(curAvailableWidthPx, maxWidth);
+            lp.height = getOverviewModeButtonBarHeight(curAvailableHeightPx);
             // Center the overview buttons on the workspace page
-            lp.leftMargin = workspacePadding.left + (availableWidthPx -
+            lp.leftMargin = workspacePadding.left + (curAvailableWidthPx -
                     workspacePadding.left - workspacePadding.right - lp.width) / 2;
             overviewMode.setLayoutParams(lp);
         }
@@ -496,6 +486,18 @@ public class DeviceProfile {
                 mListeners.get(i).onLauncherLayoutChanged();
             }
         }
+    }
+
+    public Point getSearchBarDimensForWidgetOpts(int availableWidth) {
+        int gap = desiredWorkspaceLeftRightMarginPx - defaultWidgetPadding.right;
+        return new Point(availableWidth - 2 * gap, dropTargetBarSizePx);
+    }
+
+    int getOverviewModeButtonBarHeight(int availableHeight) {
+        int zoneHeight = (int) (overviewModeIconZoneRatio * availableHeight);
+        zoneHeight = Math.min(overviewModeMaxIconZoneHeightPx,
+                Math.max(overviewModeMinIconZoneHeightPx, zoneHeight));
+        return zoneHeight;
     }
 
     private int getCurrentWidth() {

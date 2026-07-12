@@ -193,6 +193,14 @@ public class SettingsActivity extends AppCompatActivity implements
                     return true;
                 });
             }
+
+            Preference pixelBarPref = findPreference("pref_showPixelBar");
+            if (pixelBarPref != null) {
+                pixelBarPref.setOnPreferenceChangeListener((preference, newValue) -> {
+                    reloadLauncher();
+                    return true;
+                });
+            }
         }
 
         private void reloadLauncher() {

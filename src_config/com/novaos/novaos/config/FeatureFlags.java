@@ -98,6 +98,6 @@ public final class FeatureFlags {
     }
 
     public static boolean showPixelBar(Context context) {
-        return false;
+        return Utilities.getPrefs(context).getBoolean(KEY_SHOW_PIXEL_BAR, false);
     }
 }

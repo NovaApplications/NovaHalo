@@ -202,6 +202,13 @@
             android:entries="@array/numHotseatIconsTexts"
             android:defaultValue="@string/generalDefault"
             android:persistent="true" />
+
+        <SwitchPreference
+            android:key="pref_showPixelBar"
+            android:title="@string/pref_show_pixel_bar_title"
+            android:summary="@string/pref_show_pixel_bar_summary"
+            android:defaultValue="false"
+            android:persistent="true" />
     </PreferenceScreen>
 
     <PreferenceScreen

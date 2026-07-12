@@ -486,7 +486,7 @@ public class LauncherModel extends BroadcastReceiver
 
         int screenCount = workspaceScreens.size();
         // First check the preferred screen.
-        int preferredScreenIndex = workspaceScreens.isEmpty() ? 0 : 1;
+        int preferredScreenIndex = 0;
         if (preferredScreenIndex < screenCount) {
             screenId = workspaceScreens.get(preferredScreenIndex);
             found = findNextAvailableIconSpaceInScreen(
@@ -495,7 +495,7 @@ public class LauncherModel extends BroadcastReceiver
 
         if (!found) {
             // Search on any of the screens starting from the first screen.
-            for (int screen = 1; screen < screenCount; screen++) {
+            for (int screen = 0; screen < screenCount; screen++) {
                 screenId = workspaceScreens.get(screen);
                 if (findNextAvailableIconSpaceInScreen(
                         screenItems.get(screenId), cordinates, spanX, spanY)) {
@@ -2748,6 +2748,10 @@ public class LauncherModel extends BroadcastReceiver
                         }
                         for (AppInfo app : mBgAllAppsList.data) {
                             if (app.user.equals(user) && !workspaceApps.contains(new ComponentKey(app.componentName, app.user))) {
+                                if (app.user != null && !app.user.equals(Utilities.myUserHandle())) {
+                                    // This is a Work Profile app, it belongs in the folder, not on home
+                                    continue;
+                                }
                                 missingApps.add(app.makeShortcut());
                             }
                         }
