@@ -114,9 +114,10 @@ public class ManagedProfileHeuristic {
 
             finalizeWorkFolder(user, workFolderApps, homescreenApps);
 
-            // Do not add shortcuts on the homescreen for the first time. This prevents the launcher
-            // getting filled with the managed user apps, when it start with a fresh DB (or after
-            // a very long time).
+            // Never add work profile shortcuts to the homescreen directly.
+            // They belong in the work folder or the app drawer.
+            homescreenApps.clear();
+
             if (userAppsExisted && !homescreenApps.isEmpty()) {
                 mModel.addAndBindAddedWorkspaceItems(mContext, homescreenApps);
             }

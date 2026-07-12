@@ -796,10 +796,8 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
         int numHeightGaps = mCountY - 1;
 
         if (mOriginalWidthGap < 0 || mOriginalHeightGap < 0) {
-            int hSpace = childWidthSize;
-            int vSpace = childHeightSize;
-            int hFreeSpace = hSpace - (mCountX * mCellWidth);
-            int vFreeSpace = vSpace - (mCountY * mCellHeight);
+            int hFreeSpace = childWidthSize - (mCountX * mCellWidth);
+            int vFreeSpace = childHeightSize - (mCountY * mCellHeight);
             mWidthGap = Math.min(mMaxGap, numWidthGaps > 0 ? (Math.max(0, hFreeSpace) / numWidthGaps) : 0);
             mHeightGap = Math.min(mMaxGap, numHeightGaps > 0 ? (Math.max(0, vFreeSpace) / numHeightGaps) : 0);
             mShortcutsAndWidgets.setCellDimensions(mCellWidth, mCellHeight, mWidthGap,
@@ -1181,6 +1179,7 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
                                 if (x + xSize > countX - 1 || mOccupied.cells[x + xSize][y + j]) {
                                     // We can't move out horizontally
                                     hitMaxX = true;
+                                    break;
                                 }
                             }
                             if (!hitMaxX) {
@@ -1191,6 +1190,7 @@ public class CellLayout extends ViewGroup implements BubbleTextShadowHandler {
                                 if (y + ySize > countY - 1 || mOccupied.cells[x + i][y + ySize]) {
                                     // We can't move out vertically
                                     hitMaxY = true;
+                                    break;
                                 }
                             }
                             if (!hitMaxY) {

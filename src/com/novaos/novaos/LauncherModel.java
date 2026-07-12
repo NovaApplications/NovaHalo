@@ -425,13 +425,19 @@ public class LauncherModel extends BroadcastReceiver
         runOnWorkerThread(r);
     }
 
-    private static boolean findNextAvailableIconSpaceInScreen(ArrayList<ItemInfo> occupiedPos,
+    private static boolean findNextAvailableIconSpaceInScreen(Context context, long screenId,
+                                                              ArrayList<ItemInfo> occupiedPos,
                                                               int[] xy, int spanX, int spanY) {
         LauncherAppState app = LauncherAppState.getInstance();
         InvariantDeviceProfile inv = app.getInvariantDeviceProfile();
         DeviceProfile grid = inv.profile;
 
         GridOccupancy occupied = new GridOccupancy(grid.numColumns, grid.numRows);
+        if (screenId == Workspace.FIRST_SCREEN_ID) {
+            // Mark the first row as occupied (if the feature is enabled)
+            // in order to account for the QSB.
+            occupied.markCells(0, 0, grid.numColumns, 1, FeatureFlags.showPixelBar(context));
+        }
         if (occupiedPos != null) {
             for (ItemInfo r : occupiedPos) {
                 occupied.markCells(r, true);
@@ -490,7 +496,7 @@ public class LauncherModel extends BroadcastReceiver
         if (preferredScreenIndex < screenCount) {
             screenId = workspaceScreens.get(preferredScreenIndex);
             found = findNextAvailableIconSpaceInScreen(
-                    screenItems.get(screenId), cordinates, spanX, spanY);
+                    context, screenId, screenItems.get(screenId), cordinates, spanX, spanY);
         }
 
         if (!found) {
@@ -498,7 +504,7 @@ public class LauncherModel extends BroadcastReceiver
             for (int screen = 0; screen < screenCount; screen++) {
                 screenId = workspaceScreens.get(screen);
                 if (findNextAvailableIconSpaceInScreen(
-                        screenItems.get(screenId), cordinates, spanX, spanY)) {
+                        context, screenId, screenItems.get(screenId), cordinates, spanX, spanY)) {
                     // We found a space for it
                     found = true;
                     break;
@@ -516,9 +522,11 @@ public class LauncherModel extends BroadcastReceiver
             workspaceScreens.add(screenId);
             addedWorkspaceScreensFinal.add(screenId);
 
-            // New screen is empty, so it's always vacant
-            cordinates[0] = 0;
-            cordinates[1] = 0;
+            // If we still can't find an empty space, then God help us all!!!
+            if (!findNextAvailableIconSpaceInScreen(
+                    context, screenId, screenItems.get(screenId), cordinates, spanX, spanY)) {
+                throw new RuntimeException("Can't find space to add the item");
+            }
         }
         return Pair.create(screenId, cordinates);
     }
@@ -1656,11 +1664,11 @@ public class LauncherModel extends BroadcastReceiver
             }
 
             if (!occupied.containsKey(item.screenId)) {
-                GridOccupancy screen = new GridOccupancy(countX + 1, countY + 1);
+                GridOccupancy screen = new GridOccupancy(countX, countY);
                 if (item.screenId == Workspace.FIRST_SCREEN_ID) {
                     // Mark the first row as occupied (if the feature is enabled)
                     // in order to account for the QSB.
-                    screen.markCells(0, 0, countX + 1, 1, FeatureFlags.showPixelBar(mContext));
+                    screen.markCells(0, 0, countX, 1, FeatureFlags.showPixelBar(mContext));
                 }
                 occupied.put(item.screenId, screen);
             }

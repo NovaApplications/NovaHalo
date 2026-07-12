@@ -42,8 +42,6 @@ public class DeviceProfile {
     public final InvariantDeviceProfile inv;
 
     // Device properties
-    public final boolean isTablet;
-    public final boolean isLargeTablet;
     public final boolean isPhone;
 
     // Device properties in current orientation
@@ -81,7 +79,6 @@ public class DeviceProfile {
 
     // Page indicator
     private final int pageIndicatorHeightPx;
-    private final int pageIndicatorLandGutterRightNavBarPx;
 
     // Workspace icons
     public int iconSizePx;
@@ -106,7 +103,6 @@ public class DeviceProfile {
     public int hotseatIconSizePx;
     private int hotseatBarHeightPx;
     private int hotseatBarTopPaddingPx;
-    private int hotseatLandGutterPx;
 
     // All apps
     public int allAppsButtonVisualSize;
@@ -133,9 +129,7 @@ public class DeviceProfile {
         DisplayMetrics dm = res.getDisplayMetrics();
 
         // Constants from resources
-        isTablet = res.getBoolean(R.bool.is_tablet);
-        isLargeTablet = res.getBoolean(R.bool.is_large_tablet);
-        isPhone = !isTablet && !isLargeTablet;
+        isPhone = true;
 
         // Some more constants
         ComponentName cn = new ComponentName(context.getPackageName(),
@@ -145,8 +139,6 @@ public class DeviceProfile {
         desiredWorkspaceLeftRightMarginPx = edgeMarginPx;
         pageIndicatorHeightPx =
                 res.getDimensionPixelSize(R.dimen.dynamic_grid_page_indicator_height);
-        pageIndicatorLandGutterRightNavBarPx = res.getDimensionPixelSize(
-                R.dimen.dynamic_grid_page_indicator_gutter_width_right_nav_bar);
         defaultPageSpacingPx =
                 res.getDimensionPixelSize(R.dimen.dynamic_grid_workspace_page_spacing);
         topWorkspacePadding =
@@ -169,7 +161,6 @@ public class DeviceProfile {
         hotseatBarHeightPx = res.getDimensionPixelSize(R.dimen.dynamic_grid_hotseat_height);
         hotseatBarTopPaddingPx =
                 res.getDimensionPixelSize(R.dimen.dynamic_grid_hotseat_top_padding);
-        hotseatLandGutterPx = res.getDimensionPixelSize(R.dimen.dynamic_grid_hotseat_gutter_width);
 
         // Determine sizes.
         widthPx = width;
@@ -239,18 +230,9 @@ public class DeviceProfile {
         cellWidthPx = availableWidthPx / numColumns;
         int textHeight = Utilities.calculateTextHeight(iconTextSizePx);
         
-        // On tablets, increase padding between icon and text to prevent overlap/cut-off
         int padding = iconDrawablePaddingPx;
-        if (!isPhone) {
-            padding = (int) (padding * 1.5f);
-        }
         
         cellHeightPx = iconSizePx + padding + textHeight;
-
-        // Ensure there is enough vertical space for labels on tablets/large screens
-        if (!isPhone) {
-            cellHeightPx += Utilities.pxFromDp(12, dm);
-        }
 
         dragViewScale = iconSizePx;
 
@@ -346,15 +328,10 @@ public class DeviceProfile {
     }
 
     private int getWorkspacePageSpacing() {
-        if (isLargeTablet) {
-            // In landscape mode the page spacing is set to the default.
-            return defaultPageSpacingPx;
-        } else {
-            // In portrait, we want the pages spaced such that there is no
-            // overhang of the previous / next page into the current page viewport.
-            // We assume symmetrical padding in portrait mode.
-            return Math.max(defaultPageSpacingPx, getWorkspacePadding(null).left + 1);
-        }
+        // We want the pages spaced such that there is no
+        // overhang of the previous / next page into the current page viewport.
+        // We assume symmetrical padding in portrait mode.
+        return Math.max(defaultPageSpacingPx, getWorkspacePadding(null).left + 1);
     }
 
     public static int calculateCellWidth(int width, int countX) {
@@ -366,7 +343,7 @@ public class DeviceProfile {
     }
 
     boolean shouldFadeAdjacentWorkspaceScreens() {
-        return isLargeTablet;
+        return false;
     }
 
     private int getVisibleChildCount(ViewGroup parent) {
@@ -398,13 +375,7 @@ public class DeviceProfile {
         
         int textHeight = Utilities.calculateTextHeight(iconTextSizePx);
         int iconPadding = iconDrawablePaddingPx;
-        if (!isPhone) {
-            iconPadding = (int) (iconPadding * 1.5f);
-        }
         cellHeightPx = iconSizePx + iconPadding + textHeight;
-        if (!isPhone) {
-            cellHeightPx += Utilities.pxFromDp(12, res.getDisplayMetrics());
-        }
 
         // Layout the search bar space
         Point searchBarBounds = getSearchBarDimensForWidgetOpts(curAvailableWidthPx);
@@ -517,15 +488,6 @@ public class DeviceProfile {
      * @return the left/right paddings for all containers.
      */
     public final int[] getContainerPadding() {
-
-        // No paddings for portrait phone
-        if (isPhone) {
-            return new int[]{0, 0};
-        }
-
-        // In landscape, we match the width of the workspace
-        int padding = (pageIndicatorLandGutterRightNavBarPx +
-                hotseatBarHeightPx + hotseatLandGutterPx + mInsets.left) / 2;
-        return new int[]{padding, padding};
+        return new int[]{0, 0};
     }
 }

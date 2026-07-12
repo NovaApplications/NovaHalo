@@ -17,4 +17,15 @@
 <com.novaos.novaos.QsbBlockerView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+    android:layout_height="match_parent">
+
+    <include layout="@layout/qsb_wide_with_mic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:clickable="true"
+        android:focusable="true" />
+
+</com.novaos.novaos.QsbBlockerView>

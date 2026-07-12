@@ -79,7 +79,6 @@ import com.novaos.novaos.folder.FolderIcon;
 import com.novaos.novaos.graphics.DragPreviewProvider;
 import com.novaos.novaos.util.ItemInfoMatcher;
 import com.novaos.novaos.util.LongArrayMap;
-import com.novaos.novaos.util.MultiStateAlphaController;
 import com.novaos.novaos.util.Thunk;
 import com.novaos.novaos.util.VerticalFlingDetector;
 import com.novaos.novaos.util.WallpaperOffsetInterpolator;
@@ -169,11 +168,10 @@ public class Workspace extends PagedView
     // return an (x, y) value from helper functions. Do NOT use them to maintain other state.
     private static final Rect sTempRect = new Rect();
     private final int[] mTempXY = new int[2];
-    @Thunk
-    float[] mDragViewVisualCenter = new float[2];
-    private float[] mTempCellLayoutCenterCoordinates = new float[2];
-    private int[] mTempVisiblePagesRange = new int[2];
-    private Matrix mTempMatrix = new Matrix();
+    private final float[] mDragViewVisualCenter = new float[2];
+    private final float[] mTempCellLayoutCenterCoordinates = new float[2];
+    private final int[] mTempVisiblePagesRange = new int[2];
+    private final Matrix mTempMatrix = new Matrix();
 
     private SpringLoadedDragController mSpringLoadedDragController;
     private float mOverviewModeShrinkFactor;
@@ -214,13 +212,13 @@ public class Workspace extends PagedView
     /**
      * These values correspond to {@link Direction#X} & {@link Direction#Y}
      */
-    private float[] mPageAlpha = new float[]{1, 1};
+    private final float[] mPageAlpha = new float[]{1, 1};
     /**
      * Hotseat alpha can be changed when moving horizontally, vertically, changing states.
      * The values correspond to {@link Direction#X}, {@link Direction#Y} &
      * {@link #HOTSEAT_STATE_ALPHA_INDEX} respectively.
      */
-    private float[] mHotseatAlpha = new float[]{1, 1, 1};
+    private final float[] mHotseatAlpha = new float[]{1, 1, 1};
 
     public static final int QSB_ALPHA_INDEX_STATE_CHANGE = 0;
     public static final int QSB_ALPHA_INDEX_Y_TRANSLATION = 1;
@@ -269,9 +267,9 @@ public class Workspace extends PagedView
     // Variables relating to touch disambiguation (scrolling workspace vs. scrolling a widget)
     private float mXDown;
     private float mYDown;
-    final static float START_DAMPING_TOUCH_SLOP_ANGLE = (float) Math.PI / 6;
-    final static float MAX_SWIPE_ANGLE = (float) Math.PI / 3;
-    final static float TOUCH_SLOP_DAMPING_FACTOR = 4;
+    private final static float START_DAMPING_TOUCH_SLOP_ANGLE = (float) Math.PI / 6;
+    private final static float MAX_SWIPE_ANGLE = (float) Math.PI / 3;
+    private final static float TOUCH_SLOP_DAMPING_FACTOR = 4;
 
     // Relating to the animation of items being dropped externally
     public static final int ANIMATE_INTO_POSITION_AND_DISAPPEAR = 0;
@@ -309,8 +307,6 @@ public class Workspace extends PagedView
     private int mUnboundedScrollX;
     // Total over scrollX in the overlay direction.
     private float mOverlayTranslation;
-    private int mFirstPageScrollX;
-    private boolean mIgnoreQsbScroll;
 
 
     boolean mScrollInteractionBegan;
@@ -318,7 +314,7 @@ public class Workspace extends PagedView
     private boolean mForceDrawAdjacentPages = false;
 
     // Handles workspace state transitions
-    private WorkspaceStateTransitionAnimation mStateTransitionAnimation;
+    private final WorkspaceStateTransitionAnimation mStateTransitionAnimation;
 
     private AccessibilityDelegate mPagesAccessibilityDelegate;
     private OnStateChangeListener mOnStateChangeListener;
@@ -733,7 +729,7 @@ public class Workspace extends PagedView
             return;
         }
 
-        if (hasExtraEmptyScreen() || mScreenOrder.size() == 0) return;
+        if (hasExtraEmptyScreen() || mScreenOrder.isEmpty()) return;
         long finalScreenId = mScreenOrder.get(mScreenOrder.size() - 1);
 
         CellLayout finalScreen = mWorkspaceScreens.get(finalScreenId);
@@ -1583,7 +1579,6 @@ public class Workspace extends PagedView
         @Override
         public void startTransition(LayoutTransition transition, ViewGroup container,
                                     View view, int transitionType) {
-            mIgnoreQsbScroll = true;
         }
 
         @Override
@@ -1591,9 +1586,7 @@ public class Workspace extends PagedView
                                   View view, int transitionType) {
             // Wait until all transitions are complete.
             if (!transition.isRunning()) {
-                mIgnoreQsbScroll = false;
                 transition.removeTransitionListener(this);
-                mFirstPageScrollX = getScrollForPage(0);
                 onWorkspaceOverallScrollChanged();
             }
         }
@@ -1610,7 +1603,6 @@ public class Workspace extends PagedView
             mWallpaperOffset.jumpToFinal();
         }
         super.onLayout(changed, left, top, right, bottom);
-        mFirstPageScrollX = getScrollForPage(0);
         onWorkspaceOverallScrollChanged();
 
         final LayoutTransition transition = getLayoutTransition();
@@ -1832,9 +1824,9 @@ public class Workspace extends PagedView
                 - grid.workspaceSpringLoadedBottomSpace;
         float totalShrunkSpace = shrunkBottom - shrunkTop;
 
-        float desiredCellTop = shrunkTop + (totalShrunkSpace - scaledHeight) / 2;
+        float desiredCellTop = shrunkTop + (totalShrunkSpace - scaledHeight) / 2.0f;
 
-        float halfHeight = getHeight() / 2;
+        float halfHeight = getHeight() / 2.0f;
         float myCenter = getTop() + halfHeight;
         float cellTopFromCenter = halfHeight - getChildAt(0).getTop();
         float actualCellTop = myCenter - cellTopFromCenter * grid.workspaceSpringLoadShrinkFactor;
@@ -2092,7 +2084,7 @@ public class Workspace extends PagedView
             }
             if (!transitionStateShouldAllowDrop()) return false;
 
-            mDragViewVisualCenter = d.getVisualCenter(mDragViewVisualCenter);
+            d.getVisualCenter(mDragViewVisualCenter);
 
             // We want the point to be mapped to the dragTarget.
             if (mLauncher.isHotseatLayout(dropTargetLayout)) {
@@ -2303,7 +2295,7 @@ public class Workspace extends PagedView
 
     @Override
     public void onDrop(final DragObject d) {
-        mDragViewVisualCenter = d.getVisualCenter(mDragViewVisualCenter);
+        d.getVisualCenter(mDragViewVisualCenter);
         CellLayout dropTargetLayout = mDropToLayout;
 
         // We want the point to be mapped to the dragTarget.
@@ -2769,7 +2761,7 @@ public class Workspace extends PagedView
 
         // Ensure that we have proper spans for the item that we are dropping
         if (item.spanX < 0 || item.spanY < 0) throw new RuntimeException("Improper spans found");
-        mDragViewVisualCenter = d.getVisualCenter(mDragViewVisualCenter);
+        d.getVisualCenter(mDragViewVisualCenter);
 
         final View child = (mDragInfo == null) ? null : mDragInfo.cell;
         if (setDropLayoutForDragObject(d)) {
@@ -4033,10 +4025,24 @@ public class Workspace extends PagedView
         if (qsb != null) {
             qsb.setVisibility(visible ? View.VISIBLE : View.GONE);
             CellLayout firstPage = mWorkspaceScreens.get(FIRST_SCREEN_ID);
-            if (!visible) {
-                firstPage.markCellsAsUnoccupiedForView(qsb);
-            } else {
-                firstPage.markCellsAsOccupiedForView(qsb);
+            if (firstPage != null) {
+                if (!visible) {
+                    firstPage.markCellsAsUnoccupiedForView(qsb);
+                } else {
+                    firstPage.markCellsAsOccupiedForView(qsb);
+                }
+            }
+        } else if (visible) {
+            // QSB is enabled but not present, add it.
+            CellLayout firstPage = mWorkspaceScreens.get(FIRST_SCREEN_ID);
+            if (firstPage != null) {
+                qsb = mLauncher.getLayoutInflater().inflate(R.layout.qsb_blocker_view,
+                        firstPage, false);
+                CellLayout.LayoutParams lp = new CellLayout.LayoutParams(0, 0, firstPage.getCountX(), 1);
+                lp.canReorder = false;
+                if (!firstPage.addViewToCellLayout(qsb, 0, getEmbeddedQsbId(), lp, true)) {
+                    Log.e(TAG, "Failed to add QSB to CellLayout");
+                }
             }
         }
     }

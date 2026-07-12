@@ -3,15 +3,20 @@ package com.novaos.novaos;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.app.SearchManager;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Property;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import com.novaos.novaos.config.FeatureFlags;
 
-public class QsbBlockerView extends FrameLayout implements Workspace.OnStateChangeListener {
+public class QsbBlockerView extends FrameLayout implements Workspace.OnStateChangeListener, View.OnClickListener {
     public static final Property<QsbBlockerView, Integer> QSB_BLOCKER_VIEW_ALPHA = new QsbBlockerViewAlpha(Integer.TYPE, "bgAlpha");
     private final Paint mBgPaint = new Paint(1);
 
@@ -19,6 +24,26 @@ public class QsbBlockerView extends FrameLayout implements Workspace.OnStateChan
         super(context, attributeSet);
         mBgPaint.setColor(-1);
         mBgPaint.setAlpha(0);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        setOnClickListener(this);
+        View gIcon = findViewById(R.id.g_icon);
+        if (gIcon != null) gIcon.setOnClickListener(this);
+        View micIcon = findViewById(R.id.mic_icon);
+        if (micIcon != null) micIcon.setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        Launcher launcher = Launcher.getLauncher(getContext());
+        if (v.getId() == R.id.mic_icon) {
+            launcher.startVoiceAssistant();
+        } else {
+            launcher.startSearch("", false, null, true);
+        }
     }
 
 

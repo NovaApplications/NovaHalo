@@ -52,7 +52,6 @@ import android.graphics.drawable.Drawable;
 import androidx.core.content.ContextCompat;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.media.AudioManager;
@@ -453,8 +452,11 @@ public class Launcher extends Activity
         if (mHotseat != null) {
             mHotseat.updateColor(mExtractedColors, !mPaused);
         }
-        if (mWorkspace != null && mWorkspace.getPageIndicator() != null) {
-            mWorkspace.getPageIndicator().updateColor(mExtractedColors);
+        if (mWorkspace != null) {
+            if (mWorkspace.getPageIndicator() != null) {
+                mWorkspace.getPageIndicator().updateColor(mExtractedColors);
+            }
+            mWorkspace.updateQsbVisibility();
         }
         if (mAppsView != null) {
             mAppsView.updateBackground();
@@ -577,7 +579,7 @@ public class Launcher extends Activity
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         // Populate work apps
-        RecyclerView list = (RecyclerView) findViewById(R.id.work_apps_list);
+        RecyclerView list = findViewById(R.id.work_apps_list);
         list.setLayoutManager(new GridLayoutManager(this, mDeviceProfile.numColumns));
         
         // Add vertical spacing between items
@@ -648,7 +650,7 @@ public class Launcher extends Activity
     }
 
     private void updateWorkModeStatusIcons() {
-        TextView batteryText = (TextView) findViewById(R.id.work_mode_battery);
+        TextView batteryText = findViewById(R.id.work_mode_battery);
         ImageView batteryIcon = findViewById(R.id.work_mode_battery_icon);
         ImageView batteryBolt = findViewById(R.id.work_mode_battery_bolt);
 
@@ -1146,7 +1148,7 @@ public class Launcher extends Activity
     }
 
     private void updateDevInfoVisibility() {
-        android.widget.TextView devInfo = (android.widget.TextView) findViewById(R.id.dev_info);
+        TextView devInfo = findViewById(R.id.dev_info);
         if (devInfo != null) {
             boolean isDev = Utilities.getPrefs(this).getBoolean("pref_dev_mode", false);
             boolean showInfo = Utilities.getPrefs(this).getBoolean("pref_show_build_info", true);
@@ -2006,6 +2008,22 @@ public class Launcher extends Activity
 
         // We need to show the workspace after starting the search
         showWorkspace(true);
+    }
+
+    public void startVoiceAssistant() {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VOICE_COMMAND);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } catch (Exception e) {
+            try {
+                Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            } catch (Exception e2) {
+                // Fallback
+            }
+        }
     }
 
     /**
@@ -3818,13 +3836,13 @@ public class Launcher extends Activity
 
     private boolean canRunNewAppsAnimation() {
         long diff = System.currentTimeMillis() - mDragController.getLastGestureUpTime();
-        return diff > (NEW_APPS_ANIMATION_INACTIVE_TIMEOUT_SECONDS * 1000);
+        return diff > (NEW_APPS_ANIMATION_INACTIVE_TIMEOUT_SECONDS * 1000L);
     }
 
     private ValueAnimator createNewAppBounceAnimation(View v, int i) {
         ValueAnimator bounceAnim = LauncherAnimUtils.ofViewAlphaAndScale(v, 1, 1, 1);
         bounceAnim.setDuration(InstallShortcutReceiver.NEW_SHORTCUT_BOUNCE_DURATION);
-        bounceAnim.setStartDelay(i * InstallShortcutReceiver.NEW_SHORTCUT_STAGGER_DELAY);
+        bounceAnim.setStartDelay((long) i * InstallShortcutReceiver.NEW_SHORTCUT_STAGGER_DELAY);
         bounceAnim.setInterpolator(new OvershootInterpolator(BOUNCE_ANIMATION_TENSION));
         return bounceAnim;
     }
