@@ -433,14 +433,14 @@ public class LauncherModel extends BroadcastReceiver
         DeviceProfile grid = inv.profile;
 
         GridOccupancy occupied = new GridOccupancy(grid.numColumns, grid.numRows);
-        if (screenId == Workspace.FIRST_SCREEN_ID) {
+        if (screenId == Workspace.FIRST_SCREEN_ID && FeatureFlags.showPixelBar(context)) {
             // Mark the first row as occupied (if the feature is enabled)
             // in order to account for the QSB.
-            occupied.markCells(0, 0, grid.numColumns, 1, FeatureFlags.showPixelBar(context));
+            occupied.markCells(0, 0, grid.numColumns, 1, true);
         }
         if (occupiedPos != null) {
             for (ItemInfo r : occupiedPos) {
-                occupied.markCells(r, true);
+                occupied.markCells(r.cellX, r.cellY, r.spanX, r.spanY, true);
             }
         }
         return occupied.findVacantCell(xy, spanX, spanY);
@@ -1665,10 +1665,9 @@ public class LauncherModel extends BroadcastReceiver
 
             if (!occupied.containsKey(item.screenId)) {
                 GridOccupancy screen = new GridOccupancy(countX, countY);
-                if (item.screenId == Workspace.FIRST_SCREEN_ID) {
-                    // Mark the first row as occupied (if the feature is enabled)
-                    // in order to account for the QSB.
-                    screen.markCells(0, 0, countX, 1, FeatureFlags.showPixelBar(mContext));
+                if (item.screenId == Workspace.FIRST_SCREEN_ID && FeatureFlags.showPixelBar(mContext)) {
+                    // Mark the first row as occupied in order to account for the QSB.
+                    screen.markCells(0, 0, countX, 1, true);
                 }
                 occupied.put(item.screenId, screen);
             }
@@ -1831,15 +1830,24 @@ public class LauncherModel extends BroadcastReceiver
                                     intentDescription = c.getString(intentIndex);
                                     serialNumber = c.getInt(profileIdIndex);
                                     user = allUsers.get(serialNumber);
-                                    int promiseType = c.getInt(restoredIndex);
-                                    int disabledState = 0;
-                                    boolean itemReplaced = false;
-                                    targetPackage = null;
                                     if (user == null) {
                                         // User has been deleted remove the item.
                                         itemsToRemove.add(id);
                                         continue;
                                     }
+
+                                    // Filter out work profile apps from the home screen pages.
+                                    // They belong in the work folder.
+                                    if (!user.equals(Utilities.myUserHandle())
+                                            && container == LauncherSettings.Favorites.CONTAINER_DESKTOP) {
+                                        itemsToRemove.add(id);
+                                        continue;
+                                    }
+
+                                    int promiseType = c.getInt(restoredIndex);
+                                    int disabledState = 0;
+                                    boolean itemReplaced = false;
+                                    targetPackage = null;
                                     try {
                                         intent = Intent.parseUri(intentDescription, 0);
                                         ComponentName cn = intent.getComponent();
@@ -3054,6 +3062,10 @@ public class LauncherModel extends BroadcastReceiver
                             }
                             for (AppInfo app : mBgAllAppsList.added) {
                                 if (app.user.equals(mUser) && !workspaceApps.contains(new ComponentKey(app.componentName, app.user))) {
+                                    if (app.user != null && !app.user.equals(Utilities.myUserHandle())) {
+                                        // This is a Work Profile app, it belongs in the folder, not on home
+                                        continue;
+                                    }
                                     missingApps.add(app.makeShortcut());
                                 }
                             }

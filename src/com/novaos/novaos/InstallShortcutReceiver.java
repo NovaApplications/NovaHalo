@@ -232,7 +232,19 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
             // Add the new apps to the model and bind them
             if (!addShortcuts.isEmpty()) {
                 LauncherAppState app = LauncherAppState.getInstance();
-                app.getModel().addAndBindAddedWorkspaceItems(context, addShortcuts);
+                
+                // Filter out work profile apps from being added to the homescreen
+                ArrayList<ItemInfo> filteredShortcuts = new ArrayList<>();
+                UserHandle myUser = Utilities.myUserHandle();
+                for (ItemInfo item : addShortcuts) {
+                    if (item.user == null || item.user.equals(myUser)) {
+                        filteredShortcuts.add(item);
+                    }
+                }
+                
+                if (!filteredShortcuts.isEmpty()) {
+                    app.getModel().addAndBindAddedWorkspaceItems(context, filteredShortcuts);
+                }
             }
         }
     }
