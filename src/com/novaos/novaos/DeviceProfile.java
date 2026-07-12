@@ -493,6 +493,10 @@ public class DeviceProfile {
         return new Point(availableWidth - 2 * gap, dropTargetBarSizePx);
     }
 
+    int getOverviewModeButtonBarHeight() {
+        return getOverviewModeButtonBarHeight(availableHeightPx);
+    }
+
     int getOverviewModeButtonBarHeight(int availableHeight) {
         int zoneHeight = (int) (overviewModeIconZoneRatio * availableHeight);
         zoneHeight = Math.min(overviewModeMaxIconZoneHeightPx,
