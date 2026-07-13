@@ -126,6 +126,13 @@
             android:persistent="true" />
 
         <SwitchPreference
+            android:key="pref_enable_google_now"
+            android:title="Google Feed"
+            android:summary="Swipe right from the first page to open the Google Feed"
+            android:defaultValue="false"
+            android:persistent="true" />
+
+        <SwitchPreference
             android:key="pref_showHidden"
             android:title="Show Hidden Apps"
             android:summaryOn="Hidden apps will be shown to change visibility settings"

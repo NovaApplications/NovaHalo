@@ -438,8 +438,8 @@ public class DeviceProfile {
         lp = (FrameLayout.LayoutParams) hotseat.getLayoutParams();
         
         // Align hotseat with workspace
-        float workspaceCellWidth = (float) (curAvailableWidthPx - 2 * edgeMarginPx) / numColumns;
-        float hotseatCellWidth = (float) (curAvailableWidthPx - 2 * edgeMarginPx) / numHotseatIcons;
+        float workspaceCellWidth = (float) (availableWidthPx - 2 * edgeMarginPx) / numColumns;
+        float hotseatCellWidth = (float) (availableWidthPx - 2 * edgeMarginPx) / numHotseatIcons;
         int hotseatAdjustment = Math.round((workspaceCellWidth - hotseatCellWidth) / 2);
 
         lp.gravity = Gravity.BOTTOM;

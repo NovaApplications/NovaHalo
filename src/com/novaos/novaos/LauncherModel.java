@@ -1819,6 +1819,8 @@ public class LauncherModel extends BroadcastReceiver
                     Intent intent;
                     UserHandle user;
                     String targetPackage;
+                    int disabledState;
+                    boolean itemReplaced;
 
                     while (!mStopped && c.moveToNext()) {
                         try {
@@ -1850,8 +1852,8 @@ public class LauncherModel extends BroadcastReceiver
                                     }
 
                                     int promiseType = c.getInt(restoredIndex);
-                                    int disabledState = 0;
-                                    boolean itemReplaced = false;
+                                    disabledState = 0;
+                                    itemReplaced = false;
                                     targetPackage = null;
                                     try {
                                         intent = Intent.parseUri(intentDescription, 0);
