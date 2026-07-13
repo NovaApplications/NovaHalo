@@ -364,17 +364,6 @@ public class Launcher extends Activity
         mSharedPrefs = Utilities.getPrefs(this);
         mSharedPrefs.registerOnSharedPreferenceChangeListener(this);
 
-        // One-time reset for Beta 16+ to clean up workspace organization
-        int lastVersion = mSharedPrefs.getInt("last_reset_version", 0);
-        if (lastVersion < 68) { // 68 is the versionCode for Beta 16
-            // Reset both desktop items AND workspace screens to ensure Page 0 is used correctly
-            getContentResolver().delete(LauncherSettings.Favorites.CONTENT_URI,
-                    LauncherSettings.Favorites.CONTAINER + " = ?",
-                    new String[]{Integer.toString(LauncherSettings.Favorites.CONTAINER_DESKTOP)});
-            getContentResolver().delete(LauncherSettings.WorkspaceScreens.CONTENT_URI, null, null);
-            mSharedPrefs.edit().putInt("last_reset_version", 68).apply();
-        }
-
         mIsSafeModeEnabled = getPackageManager().isSafeMode();
         mModel = app.setLauncher(this);
         mIconCache = app.getIconCache();

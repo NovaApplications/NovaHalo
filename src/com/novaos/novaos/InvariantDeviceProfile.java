@@ -24,6 +24,7 @@ import android.content.res.XmlResourceParser;
 import android.graphics.Point;
 import android.os.Build;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Xml;
 import android.view.Display;
 import android.view.WindowManager;
@@ -195,15 +196,24 @@ public class InvariantDeviceProfile {
         display.getMetrics(dm);
         SharedPreferences prefs = Utilities.getPrefs(context.getApplicationContext());
         String valueDefault = "default";
-        if (!prefs.getString("pref_numRows", valueDefault).equals(valueDefault)) {
-            numRows = Integer.valueOf(prefs.getString("pref_numRows", ""));
+        
+        try {
+            String rowStr = prefs.getString("pref_numRows", valueDefault);
+            if (!rowStr.equals(valueDefault) && !rowStr.isEmpty()) {
+                numRows = Integer.valueOf(rowStr);
+            }
+            String colStr = prefs.getString("pref_numCols", valueDefault);
+            if (!colStr.equals(valueDefault) && !colStr.isEmpty()) {
+                numColumns = Integer.valueOf(colStr);
+            }
+            String hotseatStr = prefs.getString("pref_numHotseatIcons", valueDefault);
+            if (!hotseatStr.equals(valueDefault) && !hotseatStr.isEmpty()) {
+                numHotseatIcons = Integer.valueOf(hotseatStr);
+            }
+        } catch (Exception e) {
+            Log.e("InvariantDeviceProfile", "Error parsing grid preferences", e);
         }
-        if (!prefs.getString("pref_numCols", valueDefault).equals(valueDefault)) {
-            numColumns = Integer.valueOf(prefs.getString("pref_numCols", ""));
-        }
-        if (!prefs.getString("pref_numHotseatIcons", valueDefault).equals(valueDefault)) {
-            numHotseatIcons = Integer.valueOf(prefs.getString("pref_numHotseatIcons", ""));
-        }
+
         if (prefs.getFloat("pref_iconScaleSB", 1f) != 1f) {
             float iconScale = prefs.getFloat("pref_iconScaleSB", 1f);
             iconSize *= iconScale;

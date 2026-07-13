@@ -26,12 +26,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.Intent.ShortcutIconResource;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import androidx.core.content.ContextCompat;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -518,19 +520,22 @@ public class LauncherModel extends BroadcastReceiver
         }
 
         if (!found) {
-            // Still no position found. Add a new screen to the end.
-            screenId = LauncherSettings.Settings.call(context.getContentResolver(),
-                    LauncherSettings.Settings.METHOD_NEW_SCREEN_ID)
-                    .getLong(LauncherSettings.Settings.EXTRA_VALUE);
+            // No space found, add a new screen.
+            Bundle res = LauncherSettings.Settings.call(context.getContentResolver(),
+                    LauncherSettings.Settings.METHOD_NEW_SCREEN_ID);
+            if (res != null) {
+                screenId = res.getLong(LauncherSettings.Settings.EXTRA_VALUE);
+                workspaceScreens.add(screenId);
+                addedWorkspaceScreensFinal.add(screenId);
 
-            // Save the screen id for binding in the workspace
-            workspaceScreens.add(screenId);
-            addedWorkspaceScreensFinal.add(screenId);
-
-            // If we still can't find an empty space, then God help us all!!!
-            if (!findNextAvailableIconSpaceInScreen(
-                    context, screenId, screenItems.get(screenId), cordinates, spanX, spanY)) {
-                throw new RuntimeException("Can't find space to add the item");
+                if (!findNextAvailableIconSpaceInScreen(
+                        context, screenId, screenItems.get(screenId), cordinates, spanX, spanY)) {
+                    Log.e(TAG, "Can't find space even on a fresh screen. Grid full?");
+                    return null;
+                }
+            } else {
+                Log.e(TAG, "Failed to generate new screen ID");
+                return null;
             }
         }
         return Pair.create(screenId, cordinates);
@@ -1199,6 +1204,66 @@ public class LauncherModel extends BroadcastReceiver
         runOnWorkerThread(r);
     }
 
+    public void populateDefaultDock(Context context) {
+        synchronized (sBgLock) {
+            // Only populate if dock is empty
+            for (ItemInfo item : sBgItemsIdMap) {
+                if (item.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT) {
+                    return;
+                }
+            }
+        }
+
+        PackageManager pm = context.getPackageManager();
+        int rank = 0;
+        
+        // 1. Phone
+        addDefaultAppToDock(context, pm, new Intent(Intent.ACTION_DIAL), rank++);
+        
+        // 2. Messages
+        addDefaultAppToDock(context, pm, new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_APP_MESSAGING), rank++);
+        
+        // 3. Chrome / Browser
+        Intent chromeIntent = pm.getLaunchIntentForPackage("com.android.chrome");
+        if (chromeIntent != null) {
+            addDefaultAppToDock(context, pm, chromeIntent, rank++);
+        } else {
+            addDefaultAppToDock(context, pm, new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.google.com")), rank++);
+        }
+        
+        // 4. Music
+        addDefaultAppToDock(context, pm, new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_APP_MUSIC), rank);
+    }
+
+    private void addDefaultAppToDock(Context context, PackageManager pm, Intent intent, int rank) {
+        ResolveInfo ri = pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        if (ri != null) {
+            // Ensure we use the actual launch intent
+            Intent launchIntent = pm.getLaunchIntentForPackage(ri.activityInfo.packageName);
+            if (launchIntent != null) {
+                ShortcutInfo info = new ShortcutInfo();
+                info.intent = launchIntent;
+                info.title = ri.loadLabel(pm);
+                info.user = Utilities.myUserHandle();
+                info.itemType = LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
+                info.container = LauncherSettings.Favorites.CONTAINER_HOTSEAT;
+                info.rank = rank;
+                info.screenId = rank;
+                
+                // Synchronous add since we are already on the worker thread during loadWorkspace
+                ContentValues values = new ContentValues();
+                info.onAddToDatabase(context, values);
+                Bundle res = LauncherSettings.Settings.call(context.getContentResolver(),
+                        LauncherSettings.Settings.METHOD_NEW_ITEM_ID);
+                if (res != null) {
+                    info.id = res.getLong(LauncherSettings.Settings.EXTRA_VALUE);
+                    values.put(LauncherSettings.Favorites._ID, info.id);
+                    context.getContentResolver().insert(LauncherSettings.Favorites.CONTENT_URI, values);
+                }
+            }
+        }
+    }
+
     /**
      * Set this as the current Launcher activity object for the loader.
      */
@@ -1713,6 +1778,32 @@ public class LauncherModel extends BroadcastReceiver
             final LauncherAppsCompat launcherApps = LauncherAppsCompat.getInstance(context);
             final boolean isSdCardReady = Utilities.isBootCompleted();
 
+            SharedPreferences prefs = Utilities.getPrefs(context);
+            int lastVersion = prefs.getInt("last_reset_version", 0);
+            if (lastVersion < 69) {
+                Log.d(TAG, "loadWorkspace: performing one-time reset for Beta 17");
+                // 1. Delete all desktop items
+                contentResolver.delete(LauncherSettings.Favorites.CONTENT_URI,
+                        LauncherSettings.Favorites.CONTAINER + " = " + LauncherSettings.Favorites.CONTAINER_DESKTOP, null);
+                // 2. Delete all items in folders (container > 0)
+                contentResolver.delete(LauncherSettings.Favorites.CONTENT_URI,
+                        LauncherSettings.Favorites.CONTAINER + " > 0", null);
+                // 3. Delete folders themselves
+                contentResolver.delete(LauncherSettings.Favorites.CONTENT_URI,
+                        LauncherSettings.Favorites.ITEM_TYPE + " = " + LauncherSettings.Favorites.ITEM_TYPE_FOLDER, null);
+                
+                // 4. Clear and trigger dock population if phone
+                if (!LauncherAppState.getInstance().getInvariantDeviceProfile().profile.isTablet) {
+                    contentResolver.delete(LauncherSettings.Favorites.CONTENT_URI,
+                            LauncherSettings.Favorites.CONTAINER + " = " + LauncherSettings.Favorites.CONTAINER_HOTSEAT, null);
+                    prefs.edit().putBoolean("should_populate_default_dock", true).apply();
+                }
+
+                // 5. Reset screens
+                contentResolver.delete(LauncherSettings.WorkspaceScreens.CONTENT_URI, null, null);
+                prefs.edit().putInt("last_reset_version", 69).apply();
+            }
+
             boolean clearDb = false;
 
             if (!clearDb && GridSizeMigrationTask.ENABLED &&
@@ -1733,6 +1824,13 @@ public class LauncherModel extends BroadcastReceiver
 
             synchronized (sBgLock) {
                 clearSBgDataStructures();
+
+                // Populate default dock if needed for Beta 17 update
+                if (Utilities.getPrefs(mContext).getBoolean("should_populate_default_dock", false)) {
+                    populateDefaultDock(mContext);
+                    Utilities.getPrefs(mContext).edit().remove("should_populate_default_dock").apply();
+                }
+
                 final HashMap<String, Integer> installingPkgs = PackageInstallerCompat
                         .getInstance(mContext).updateAndGetActiveSessionCache();
                 sBgWorkspaceScreens.addAll(loadWorkspaceScreensDb(mContext));
@@ -2744,9 +2842,8 @@ public class LauncherModel extends BroadcastReceiver
                 // Query for the set of apps
                 final List<LauncherActivityInfoCompat> apps = mLauncherApps.getActivityList(null, user);
                 // Fail if we don't have any apps
-                // TODO: Fix this. Only fail for the current user.
                 if (apps == null || apps.isEmpty()) {
-                    return;
+                    continue;
                 }
                 boolean quietMode = mUserManager.isQuietModeEnabled(user);
                 // Create the ApplicationInfos

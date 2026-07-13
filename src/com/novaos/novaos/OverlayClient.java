@@ -17,33 +17,44 @@ public class OverlayClient implements Launcher.LauncherOverlay {
         mLauncher = launcher;
     }
 
+    private float mCurrentProgress;
+
     @Override
     public void onScrollInteractionBegin() {
-        // Prepare for scroll
+        mCurrentProgress = 0f;
     }
 
     @Override
     public void onScrollInteractionEnd() {
-        // End scroll
+        // If the user swiped at least 15% of the screen, launch the feed
+        if (mCurrentProgress > 0.15f) {
+            launchGoogleApp();
+        }
+        mCurrentProgress = 0f;
     }
 
     @Override
     public void onScrollChange(float progress, boolean rtl) {
-        // If the user swipes far enough (e.g. 80%), launch the Google app
-        if (progress > 0.8f) {
-            launchGoogleApp();
-        }
+        mCurrentProgress = progress;
     }
 
     private void launchGoogleApp() {
         try {
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_LAUNCHER);
-            intent.setPackage("com.google.android.googlequicksearchbox");
+            // Intent to launch the Google Feed specifically if possible, 
+            // otherwise fall back to the main Google app.
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("googleapp://feed"));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mLauncher.startActivity(intent);
         } catch (Exception e) {
-            // Google app not found
+            try {
+                Intent intent = mLauncher.getPackageManager().getLaunchIntentForPackage("com.google.android.googlequicksearchbox");
+                if (intent != null) {
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mLauncher.startActivity(intent);
+                }
+            } catch (Exception e2) {
+                // Google app not found
+            }
         }
     }
 }

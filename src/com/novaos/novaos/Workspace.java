@@ -1310,9 +1310,10 @@ public class Workspace extends PagedView
 
             mLastOverlaySroll = Math.abs(amount / getViewportWidth());
             mLauncherOverlay.onScrollChange(mLastOverlaySroll, mIsRtl);
-        } else {
-            dampedOverScroll(amount);
         }
+        
+        // Always allow the overscroll bounce for visual feedback
+        dampedOverScroll(amount);
 
         if (shouldZeroOverlay && mLauncherOverlay != null) {
             mLauncherOverlay.onScrollChange(0, mIsRtl);
