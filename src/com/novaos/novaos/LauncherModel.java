@@ -490,8 +490,13 @@ public class LauncherModel extends BroadcastReceiver
         int[] cordinates = new int[2];
         boolean found = false;
 
+        // Ensure the first screen is always considered
+        if (!workspaceScreens.contains(Workspace.FIRST_SCREEN_ID)) {
+            workspaceScreens.add(0, Workspace.FIRST_SCREEN_ID);
+        }
+
         int screenCount = workspaceScreens.size();
-        // First check the preferred screen.
+        // First check the preferred screen (always start with screen 0).
         int preferredScreenIndex = 0;
         if (preferredScreenIndex < screenCount) {
             screenId = workspaceScreens.get(preferredScreenIndex);

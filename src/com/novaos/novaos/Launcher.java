@@ -364,14 +364,14 @@ public class Launcher extends Activity
         mSharedPrefs = Utilities.getPrefs(this);
         mSharedPrefs.registerOnSharedPreferenceChangeListener(this);
 
-        // One-time reset for Beta 14+ to clean up workspace organization
+        // One-time reset for Beta 15+ to clean up workspace organization
         int lastVersion = mSharedPrefs.getInt("last_reset_version", 0);
-        if (lastVersion < 66) { // 66 is the versionCode for Beta 14
+        if (lastVersion < 67) { // 67 is the versionCode for Beta 15
             getContentResolver().delete(LauncherSettings.Favorites.CONTENT_URI,
                     LauncherSettings.Favorites.CONTAINER + " != ?",
                     new String[]{Integer.toString(LauncherSettings.Favorites.CONTAINER_HOTSEAT)});
             getContentResolver().delete(LauncherSettings.WorkspaceScreens.CONTENT_URI, null, null);
-            mSharedPrefs.edit().putInt("last_reset_version", 66).apply();
+            mSharedPrefs.edit().putInt("last_reset_version", 67).apply();
         }
 
         mIsSafeModeEnabled = getPackageManager().isSafeMode();
