@@ -253,7 +253,7 @@
             android:key="pref_dev_mode"
             android:title="@string/pref_enable_developer_title"
             android:summary="@string/pref_enable_developer_summary"
-            android:defaultValue="true" />
+            android:defaultValue="false" />
 
         <SwitchPreference
             android:key="pref_show_build_info"
