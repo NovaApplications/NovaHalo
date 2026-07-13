@@ -65,11 +65,16 @@ public class ManagedProfileHeuristic {
     private final Context mContext;
     private final LauncherModel mModel;
     private final UserHandle mUser;
+    private final UserManagerCompat mUserManager;
+    private final SharedPreferences mPrefs;
 
     private ManagedProfileHeuristic(Context context, UserHandle user) {
         mContext = context;
         mUser = user;
         mModel = LauncherAppState.getInstance().getModel();
+        mUserManager = UserManagerCompat.getInstance(context);
+        mPrefs = context.getSharedPreferences(LauncherFiles.MANAGED_USER_PREFERENCES_KEY,
+                Context.MODE_PRIVATE);
     }
 
     public void processPackageRemoved(String[] packages) {
@@ -87,7 +92,25 @@ public class ManagedProfileHeuristic {
     }
 
     public void processUserApps(List<LauncherActivityInfoCompat> apps) {
-        new ManagedProfilePackageHandler().processUserApps(apps, mUser);
+        String folderIdKey = USER_FOLDER_ID_PREFIX + mUserManager.getSerialNumberForUser(mUser);
+        boolean folderMissing = true;
+        if (mPrefs.contains(folderIdKey)) {
+            long folderId = mPrefs.getLong(folderIdKey, 0);
+            if (mModel.findFolderById(folderId) != null) {
+                folderMissing = false;
+            }
+        }
+
+        if (folderMissing) {
+            // If the folder is missing, process all apps to ensure they are added to the new folder
+            ArrayList<CachedPackageTracker.LauncherActivityInstallInfo> allApps = new ArrayList<>();
+            for (LauncherActivityInfoCompat info : apps) {
+                allApps.add(new CachedPackageTracker.LauncherActivityInstallInfo(info, info.getFirstInstallTime()));
+            }
+            new ManagedProfilePackageHandler().onLauncherAppsAdded(allApps, mUser, true);
+        } else {
+            new ManagedProfilePackageHandler().processUserApps(apps, mUser);
+        }
     }
 
     private class ManagedProfilePackageHandler extends CachedPackageTracker {
@@ -138,16 +161,19 @@ public class ManagedProfileHeuristic {
             }
             // Try to get a work folder.
             String folderIdKey = USER_FOLDER_ID_PREFIX + mUserManager.getSerialNumberForUser(user);
+            FolderInfo workFolder = null;
             if (mPrefs.contains(folderIdKey)) {
                 long folderId = mPrefs.getLong(folderIdKey, 0);
-                final FolderInfo workFolder = mModel.findFolderById(folderId);
+                workFolder = mModel.findFolderById(folderId);
 
-                if (workFolder == null || !workFolder.hasOption(FolderInfo.FLAG_WORK_FOLDER)) {
-                    // Could not get a work folder. Add all the icons to homescreen.
-                    homescreenApps.addAll(0, workFolderApps);
-                    return;
+                if (workFolder != null && !workFolder.hasOption(FolderInfo.FLAG_WORK_FOLDER)) {
+                    workFolder = null;
                 }
-                saveWorkFolderShortcuts(folderId, workFolder.contents.size(), workFolderApps);
+            }
+
+            if (workFolder != null) {
+                final FolderInfo finalWorkFolder = workFolder;
+                saveWorkFolderShortcuts(workFolder.id, workFolder.contents.size(), workFolderApps);
 
                 // FolderInfo could already be bound. We need to add shortcuts on the UI thread.
                 new MainThreadExecutor().execute(new Runnable() {
@@ -155,28 +181,28 @@ public class ManagedProfileHeuristic {
                     @Override
                     public void run() {
                         for (ShortcutInfo info : workFolderApps) {
-                            workFolder.add(info, false);
+                            finalWorkFolder.add(info, false);
                         }
                     }
                 });
             } else {
                 // Create a new folder.
-                final FolderInfo workFolder = new FolderInfo();
-                workFolder.title = mContext.getText(R.string.work_folder_name);
-                workFolder.setOption(FolderInfo.FLAG_WORK_FOLDER, true, null);
+                final FolderInfo newWorkFolder = new FolderInfo();
+                newWorkFolder.title = mContext.getText(R.string.work_folder_name);
+                newWorkFolder.setOption(FolderInfo.FLAG_WORK_FOLDER, true, null);
 
                 // Add all shortcuts before adding it to the UI, as an empty folder might get deleted.
                 for (ShortcutInfo info : workFolderApps) {
-                    workFolder.add(info, false);
+                    newWorkFolder.add(info, false);
                 }
 
                 // Add the item to home screen and DB. This also generates an item id synchronously.
                 ArrayList<ItemInfo> itemList = new ArrayList<>(1);
-                itemList.add(workFolder);
+                itemList.add(newWorkFolder);
                 mModel.addAndBindAddedWorkspaceItems(mContext, itemList);
-                mPrefs.edit().putLong(folderIdKey, workFolder.id).apply();
+                mPrefs.edit().putLong(folderIdKey, newWorkFolder.id).apply();
 
-                saveWorkFolderShortcuts(workFolder.id, 0, workFolderApps);
+                saveWorkFolderShortcuts(newWorkFolder.id, 0, workFolderApps);
             }
         }
 
