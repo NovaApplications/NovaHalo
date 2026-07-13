@@ -34,9 +34,12 @@ import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
+import android.widget.ImageView;
 
+import com.novaos.novaos.Launcher;
 import com.novaos.novaos.R;
 import com.novaos.novaos.Utilities;
+import com.novaos.novaos.dynamicui.ExtractedColors;
 
 /**
  * {@link PageIndicator} which shows dots per page. The active page is shown with the current
@@ -86,11 +89,13 @@ public class PageIndicatorDots extends PageIndicator {
 
     private final Paint mCirclePaint;
     private final float mDotRadius;
-    private final int mActiveColor;
-    private final int mInActiveColor;
+    private int mActiveColor;
+    private int mInActiveColor;
     private final boolean mIsRtl;
 
     private int mActivePage;
+    private ImageView mAllAppsHandle;
+    private Launcher mLauncher;
 
     /**
      * The current position of the active dot including the animation progress.
@@ -127,10 +132,43 @@ public class PageIndicatorDots extends PageIndicator {
         mInActiveColor = getResources().getColor(R.color.page_indicator_dot_color);
 
         mIsRtl = Utilities.isRtl(getResources());
+        mLauncher = Launcher.getLauncher(context);
+        setCaretDrawable(new CaretDrawable(context));
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        mAllAppsHandle = (ImageView) findViewById(R.id.all_apps_handle);
+        if (mAllAppsHandle != null) {
+            mAllAppsHandle.setImageDrawable(getCaretDrawable());
+            mAllAppsHandle.setOnTouchListener(mLauncher.getHapticFeedbackTouchListener());
+            mAllAppsHandle.setOnClickListener(mLauncher);
+            mAllAppsHandle.setOnLongClickListener(mLauncher);
+            mAllAppsHandle.setOnFocusChangeListener(mLauncher.mFocusHandler);
+            mLauncher.setAllAppsHandle(mAllAppsHandle);
+        }
+    }
+
+    @Override
+    public void updateColor(ExtractedColors extractedColors) {
+        if (extractedColors != null) {
+            boolean isLight = extractedColors.getColor(com.novaos.novaos.dynamicui.ExtractedColors.IS_SUPER_LIGHT, 0) == 1;
+            mActiveColor = isLight ? android.graphics.Color.BLACK : android.graphics.Color.WHITE;
+            mInActiveColor = androidx.core.graphics.ColorUtils.setAlphaComponent(mActiveColor, 128);
+        } else {
+            mActiveColor = Utilities.getColorAccent(getContext());
+            mInActiveColor = getResources().getColor(R.color.page_indicator_dot_color);
+        }
+        invalidate();
     }
 
     @Override
     public void setScroll(int currentScroll, int totalScroll) {
+        if (mAllAppsHandle != null) {
+            mAllAppsHandle.setVisibility(com.novaos.novaos.config.FeatureFlags.isAppDrawerEnabled(mLauncher) ? VISIBLE : GONE);
+        }
+
         if (mNumPages > 1) {
             if (mIsRtl) {
                 currentScroll = totalScroll - currentScroll;
@@ -223,9 +261,16 @@ public class PageIndicatorDots extends PageIndicator {
     }
 
     @Override
+    public void setShouldAutoHide(boolean shouldAutoHide) {
+        // Launcher 3 dots usually don't auto-hide, but we'll follow the system state
+        setAlpha(shouldAutoHide ? 0.5f : 1.0f);
+    }
+
+    @Override
     public void setActiveMarker(int activePage) {
         if (mActivePage != activePage) {
             mActivePage = activePage;
+            stopAllAnimations();
         }
     }
 
@@ -246,11 +291,12 @@ public class PageIndicatorDots extends PageIndicator {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if (mNumPages <= 1) return;
         // Draw all page indicators;
-        float circleGap = 3 * mDotRadius;
-        float startX = (getWidth() - mNumPages * circleGap + mDotRadius) / 2;
+        float circleGap = 4 * mDotRadius;
+        float startX = (getWidth() - (mNumPages - 1) * circleGap) / 2f;
 
-        float x = startX + mDotRadius;
+        float x = startX;
         float y = canvas.getHeight() / 2;
 
         if (mEntryAnimationRadiusFactors != null) {
@@ -280,12 +326,12 @@ public class PageIndicatorDots extends PageIndicator {
         float startCircle = (int) mCurrentPosition;
         float delta = mCurrentPosition - startCircle;
         float diameter = 2 * mDotRadius;
-        float circleGap = 3 * mDotRadius;
-        float startX = (getWidth() - mNumPages * circleGap + mDotRadius) / 2;
+        float circleGap = 4 * mDotRadius;
+        float startX = (getWidth() - (mNumPages - 1) * circleGap) / 2f;
 
         sTempRect.top = getHeight() * 0.5f - mDotRadius;
         sTempRect.bottom = getHeight() * 0.5f + mDotRadius;
-        sTempRect.left = startX + startCircle * circleGap;
+        sTempRect.left = startX + startCircle * circleGap - mDotRadius;
         sTempRect.right = sTempRect.left + diameter;
 
         if (delta < SHIFT_PER_ANIMATION) {
