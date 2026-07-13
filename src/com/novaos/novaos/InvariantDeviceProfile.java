@@ -171,6 +171,23 @@ public class InvariantDeviceProfile {
         }
     }
 
+    public DeviceProfile getDeviceProfile(Context context) {
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        DisplayMetrics dm = new DisplayMetrics();
+        display.getMetrics(dm);
+
+        Point smallestSize = new Point();
+        Point largestSize = new Point();
+        display.getCurrentSizeRange(smallestSize, largestSize);
+
+        Point realSize = new Point();
+        display.getRealSize(realSize);
+
+        return new DeviceProfile(context, this, smallestSize, largestSize,
+                realSize.x, realSize.y);
+    }
+
     public void customizationHook(Context context) {
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();

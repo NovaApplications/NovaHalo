@@ -42,13 +42,15 @@ public class DeviceProfile {
     public final InvariantDeviceProfile inv;
 
     // Device properties
+    public final boolean isTablet;
+    public final boolean isLargeTablet;
     public final boolean isPhone;
 
     // Device properties in current orientation
     public final int widthPx;
     public final int heightPx;
-    public final int availableWidthPx;
-    public final int availableHeightPx;
+    public int availableWidthPx;
+    public int availableHeightPx;
 
     public int numColumns;
     public int numRows;
@@ -129,7 +131,9 @@ public class DeviceProfile {
         DisplayMetrics dm = res.getDisplayMetrics();
 
         // Constants from resources
-        isPhone = true;
+        isTablet = res.getBoolean(R.bool.is_tablet);
+        isLargeTablet = res.getBoolean(R.bool.is_large_tablet);
+        isPhone = !isTablet && !isLargeTablet;
 
         // Some more constants
         ComponentName cn = new ComponentName(context.getPackageName(),
@@ -165,8 +169,8 @@ public class DeviceProfile {
         // Determine sizes.
         widthPx = width;
         heightPx = height;
-        availableWidthPx = minSize.x;
-        availableHeightPx = maxSize.y;
+        availableWidthPx = width;
+        availableHeightPx = height;
 
         numRows = inv.numRows;
         numColumns = inv.numColumns;
@@ -231,8 +235,14 @@ public class DeviceProfile {
         int textHeight = Utilities.calculateTextHeight(iconTextSizePx);
         
         int padding = iconDrawablePaddingPx;
+        if (!isPhone) {
+            padding = (int) (padding * 1.5f);
+        }
         
         cellHeightPx = iconSizePx + padding + textHeight;
+        if (!isPhone) {
+            cellHeightPx += Utilities.pxFromDp(12, dm);
+        }
 
         dragViewScale = iconSizePx;
 
@@ -343,7 +353,7 @@ public class DeviceProfile {
     }
 
     boolean shouldFadeAdjacentWorkspaceScreens() {
-        return false;
+        return isLargeTablet;
     }
 
     private int getVisibleChildCount(ViewGroup parent) {
@@ -362,23 +372,40 @@ public class DeviceProfile {
         Resources res = launcher.getResources();
         boolean isLandscape = res.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
 
+        // Dynamic grid adjustment for tablets
+        if (isTablet || isLargeTablet) {
+            // Adjust rows/columns for tablet landscape/portrait
+            if (isLandscape) {
+                numColumns = inv.numColumns + 2; // Add 2 columns in landscape for tablets
+                numRows = Math.max(1, inv.numRows - 1); // Maybe one less row to fit search bar/dock better
+            } else {
+                numColumns = inv.numColumns;
+                numRows = inv.numRows;
+            }
+            numHotseatIcons = numColumns; // Match hotseat to columns
+        } else {
+            // For phones, stick to invariant profile
+            numColumns = inv.numColumns;
+            numRows = inv.numRows;
+            numHotseatIcons = inv.numHotseatIcons;
+        }
+
         // Recalculate cell dimensions for the current screen size and orientation
         int currentWidth = isLandscape ? Math.max(widthPx, heightPx) : Math.min(widthPx, heightPx);
         int currentHeight = isLandscape ? Math.min(widthPx, heightPx) : Math.max(widthPx, heightPx);
 
         // Update available dimensions for the current orientation
-        int curAvailableWidthPx = currentWidth - mInsets.left - mInsets.right;
-        int curAvailableHeightPx = currentHeight - mInsets.top - mInsets.bottom;
+        availableWidthPx = currentWidth - mInsets.left - mInsets.right;
+        availableHeightPx = currentHeight - mInsets.top - mInsets.bottom;
         
-        // Cell width should be the width of the screen divided by columns, minus small edge margins
-        cellWidthPx = (curAvailableWidthPx - (2 * edgeMarginPx)) / numColumns;
-        
-        int textHeight = Utilities.calculateTextHeight(iconTextSizePx);
-        int iconPadding = iconDrawablePaddingPx;
-        cellHeightPx = iconSizePx + iconPadding + textHeight;
+        // Update icon and text sizes for the new grid if it changed
+        updateIconSize(1f, iconDrawablePaddingOriginalPx, res, res.getDisplayMetrics());
 
+        // Cell width should be the width of the screen divided by columns, minus small edge margins
+        cellWidthPx = (availableWidthPx - (2 * edgeMarginPx)) / numColumns;
+        
         // Layout the search bar space
-        Point searchBarBounds = getSearchBarDimensForWidgetOpts(curAvailableWidthPx);
+        Point searchBarBounds = getSearchBarDimensForWidgetOpts(availableWidthPx);
         View searchBar = launcher.getDropTargetBar();
         lp = (FrameLayout.LayoutParams) searchBar.getLayoutParams();
         lp.width = searchBarBounds.x;
@@ -444,10 +471,10 @@ public class DeviceProfile {
             int totalItemWidth = visibleChildCount * overviewModeBarItemWidthPx;
             int maxWidth = totalItemWidth + (visibleChildCount - 1) * overviewModeBarSpacerWidthPx;
 
-            lp.width = Math.min(curAvailableWidthPx, maxWidth);
-            lp.height = getOverviewModeButtonBarHeight(curAvailableHeightPx);
+            lp.width = Math.min(availableWidthPx, maxWidth);
+            lp.height = getOverviewModeButtonBarHeight(availableHeightPx);
             // Center the overview buttons on the workspace page
-            lp.leftMargin = workspacePadding.left + (curAvailableWidthPx -
+            lp.leftMargin = workspacePadding.left + (availableWidthPx -
                     workspacePadding.left - workspacePadding.right - lp.width) / 2;
             overviewMode.setLayoutParams(lp);
         }
@@ -488,6 +515,12 @@ public class DeviceProfile {
      * @return the left/right paddings for all containers.
      */
     public final int[] getContainerPadding() {
-        return new int[]{0, 0};
+        if (isPhone) {
+            return new int[]{0, 0};
+        } else {
+            // Optimized padding for tablets to center content better
+            int padding = (int) (availableWidthPx * 0.05f);
+            return new int[]{padding, padding};
+        }
     }
 }

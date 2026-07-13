@@ -359,19 +359,19 @@ public class Launcher extends Activity
         app.setMLauncher(this);
 
         // Load configuration-specific DeviceProfile
-        mDeviceProfile = app.getInvariantDeviceProfile().profile;
+        mDeviceProfile = app.getInvariantDeviceProfile().getDeviceProfile(this);
 
         mSharedPrefs = Utilities.getPrefs(this);
         mSharedPrefs.registerOnSharedPreferenceChangeListener(this);
 
-        // One-time reset for Beta 15+ to clean up workspace organization
+        // One-time reset for Beta 16+ to clean up workspace organization
         int lastVersion = mSharedPrefs.getInt("last_reset_version", 0);
-        if (lastVersion < 67) { // 67 is the versionCode for Beta 15
+        if (lastVersion < 68) { // 68 is the versionCode for Beta 16
             getContentResolver().delete(LauncherSettings.Favorites.CONTENT_URI,
                     LauncherSettings.Favorites.CONTAINER + " != ?",
                     new String[]{Integer.toString(LauncherSettings.Favorites.CONTAINER_HOTSEAT)});
             getContentResolver().delete(LauncherSettings.WorkspaceScreens.CONTENT_URI, null, null);
-            mSharedPrefs.edit().putInt("last_reset_version", 67).apply();
+            mSharedPrefs.edit().putInt("last_reset_version", 68).apply();
         }
 
         mIsSafeModeEnabled = getPackageManager().isSafeMode();
