@@ -1363,10 +1363,6 @@ public class Launcher extends Activity
 
         mAllAppsController.setupViews(mAppsView, mHotseat, mWorkspace);
 
-        if (FeatureFlags.isGoogleNowEnabled(this)) {
-            setLauncherOverlay(new OverlayClient(this));
-        }
-
         mWorkModeOverlay = findViewById(R.id.work_mode_overlay);
         if (mWorkModeOverlay != null) {
             mWorkModeOverlay.setOnLongClickListener(v -> {
@@ -1938,13 +1934,6 @@ public class Launcher extends Activity
         if ("pref_taskbarTransparency".equals(key) || "pref_taskbarColor".equals(key) || 
             "pref_hotseatShouldUseExtractedColors".equals(key)) {
             loadExtractedColorsAndColorItems();
-        }
-        if ("pref_enable_google_now".equals(key)) {
-            if (FeatureFlags.isGoogleNowEnabled(this)) {
-                setLauncherOverlay(new OverlayClient(this));
-            } else {
-                setLauncherOverlay(null);
-            }
         }
     }
 
@@ -4157,7 +4146,7 @@ public class Launcher extends Activity
 
 
     public boolean isClientConnected() {
-        return FeatureFlags.isGoogleNowEnabled(this);
+        return false;
     }
 
     public interface LauncherOverlay {

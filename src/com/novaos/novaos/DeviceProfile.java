@@ -30,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 
@@ -450,9 +451,20 @@ public class DeviceProfile {
         lp.gravity = Gravity.BOTTOM;
         lp.width = LayoutParams.MATCH_PARENT;
         lp.height = hotseatBarHeightPx + mInsets.bottom;
+        
+        // On phones, the search bar is at the bottom, so CellLayout doesn't need bottom insets padding
+        int hotseatBottomPadding = isPhone ? 0 : mInsets.bottom;
         hotseat.getLayout().setPadding(hotseatAdjustment + workspacePadding.left,
                 hotseatBarTopPaddingPx, hotseatAdjustment + workspacePadding.right,
-                mInsets.bottom);
+                hotseatBottomPadding);
+        
+        View searchBarHotseat = hotseat.findViewById(R.id.search_container_hotseat);
+        if (searchBarHotseat != null) {
+            FrameLayout.LayoutParams slp = (FrameLayout.LayoutParams) searchBarHotseat.getLayoutParams();
+            slp.bottomMargin = mInsets.bottom + Utilities.pxFromDp(4, res.getDisplayMetrics());
+            searchBarHotseat.setLayoutParams(slp);
+        }
+
         hotseat.setLayoutParams(lp);
 
         // Layout the page indicators

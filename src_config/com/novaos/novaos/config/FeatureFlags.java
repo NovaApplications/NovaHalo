@@ -39,13 +39,8 @@ public final class FeatureFlags {
     public static final String KEY_SHOW_VOICE_SEARCH_BUTTON = "pref_showMic";
     private static final String KEY_PREF_APP_DRAWER_ENABLED = "pref_app_drawer_enabled";
     private static final String KEY_ADD_NEW_APPS_TO_HOME = "pref_add_new_apps_to_home";
-    private static final String KEY_ENABLE_GOOGLE_NOW = "pref_enable_google_now";
 
     private FeatureFlags() {
-    }
-
-    public static boolean isGoogleNowEnabled(Context context) {
-        return Utilities.getPrefs(context).getBoolean(KEY_ENABLE_GOOGLE_NOW, false);
     }
 
     public static boolean isAppDrawerEnabled(Context context) {

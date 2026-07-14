@@ -203,6 +203,21 @@ public class SettingsActivity extends AppCompatActivity implements
                 });
             }
 
+            if (rootKey != null && rootKey.equals("pref_screen_at_a_glance")) {
+                Preference.OnPreferenceChangeListener reloadListener = (preference, newValue) -> {
+                    reloadLauncher();
+                    return true;
+                };
+                Preference showDate = findPreference("pref_pixel_bar_show_date");
+                if (showDate != null) showDate.setOnPreferenceChangeListener(reloadListener);
+                Preference showTime = findPreference("pref_pixel_bar_show_time");
+                if (showTime != null) showTime.setOnPreferenceChangeListener(reloadListener);
+                Preference showBattery = findPreference("pref_pixel_bar_show_battery");
+                if (showBattery != null) showBattery.setOnPreferenceChangeListener(reloadListener);
+                Preference showMusic = findPreference("pref_pixel_bar_show_music");
+                if (showMusic != null) showMusic.setOnPreferenceChangeListener(reloadListener);
+            }
+
             if (rootKey != null && rootKey.equals("pref_screen_notifications")) {
                 Preference notificationDotsPref = findPreference("pref_notification_dots");
                 if (notificationDotsPref != null) {

@@ -17,6 +17,16 @@
         android:textStyle="bold"
         android:text="Monday, Oct 25" />
 
+    <TextView
+        android:id="@+id/now_bar_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:visibility="gone"
+        android:text="12:00" />
+
     <LinearLayout
         android:id="@+id/now_bar_info_container"
         android:layout_width="0dp"

@@ -126,13 +126,6 @@
             android:persistent="true" />
 
         <SwitchPreference
-            android:key="pref_enable_google_now"
-            android:title="Google Feed"
-            android:summary="Swipe right from the first page to open the Google Feed"
-            android:defaultValue="false"
-            android:persistent="true" />
-
-        <SwitchPreference
             android:key="pref_showHidden"
             android:title="Show Hidden Apps"
             android:summaryOn="Hidden apps will be shown to change visibility settings"
@@ -246,6 +239,36 @@
             android:summary="@string/pref_show_pixel_bar_summary"
             android:defaultValue="false"
             android:persistent="true" />
+
+        <PreferenceScreen
+            android:key="pref_screen_at_a_glance"
+            android:title="At a Glance"
+            android:summary="Configure the info bar at the top of the home screen">
+
+            <SwitchPreference
+                android:key="pref_pixel_bar_show_date"
+                android:title="Show Date"
+                android:defaultValue="true"
+                android:persistent="true" />
+
+            <SwitchPreference
+                android:key="pref_pixel_bar_show_time"
+                android:title="Show Time"
+                android:defaultValue="false"
+                android:persistent="true" />
+
+            <SwitchPreference
+                android:key="pref_pixel_bar_show_battery"
+                android:title="Show Battery when charging"
+                android:defaultValue="true"
+                android:persistent="true" />
+
+            <SwitchPreference
+                android:key="pref_pixel_bar_show_music"
+                android:title="Show Now Playing info"
+                android:defaultValue="true"
+                android:persistent="true" />
+        </PreferenceScreen>
     </PreferenceScreen>
 
     <PreferenceScreen

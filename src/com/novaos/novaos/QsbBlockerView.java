@@ -6,9 +6,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.media.AudioManager;
 import android.os.BatteryManager;
+import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.Property;
 import android.view.View;
@@ -27,9 +30,11 @@ public class QsbBlockerView extends FrameLayout implements Workspace.OnStateChan
     private final Paint mBgPaint = new Paint(1);
 
     private TextView mDateText;
+    private TextView mTimeText;
     private TextView mInfoText;
     private ImageView mInfoIcon;
     private TextView mMusicText;
+    private AudioManager mAudioManager;
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -38,11 +43,12 @@ public class QsbBlockerView extends FrameLayout implements Workspace.OnStateChan
             if (Intent.ACTION_TIME_TICK.equals(action)
                     || Intent.ACTION_TIME_CHANGED.equals(action)
                     || Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
-                updateDate();
+                updateDateTime();
             } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
                 updateBattery(intent);
             } else if ("com.android.music.metachanged".equals(action)
-                    || "com.spotify.music.metadatachanged".equals(action)) {
+                    || "com.spotify.music.metadatachanged".equals(action)
+                    || "com.android.music.playstatechanged".equals(action)) {
                 updateMusic(intent);
             }
         }
@@ -52,12 +58,14 @@ public class QsbBlockerView extends FrameLayout implements Workspace.OnStateChan
         super(context, attributeSet);
         mBgPaint.setColor(-1);
         mBgPaint.setAlpha(0);
+        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
         mDateText = findViewById(R.id.now_bar_date);
+        mTimeText = findViewById(R.id.now_bar_time);
         mInfoText = findViewById(R.id.now_bar_info_text);
         mInfoIcon = findViewById(R.id.now_bar_info_icon);
         mMusicText = findViewById(R.id.now_bar_music_text);
@@ -67,7 +75,124 @@ public class QsbBlockerView extends FrameLayout implements Workspace.OnStateChan
         }
         setOnClickListener(v -> openGoogleApp());
 
-        updateDate();
+        updateDateTime();
+    }
+
+    private void updateDateTime() {
+        SharedPreferences prefs = Utilities.getPrefs(getContext());
+        Date now = new Date();
+
+        if (mDateText != null) {
+            boolean showDate = prefs.getBoolean("pref_pixel_bar_show_date", true);
+            if (showDate) {
+                SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMM d", Locale.getDefault());
+                mDateText.setText(sdf.format(now));
+                mDateText.setVisibility(VISIBLE);
+            } else {
+                mDateText.setVisibility(GONE);
+            }
+        }
+
+        if (mTimeText != null) {
+            boolean showTime = prefs.getBoolean("pref_pixel_bar_show_time", false);
+            if (showTime) {
+                String skeleton = DateFormat.is24HourFormat(getContext()) ? "Hm" : "hmm";
+                String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
+                SimpleDateFormat sdf = new SimpleDateFormat(pattern, Locale.getDefault());
+                mTimeText.setText(sdf.format(now));
+                mTimeText.setVisibility(VISIBLE);
+            } else {
+                mTimeText.setVisibility(GONE);
+            }
+        }
+
+        // If music stopped but we didn't get an intent, check it here too
+        if (mMusicText != null && mMusicText.getVisibility() == VISIBLE && !mAudioManager.isMusicActive()) {
+            mMusicText.setVisibility(GONE);
+        }
+    }
+
+    private void updateBattery(Intent intent) {
+        if (mInfoText == null || mInfoIcon == null) return;
+        
+        boolean enabled = Utilities.getPrefs(getContext()).getBoolean("pref_pixel_bar_show_battery", true);
+        if (!enabled) {
+            mInfoText.setVisibility(GONE);
+            mInfoIcon.setVisibility(GONE);
+            return;
+        }
+
+        int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+        boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                            status == BatteryManager.BATTERY_STATUS_FULL;
+
+        if (isCharging) {
+            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+            int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+            int batteryPct = (int) (level * 100 / (float) scale);
+            
+            mInfoText.setText(getContext().getString(R.string.battery_level_template, batteryPct));
+            mInfoText.setVisibility(VISIBLE);
+            mInfoIcon.setVisibility(VISIBLE);
+        } else {
+            mInfoText.setVisibility(GONE);
+            mInfoIcon.setVisibility(GONE);
+        }
+    }
+
+    private void updateMusic(Intent intent) {
+        if (mMusicText == null) return;
+
+        boolean enabled = Utilities.getPrefs(getContext()).getBoolean("pref_pixel_bar_show_music", true);
+        if (!enabled) {
+            mMusicText.setVisibility(GONE);
+            return;
+        }
+
+        boolean isPlaying = intent.getBooleanExtra("playing", false) || mAudioManager.isMusicActive();
+        String artist = intent.getStringExtra("artist");
+        String track = intent.getStringExtra("track");
+
+        if (isPlaying && track != null) {
+            mMusicText.setText(artist != null ? artist + " - " + track : track);
+            mMusicText.setVisibility(VISIBLE);
+        } else if (!mAudioManager.isMusicActive()) {
+            mMusicText.setVisibility(GONE);
+        }
+    }
+
+    @Override
+    public void setPadding(int i, int i2, int i3, int i4) {
+        super.setPadding(0, 0, 0, 0);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        Workspace workspace = Launcher.getLauncher(getContext()).getWorkspace();
+        workspace.setOnStateChangeListener(this);
+        prepareStateChange(workspace.getState(), null);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_TIME_TICK);
+        filter.addAction(Intent.ACTION_TIME_CHANGED);
+        filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
+        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        filter.addAction("com.android.music.metachanged");
+        filter.addAction("com.android.music.playstatechanged");
+        filter.addAction("com.spotify.music.metadatachanged");
+        
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            getContext().registerReceiver(mReceiver, filter, Context.RECEIVER_EXPORTED);
+        } else {
+            getContext().registerReceiver(mReceiver, filter);
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        getContext().unregisterReceiver(mReceiver);
     }
 
     private void openCalendar() {
@@ -91,82 +216,6 @@ public class QsbBlockerView extends FrameLayout implements Workspace.OnStateChan
         } catch (Exception e) {
             // Ignored
         }
-    }
-
-    private void updateDate() {
-        if (mDateText != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMM d", Locale.getDefault());
-            mDateText.setText(sdf.format(new Date()));
-        }
-    }
-
-    private void updateBattery(Intent intent) {
-        if (mInfoText == null || mInfoIcon == null) return;
-
-        int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-        boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
-                            status == BatteryManager.BATTERY_STATUS_FULL;
-
-        if (isCharging) {
-            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-            int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-            int batteryPct = (int) (level * 100 / (float) scale);
-            
-            mInfoText.setText(getContext().getString(R.string.battery_level_template, batteryPct));
-            mInfoText.setVisibility(VISIBLE);
-            mInfoIcon.setVisibility(VISIBLE);
-        } else {
-            mInfoText.setVisibility(GONE);
-            mInfoIcon.setVisibility(GONE);
-        }
-    }
-
-    private void updateMusic(Intent intent) {
-        if (mMusicText == null) return;
-
-        String artist = intent.getStringExtra("artist");
-        String track = intent.getStringExtra("track");
-
-        if (track != null) {
-            mMusicText.setText(artist != null ? artist + " - " + track : track);
-            mMusicText.setVisibility(VISIBLE);
-            // Hide date if music is playing to save space on small screens? 
-            // Or just let it be. Let's keep both for now.
-        } else {
-            mMusicText.setVisibility(GONE);
-        }
-    }
-
-    @Override
-    public void setPadding(int i, int i2, int i3, int i4) {
-        super.setPadding(0, 0, 0, 0);
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        Workspace workspace = Launcher.getLauncher(getContext()).getWorkspace();
-        workspace.setOnStateChangeListener(this);
-        prepareStateChange(workspace.getState(), null);
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_TIME_TICK);
-        filter.addAction(Intent.ACTION_TIME_CHANGED);
-        filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
-        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-        filter.addAction("com.android.music.metachanged");
-        filter.addAction("com.spotify.music.metadatachanged");
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            getContext().registerReceiver(mReceiver, filter, Context.RECEIVER_EXPORTED);
-        } else {
-            getContext().registerReceiver(mReceiver, filter);
-        }
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        getContext().unregisterReceiver(mReceiver);
     }
 
     @Override
