@@ -105,6 +105,7 @@ public class DeviceProfile {
     public int hotseatCellHeightPx;
     public int hotseatIconSizePx;
     private int hotseatBarHeightPx;
+    private int workspaceBottomPaddingPx;
     private int hotseatBarTopPaddingPx;
 
     // All apps
@@ -164,13 +165,15 @@ public class DeviceProfile {
         workspaceSpringLoadedBottomSpace =
                 res.getDimensionPixelSize(R.dimen.dynamic_grid_min_spring_loaded_space);
         hotseatBarHeightPx = res.getDimensionPixelSize(R.dimen.dynamic_grid_hotseat_height);
+        workspaceBottomPaddingPx = hotseatBarHeightPx;
+        hotseatBarTopPaddingPx =
+                res.getDimensionPixelSize(R.dimen.dynamic_grid_hotseat_top_padding);
+        
         if (isPhone) {
             // Add extra height for the search bar at the bottom of the dock
             hotseatBarHeightPx += res.getDimensionPixelSize(R.dimen.qsb_button_height) + 
                     Utilities.pxFromDp(16, dm);
         }
-        hotseatBarTopPaddingPx =
-                res.getDimensionPixelSize(R.dimen.dynamic_grid_hotseat_top_padding);
 
         // Determine sizes.
         widthPx = width;
@@ -320,7 +323,7 @@ public class DeviceProfile {
      */
     public Rect getWorkspacePadding(Rect recycle) {
         Rect padding = recycle == null ? new Rect() : recycle;
-        int paddingBottom = hotseatBarHeightPx + pageIndicatorHeightPx;
+        int paddingBottom = workspaceBottomPaddingPx + pageIndicatorHeightPx;
 
         // Simple phone-style padding that fits the screen
         padding.set(edgeMarginPx,
