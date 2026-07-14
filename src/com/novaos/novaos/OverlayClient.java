@@ -31,29 +31,44 @@ public class OverlayClient implements Launcher.LauncherOverlay {
             launchGoogleApp();
         }
         mCurrentProgress = 0f;
+        // Restore launcher alpha
+        mLauncher.getWorkspace().setAlpha(1.0f);
     }
 
     @Override
     public void onScrollChange(float progress, boolean rtl) {
         mCurrentProgress = progress;
+        // Fade the launcher slightly to indicate we are swiping to the feed
+        mLauncher.getWorkspace().setAlpha(Math.max(0.5f, 1.0f - progress));
     }
 
     private void launchGoogleApp() {
         try {
-            // Intent to launch the Google Feed specifically if possible, 
-            // otherwise fall back to the main Google app.
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("googleapp://feed"));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            // Use the more modern and reliable intent for the Google Feed
+            Intent intent = new Intent("com.google.android.googlequicksearchbox.action.SEARCH_PUBLIC")
+                    .setPackage("com.google.android.googlequicksearchbox")
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    .putExtra("show_voice_search", false)
+                    .putExtra("show_search_box", false);
+            
+            // Try to use a specific transition to make it feel more integrated
             mLauncher.startActivity(intent);
+            // After starting the intent, we can also perform a custom override transition
+            mLauncher.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.fade_out);
         } catch (Exception e) {
             try {
+                // Fallback to the generic feed URI
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("googleapp://feed"));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                mLauncher.startActivity(intent);
+                mLauncher.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.fade_out);
+            } catch (Exception e2) {
+                // Fallback to the main search box if everything else fails
                 Intent intent = mLauncher.getPackageManager().getLaunchIntentForPackage("com.google.android.googlequicksearchbox");
                 if (intent != null) {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     mLauncher.startActivity(intent);
                 }
-            } catch (Exception e2) {
-                // Google app not found
             }
         }
     }

@@ -1323,6 +1323,14 @@ public class Launcher extends Activity
         mHotseat = findViewById(R.id.hotseat);
         if (mHotseat != null) {
             mHotseat.setOnLongClickListener(this);
+            View searchBar = mHotseat.findViewById(R.id.search_container_hotseat);
+            if (searchBar != null) {
+                searchBar.setOnClickListener(v -> startSearch("", false, null, true));
+                View gIcon = searchBar.findViewById(R.id.g_icon);
+                if (gIcon != null) gIcon.setOnClickListener(v -> startSearch("", false, null, true));
+                View micIcon = searchBar.findViewById(R.id.mic_icon);
+                if (micIcon != null) micIcon.setOnClickListener(v -> startVoiceAssistant());
+            }
         }
 
         // Setup the overview panel

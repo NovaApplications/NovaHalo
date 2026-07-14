@@ -1224,6 +1224,11 @@ public class Workspace extends PagedView
             mStartedSendingScrollEvents = false;
             mLauncherOverlay.onScrollInteractionEnd();
         }
+        
+        // Animate workspace back to its original position if it was translated
+        if (getTranslationX() != 0) {
+            animate().translationX(0).setDuration(200).start();
+        }
     }
 
     public void setLauncherOverlay(Launcher.LauncherOverlay overlay) {
@@ -1310,10 +1315,16 @@ public class Workspace extends PagedView
 
             mLastOverlaySroll = Math.abs(amount / getViewportWidth());
             mLauncherOverlay.onScrollChange(mLastOverlaySroll, mIsRtl);
+            
+            // Move the workspace with the finger instead of just bouncing
+            setTranslationX(amount);
+        } else {
+            // Reset translation if we are not in overlay scroll
+            if (getTranslationX() != 0) {
+                setTranslationX(0);
+            }
+            dampedOverScroll(amount);
         }
-        
-        // Always allow the overscroll bounce for visual feedback
-        dampedOverScroll(amount);
 
         if (shouldZeroOverlay && mLauncherOverlay != null) {
             mLauncherOverlay.onScrollChange(0, mIsRtl);

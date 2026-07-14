@@ -163,6 +163,11 @@ public class DeviceProfile {
         workspaceSpringLoadedBottomSpace =
                 res.getDimensionPixelSize(R.dimen.dynamic_grid_min_spring_loaded_space);
         hotseatBarHeightPx = res.getDimensionPixelSize(R.dimen.dynamic_grid_hotseat_height);
+        if (isPhone) {
+            // Add extra height for the search bar at the bottom of the dock
+            hotseatBarHeightPx += res.getDimensionPixelSize(R.dimen.qsb_button_height) + 
+                    Utilities.pxFromDp(16, dm);
+        }
         hotseatBarTopPaddingPx =
                 res.getDimensionPixelSize(R.dimen.dynamic_grid_hotseat_top_padding);
 

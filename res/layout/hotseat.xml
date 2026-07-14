@@ -13,12 +13,29 @@
      limitations under the License.
 -->
 <com.novaos.novaos.Hotseat xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.novaos.novaos.CellLayout
-        android:id="@+id/layout"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical">
+
+        <com.novaos.novaos.CellLayout
+            android:id="@+id/layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+
+        <include
+            android:id="@+id/search_container_hotseat"
+            layout="@layout/qsb_wide_with_mic"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/qsb_button_height"
+            android:layout_marginBottom="12dp"
+            android:layout_marginLeft="@dimen/dynamic_grid_edge_margin"
+            android:layout_marginRight="@dimen/dynamic_grid_edge_margin" />
+    </LinearLayout>
+
 </com.novaos.novaos.Hotseat>

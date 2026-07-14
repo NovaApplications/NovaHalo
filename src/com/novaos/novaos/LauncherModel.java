@@ -1780,8 +1780,8 @@ public class LauncherModel extends BroadcastReceiver
 
             SharedPreferences prefs = Utilities.getPrefs(context);
             int lastVersion = prefs.getInt("last_reset_version", 0);
-            if (lastVersion < 69) {
-                Log.d(TAG, "loadWorkspace: performing one-time reset for Beta 17");
+            if (lastVersion < 70) {
+                Log.d(TAG, "loadWorkspace: performing one-time reset for Beta 18");
                 // 1. Delete all desktop items
                 contentResolver.delete(LauncherSettings.Favorites.CONTENT_URI,
                         LauncherSettings.Favorites.CONTAINER + " = " + LauncherSettings.Favorites.CONTAINER_DESKTOP, null);
@@ -1801,7 +1801,7 @@ public class LauncherModel extends BroadcastReceiver
 
                 // 5. Reset screens
                 contentResolver.delete(LauncherSettings.WorkspaceScreens.CONTENT_URI, null, null);
-                prefs.edit().putInt("last_reset_version", 69).apply();
+                prefs.edit().putInt("last_reset_version", 70).apply();
             }
 
             boolean clearDb = false;
