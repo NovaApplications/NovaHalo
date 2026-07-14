@@ -458,7 +458,7 @@ public class IconCache {
             }
         }
 
-        boolean hasNotifications = NotificationListener.hasNotifications(application.componentName.getPackageName());
+        boolean hasNotifications = NotificationListener.getNotificationCount(application.componentName.getPackageName()) > 0;
         application.iconBitmap = icon == null ? getNonNullIcon(entry, user, hasNotifications) : Utilities.createIconBitmap(icon, mContext, hasNotifications);
         application.usingLowResIcon = entry.isLowResIcon;
     }
@@ -488,7 +488,7 @@ public class IconCache {
                 }
             }
 
-            boolean hasNotifications = NotificationListener.hasNotifications(application.componentName.getPackageName());
+            boolean hasNotifications = NotificationListener.getNotificationCount(application.componentName.getPackageName()) > 0;
             application.iconBitmap = icon == null ? entry.icon : Utilities.createIconBitmap(icon, mContext, hasNotifications);
             application.usingLowResIcon = entry.isLowResIcon;
         }
@@ -557,7 +557,7 @@ public class IconCache {
             }
         }
 
-        boolean hasNotifications = NotificationListener.hasNotifications(component.getPackageName());
+        boolean hasNotifications = NotificationListener.getNotificationCount(component.getPackageName()) > 0;
         Bitmap iBitmap = icon == null ? getNonNullIcon(entry, user, hasNotifications) : Utilities.createIconBitmap(icon, mContext, hasNotifications);
         shortcutInfo.setIcon(iBitmap);
         String title = Utilities.trim(entry.title);
@@ -590,7 +590,7 @@ public class IconCache {
             }
         }
 
-        boolean hasNotifications = NotificationListener.hasNotifications(infoInOut.packageName);
+        boolean hasNotifications = NotificationListener.getNotificationCount(infoInOut.packageName) > 0;
         infoInOut.iconBitmap = getNonNullIcon(entry, infoInOut.user, hasNotifications);
         infoInOut.usingLowResIcon = entry.isLowResIcon;
     }

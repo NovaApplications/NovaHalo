@@ -1,5 +1,6 @@
 package com.novaos.novaos;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -201,6 +202,60 @@ public class SettingsActivity extends AppCompatActivity implements
                     return true;
                 });
             }
+
+            if (rootKey != null && rootKey.equals("pref_screen_notifications")) {
+                Preference notificationDotsPref = findPreference("pref_notification_dots");
+                if (notificationDotsPref != null) {
+                    notificationDotsPref.setOnPreferenceChangeListener((preference, newValue) -> {
+                        if (newValue instanceof Boolean && (Boolean) newValue) {
+                            if (!isNotificationServiceEnabled()) {
+                                showNotificationAccessDialog();
+                                return false;
+                            }
+                        }
+                        return true;
+                    });
+                }
+
+                Preference dotTypePref = findPreference("pref_notification_dot_type");
+                Preference dotColorPref = findPreference("pref_notification_dot_color");
+                if (dotTypePref != null && dotColorPref != null) {
+                    dotColorPref.setVisible("dot".equals(Utilities.getPrefs(getContext()).getString("pref_notification_dot_type", "dot")));
+                    dotTypePref.setOnPreferenceChangeListener((preference, newValue) -> {
+                        dotColorPref.setVisible("dot".equals(newValue));
+                        return true;
+                    });
+                }
+            }
+        }
+
+        private boolean isNotificationServiceEnabled() {
+            String pkgName = getContext().getPackageName();
+            final String flat = android.provider.Settings.Secure.getString(getContext().getContentResolver(),
+                    "enabled_notification_listeners");
+            if (!android.text.TextUtils.isEmpty(flat)) {
+                final String[] names = flat.split(":");
+                for (String name : names) {
+                    final ComponentName cn = ComponentName.unflattenFromString(name);
+                    if (cn != null) {
+                        if (android.text.TextUtils.equals(pkgName, cn.getPackageName())) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        private void showNotificationAccessDialog() {
+            new android.app.AlertDialog.Builder(getContext())
+                    .setTitle("Notification Access Required")
+                    .setMessage("NovaOS needs notification access to show dots on icons. Please enable it in the next screen.")
+                    .setPositiveButton("Settings", (dialog, which) -> {
+                        startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"));
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
         }
 
         private void reloadLauncher() {

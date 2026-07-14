@@ -181,7 +181,7 @@ public final class Utilities {
             Resources resources = packageManager.getResourcesForApplication(packageName);
             if (resources != null) {
                 final int id = resources.getIdentifier(resourceName, null, null);
-                boolean hasNotifications = NotificationListener.hasNotifications(packageName);
+                boolean hasNotifications = NotificationListener.getNotificationCount(packageName) > 0;
                 return createIconBitmap(
                         resources.getDrawableForDensity(id, LauncherAppState.getInstance()
                                 .getInvariantDeviceProfile().fillResIconDpi, null), context, hasNotifications);

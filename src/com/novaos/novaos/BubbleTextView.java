@@ -16,7 +16,9 @@
 
 package com.novaos.novaos;
 
+import android.content.ComponentName;
 import android.content.Context;
+import com.novaos.novaos.NotificationListener;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -380,6 +382,7 @@ public class BubbleTextView extends TextView
     public void draw(Canvas canvas) {
         if (!mCustomShadowsEnabled) {
             super.draw(canvas);
+            drawNotificationBadge(canvas);
             return;
         }
 
@@ -406,6 +409,7 @@ public class BubbleTextView extends TextView
         if (getCurrentTextColor() == getResources().getColor(android.R.color.transparent)) {
             getPaint().clearShadowLayer();
             super.draw(canvas);
+            drawNotificationBadge(canvas);
             return;
         }
 
@@ -421,6 +425,59 @@ public class BubbleTextView extends TextView
                 density * KEY_SHADOW_RADIUS, 0.0f, density * KEY_SHADOW_OFFSET, KEY_SHADOW_COLOR);
         super.draw(canvas);
         canvas.restore();
+        drawNotificationBadge(canvas);
+    }
+
+    private void drawNotificationBadge(Canvas canvas) {
+        if (!Utilities.getPrefs(getContext()).getBoolean("pref_notification_dots", false)) {
+            return;
+        }
+
+        Object tag = getTag();
+        String pkg = null;
+        if (tag instanceof ShortcutInfo) {
+            ComponentName cn = ((ShortcutInfo) tag).getTargetComponent();
+            if (cn != null) pkg = cn.getPackageName();
+        } else if (tag instanceof AppInfo) {
+            pkg = ((AppInfo) tag).componentName.getPackageName();
+        }
+
+        if (pkg != null) {
+            int count = NotificationListener.getNotificationCount(pkg);
+            if (count > 0) {
+                String type = Utilities.getPrefs(getContext()).getString("pref_notification_dot_type", "dot");
+                
+                Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                float density = getResources().getDisplayMetrics().density;
+                float radius = 5 * density;
+                
+                // Position at top-right of the icon
+                float x = getWidth() / 2f + mIconSize / 2f - radius;
+                float y = getPaddingTop() + radius;
+
+                if ("number".equals(type)) {
+                    paint.setColor(Color.RED);
+                    radius = 8 * density;
+                    canvas.drawCircle(x, y, radius, paint);
+                    paint.setColor(Color.WHITE);
+                    paint.setTextSize(10 * density);
+                    paint.setTextAlign(Paint.Align.CENTER);
+                    String text = count > 99 ? "99+" : String.valueOf(count);
+                    canvas.drawText(text, x, y + radius / 3f, paint); // Adjust Y for text centering
+                } else {
+                    int color = Color.RED;
+                    String colorPref = Utilities.getPrefs(getContext()).getString("pref_notification_dot_color", "red");
+                    switch (colorPref) {
+                        case "blue": color = Color.BLUE; break;
+                        case "green": color = Color.GREEN; break;
+                        case "black": color = Color.BLACK; break;
+                        case "accent": color = Utilities.getColorAccent(getContext()); break;
+                    }
+                    paint.setColor(color);
+                    canvas.drawCircle(x, y, radius, paint);
+                }
+            }
+        }
     }
 
     @Override

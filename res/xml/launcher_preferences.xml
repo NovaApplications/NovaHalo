@@ -139,6 +139,36 @@
             android:summaryOff="Hidden apps won\'t be visible"
             android:defaultValue="false"
             android:persistent="true" />
+
+        <PreferenceScreen
+            android:key="pref_screen_notifications"
+            android:title="Notifications">
+
+            <SwitchPreference
+                android:key="pref_notification_dots"
+                android:title="Notification Dots"
+                android:summary="Show a dot or number on icons with notifications"
+                android:defaultValue="false"
+                android:persistent="true" />
+
+            <ListPreference
+                android:key="pref_notification_dot_type"
+                android:dependency="pref_notification_dots"
+                android:title="Indicator Type"
+                android:entries="@array/notification_dot_type_entries"
+                android:entryValues="@array/notification_dot_type_values"
+                android:defaultValue="dot"
+                android:persistent="true" />
+
+            <ListPreference
+                android:key="pref_notification_dot_color"
+                android:dependency="pref_notification_dots"
+                android:title="Dot Color"
+                android:entries="@array/notification_dot_color_entries"
+                android:entryValues="@array/notification_dot_color_values"
+                android:defaultValue="red"
+                android:persistent="true" />
+        </PreferenceScreen>
     </PreferenceScreen>
 
     <PreferenceScreen

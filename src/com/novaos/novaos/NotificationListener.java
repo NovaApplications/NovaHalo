@@ -1,14 +1,18 @@
 package com.novaos.novaos;
 
 import android.app.Notification;
+import android.content.Context;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.view.View;
+
+import com.novaos.novaos.MainThreadExecutor;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class NotificationListener extends NotificationListenerService {
-    private final static Map<String, Boolean> HAS_NOTI = new HashMap<>();
+    private final static Map<String, Integer> NOTIFICATION_COUNTS = new HashMap<>();
 
     @Override
     public void onListenerConnected() {
@@ -26,22 +30,38 @@ public class NotificationListener extends NotificationListenerService {
         update(true);
     }
 
-    public static boolean hasNotifications(String packageName) {
-        Boolean tmp = HAS_NOTI.get(packageName);
-        return tmp != null && tmp;
+    public static int getNotificationCount(String packageName) {
+        Integer count = NOTIFICATION_COUNTS.get(packageName);
+        return count != null ? count : 0;
     }
 
     private void update(boolean reload) {
-        for (String key : HAS_NOTI.keySet()) {
-            HAS_NOTI.put(key, false);
-        }
-        for (StatusBarNotification sbnn : getActiveNotifications()) {
-            String key = sbnn.getPackageName();
-            boolean relevant = sbnn.isClearable() && sbnn.getNotification().priority > Notification.PRIORITY_LOW;
-            HAS_NOTI.put(key, relevant || hasNotifications(key));
+        NOTIFICATION_COUNTS.clear();
+        for (StatusBarNotification sbn : getActiveNotifications()) {
+            String pkg = sbn.getPackageName();
+            if (sbn.isClearable() && sbn.getNotification().priority > Notification.PRIORITY_LOW) {
+                int count = getNotificationCount(pkg);
+                NOTIFICATION_COUNTS.put(pkg, count + 1);
+            }
         }
         if (reload) {
-            LauncherAppState.getInstance().reloadAll(false);
+            new com.novaos.novaos.MainThreadExecutor().execute(new Runnable() {
+                @Override
+                public void run() {
+                    Launcher launcher = Launcher.getLauncher(getApplicationContext());
+                    if (launcher != null && launcher.getWorkspace() != null) {
+                        launcher.getWorkspace().mapOverItems(false, new Workspace.ItemOperator() {
+                            @Override
+                            public boolean evaluate(ItemInfo info, View view) {
+                                if (view instanceof BubbleTextView) {
+                                    view.invalidate();
+                                }
+                                return false;
+                            }
+                        });
+                    }
+                }
+            });
         }
     }
 }

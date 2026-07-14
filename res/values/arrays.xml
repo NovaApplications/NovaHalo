@@ -64,4 +64,30 @@
         <item>0.25</item>
         <item>0.0</item>
     </string-array>
+
+    <string-array name="notification_dot_type_entries">
+        <item>Just a Dot</item>
+        <item>Number</item>
+    </string-array>
+
+    <string-array name="notification_dot_type_values">
+        <item>dot</item>
+        <item>number</item>
+    </string-array>
+
+    <string-array name="notification_dot_color_entries">
+        <item>Red</item>
+        <item>Blue</item>
+        <item>Green</item>
+        <item>Black</item>
+        <item>Accent</item>
+    </string-array>
+
+    <string-array name="notification_dot_color_values">
+        <item>red</item>
+        <item>blue</item>
+        <item>green</item>
+        <item>black</item>
+        <item>accent</item>
+    </string-array>
 </resources>
